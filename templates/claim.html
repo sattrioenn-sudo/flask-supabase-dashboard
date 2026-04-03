@@ -1,33 +1,92 @@
-<div x-data="{ 
-    name: '{{ target_user }}', 
-    voucher: null, 
-    error: '',
-    async claim() {
-        const res = await fetch('/api/get-voucher', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ user_name: this.name })
-        });
-        const result = await res.json();
-        if (res.ok) { this.voucher = result.data; this.error = ''; }
-        else { this.error = result.message; this.voucher = null; }
-    }
-}" class="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-    
-    <div class="bg-white p-8 rounded-[2.5rem] shadow-xl w-full max-w-sm text-center border border-slate-100">
-        <h2 class="text-2xl font-black text-slate-800 mb-6">Nexus Claim</h2>
-        
-        <div x-show="!voucher">
-            <p class="text-sm text-slate-500 mb-4">Masukkan nama kamu untuk melihat kode voucher</p>
-            <input x-model="name" type="text" placeholder="Masukkan Nama" class="w-full p-4 bg-slate-50 rounded-2xl border-none ring-2 ring-transparent focus:ring-indigo-500 mb-4 transition-all">
-            <button @click="claim()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition-all">Lihat Kode</button>
-            <p x-text="error" class="text-red-500 text-xs mt-3 font-bold"></p>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus - Claim WiFi Voucher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-[#f8fafc] min-h-screen flex items-center justify-center p-6">
 
-        <div x-show="voucher" x-cloak class="animate-bounce-in">
-            <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Kode Voucher Kamu:</p>
-            <h1 class="text-4xl font-black text-slate-800 my-4" x-text="voucher.voucher_code"></h1>
-            <div class="bg-emerald-50 text-emerald-600 py-2 px-4 rounded-full text-xs font-bold inline-block" x-text="voucher.speed + ' Active'"></div>
+    <div x-data="{ 
+        inputName: '{{ target_user }}', 
+        voucher: null, 
+        loading: false, 
+        errorMsg: '',
+        async getVoucher() {
+            this.loading = true;
+            this.errorMsg = '';
+            try {
+                const res = await fetch('/api/get-voucher', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ user_name: this.inputName })
+                });
+                const result = await res.json();
+                if (res.ok) {
+                    this.voucher = result.data;
+                } else {
+                    this.errorMsg = result.message;
+                }
+            } catch (e) {
+                this.errorMsg = 'Gagal terhubung ke server.';
+            } finally {
+                this.loading = false;
+            }
+        }
+    }" class="w-full max-w-sm">
+
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl border border-slate-100 text-center relative overflow-hidden">
+            <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-indigo-100">
+                <span class="text-white font-bold text-xl">N</span>
+            </div>
+
+            <div x-show="!voucher">
+                <h1 class="text-xl font-extrabold text-slate-800 mb-2">Ambil Voucher</h1>
+                <p class="text-sm text-slate-400 mb-8">Konfirmasi nama kamu untuk melihat kode WiFi.</p>
+                
+                <div class="space-y-4">
+                    <input type="text" x-model="inputName" placeholder="Masukkan Nama Anda" 
+                           class="w-full p-4 bg-slate-50 border-none rounded-2xl text-center font-bold focus:ring-2 focus:ring-indigo-500 transition-all uppercase placeholder:normal-case">
+                    
+                    <button @click="getVoucher()" :disabled="loading"
+                            class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50">
+                        <span x-show="!loading text-sm">Buka Kode Voucher</span>
+                        <span x-show="loading" class="animate-pulse text-sm">Memvalidasi...</span>
+                    </button>
+                    
+                    <p x-text="errorMsg" class="text-red-500 text-[10px] font-bold mt-2" x-show="errorMsg"></p>
+                </div>
+            </div>
+
+            <div x-show="voucher" x-cloak class="animate-in fade-in zoom-in duration-300">
+                <div class="mb-4">
+                    <span class="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest" x-text="voucher.location"></span>
+                </div>
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kode Voucher Kamu</h2>
+                <div class="my-6 p-6 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                    <h1 class="text-3xl font-black text-slate-800 tracking-wider" x-text="voucher.voucher_code"></h1>
+                </div>
+                <div class="flex items-center justify-center gap-2 mb-8">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    <span class="text-sm font-bold text-slate-500" x-text="voucher.speed + ' Ready'"></span>
+                </div>
+                
+                <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode berhasil disalin!')" 
+                        class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all text-sm">
+                    Salin Kode
+                </button>
+            </div>
         </div>
+        
+        <p class="text-center mt-8 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Powered by Nexus Management</p>
     </div>
-</div>
+
+</body>
+</html>
