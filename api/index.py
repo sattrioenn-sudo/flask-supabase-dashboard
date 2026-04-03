@@ -9,7 +9,6 @@ if PARENT_DIR not in sys.path:
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from modules.auth import login_user, logout_user
-# DISINI PERUBAHANNYA: disesuaikan dengan file 'supabase_db.py' kamu
 from modules.supabase_db import supabase  
 
 # Konfigurasi Flask
@@ -57,7 +56,6 @@ def analytics():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    # Ambil data voucher untuk menghitung total
     try:
         response = supabase.table('vouchers').select("id", count='exact').execute()
         total_vouchers = response.count if response.count else 0
@@ -76,9 +74,11 @@ def vouchers():
     if request.method == 'POST':
         data = request.json
         try:
+            # REVISI: Tambahkan field 'location' agar tersimpan di Supabase
             supabase.table('vouchers').insert({
                 "user_name": data.get('user_name'),
                 "voucher_code": data.get('voucher_code'),
+                "location": data.get('location'),
                 "speed": "10Mbps",
                 "status": "Active"
             }).execute()
@@ -86,15 +86,27 @@ def vouchers():
         except Exception as e:
             return {"status": "error", "message": str(e)}, 500
 
+    # Ambil data voucher terbaru
     try:
         response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
-        db_vouchers = response.data
+        db_vouchers = response.data if response.data else []
     except Exception:
         db_vouchers = []
     
     return render_template('vouchers.html', 
                            email=session.get('user_email'),
                            vouchers=db_vouchers)
+
+# TAMBAHKAN: Route untuk menghapus voucher di database
+@app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
+def delete_voucher(code_voucher):
+    if 'user_id' not in session:
+        return {"status": "unauthorized"}, 401
+    try:
+        supabase.table('vouchers').delete().eq('voucher_code', code_voucher).execute()
+        return {"status": "success"}, 200
+    except Exception as e:
+        return {"status": "error", "message": str(e)}, 500
 
 @app.route('/settings')
 def settings():
