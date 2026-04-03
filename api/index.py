@@ -7,7 +7,7 @@ PARENT_DIR = os.path.dirname(CURRENT_DIR)
 if PARENT_DIR not in sys.path:
     sys.path.append(PARENT_DIR)
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from modules.auth import login_user, logout_user
 from modules.supabase_db import supabase  
 
@@ -72,21 +72,26 @@ def vouchers():
         return redirect(url_for('login'))
     
     if request.method == 'POST':
-        data = request.json
+        # Gunakan get_json(silent=True) agar tidak crash jika data kosong
+        data = request.get_json(silent=True)
+        
+        if not data:
+            return jsonify({"status": "error", "message": "No data received"}), 400
+            
         try:
-            # REVISI: Tambahkan field 'location' agar tersimpan di Supabase
+            # Pastikan kolom-kolom ini ada di tabel Supabase kamu
             supabase.table('vouchers').insert({
-                "user_name": data.get('user_name'),
+                "user_name": data.get('user_name', 'Unknown'),
                 "voucher_code": data.get('voucher_code'),
-                "location": data.get('location'),
+                "location": data.get('location', 'Office'),
                 "speed": "10Mbps",
                 "status": "Active"
             }).execute()
-            return {"status": "success"}, 200
+            return jsonify({"status": "success"}), 200
         except Exception as e:
-            return {"status": "error", "message": str(e)}, 500
+            return jsonify({"status": "error", "message": str(e)}), 500
 
-    # Ambil data voucher terbaru
+    # Ambil data voucher terbaru untuk metode GET
     try:
         response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
         db_vouchers = response.data if response.data else []
@@ -97,16 +102,15 @@ def vouchers():
                            email=session.get('user_email'),
                            vouchers=db_vouchers)
 
-# TAMBAHKAN: Route untuk menghapus voucher di database
 @app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
 def delete_voucher(code_voucher):
     if 'user_id' not in session:
-        return {"status": "unauthorized"}, 401
+        return jsonify({"status": "unauthorized"}), 401
     try:
         supabase.table('vouchers').delete().eq('voucher_code', code_voucher).execute()
-        return {"status": "success"}, 200
+        return jsonify({"status": "success"}), 200
     except Exception as e:
-        return {"status": "error", "message": str(e)}, 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/settings')
 def settings():
@@ -125,5 +129,5 @@ def logout():
         pass
     return redirect(url_for('login'))
 
-# WAJIB UNTUK VERCEL
+# Pastikan ini baris terakhir untuk Vercel
 app = app
