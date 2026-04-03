@@ -54,6 +54,23 @@ def analytics():
         return redirect(url_for('login'))
     return render_template('analytics.html', email=session.get('user_email'))
 
+@app.route('/vouchers')
+def vouchers():
+    """Route Baru: Manajemen Voucher WiFi"""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # Data dummy voucher untuk ditampilkan di templates/vouchers.html
+    active_vouchers = [
+        {"code": "NEX-2026-X1", "speed": "10Mbps", "status": "Active"},
+        {"code": "NEX-2026-X2", "speed": "10Mbps", "status": "Active"},
+        {"code": "NEX-2026-Z9", "speed": "5Mbps", "status": "Expired"}
+    ]
+    
+    return render_template('vouchers.html', 
+                           email=session.get('user_email'),
+                           vouchers=active_vouchers)
+
 @app.route('/settings')
 def settings():
     """Halaman Settings"""
