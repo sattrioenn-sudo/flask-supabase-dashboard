@@ -45,16 +45,20 @@ def login():
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-        
     return render_template('dashboard.html', email=session.get('user_email'))
+
+@app.route('/analytics')
+def analytics():
+    """Halaman Analytics"""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('analytics.html', email=session.get('user_email'))
 
 @app.route('/settings')
 def settings():
-    """Route Baru: Halaman Settings"""
+    """Halaman Settings"""
     if 'user_id' not in session:
         return redirect(url_for('login'))
-        
-    # Mengirim email dan user_id ke template settings.html
     return render_template('settings.html', 
                            email=session.get('user_email'), 
                            user_id=session.get('user_id'))
