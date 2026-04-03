@@ -1,5 +1,6 @@
 import os
 import sys
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
 # FIX: Tambahkan path agar folder 'modules' bisa terbaca oleh Vercel
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -7,7 +8,6 @@ PARENT_DIR = os.path.dirname(CURRENT_DIR)
 if PARENT_DIR not in sys.path:
     sys.path.append(PARENT_DIR)
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from modules.auth import login_user, logout_user
 from modules.supabase_db import supabase  
 
@@ -72,26 +72,25 @@ def vouchers():
         return redirect(url_for('login'))
     
     if request.method == 'POST':
-        # Gunakan get_json(silent=True) agar tidak crash jika data kosong
-        data = request.get_json(silent=True)
+        # Menggunakan get_json agar Flask menangkap data dari fetch()
+        data = request.get_json(silent=True) or {}
         
-        if not data:
-            return jsonify({"status": "error", "message": "No data received"}), 400
-            
         try:
-            # Pastikan kolom-kolom ini ada di tabel Supabase kamu
+            # Insert ke Supabase dengan proteksi nilai default
             supabase.table('vouchers').insert({
-                "user_name": data.get('user_name', 'Unknown'),
+                "user_name": data.get('user_name', 'Guest'),
                 "voucher_code": data.get('voucher_code'),
                 "location": data.get('location', 'Office'),
                 "speed": "10Mbps",
                 "status": "Active"
             }).execute()
+            
             return jsonify({"status": "success"}), 200
         except Exception as e:
+            # Mengirimkan pesan error asli ke console log browser (F12)
             return jsonify({"status": "error", "message": str(e)}), 500
 
-    # Ambil data voucher terbaru untuk metode GET
+    # Bagian GET: Ambil data untuk ditampilkan di tabel/grid
     try:
         response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
         db_vouchers = response.data if response.data else []
@@ -129,5 +128,5 @@ def logout():
         pass
     return redirect(url_for('login'))
 
-# Pastikan ini baris terakhir untuk Vercel
+# WAJIB UNTUK VERCEL
 app = app
