@@ -12,7 +12,7 @@ app = Flask(__name__,
             template_folder='../templates', 
             static_folder='../static')
 
-# Secret key untuk session
+# Secret key untuk session browser
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-key-yang-sangat-rahasia")
 
 @app.route('/')
@@ -30,7 +30,6 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         
-        # Logika dari modules/auth.py
         user, error = login_user(email, password)
         
         if user:
@@ -48,6 +47,17 @@ def dashboard():
         return redirect(url_for('login'))
         
     return render_template('dashboard.html', email=session.get('user_email'))
+
+@app.route('/settings')
+def settings():
+    """Route Baru: Halaman Settings"""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    # Mengirim email dan user_id ke template settings.html
+    return render_template('settings.html', 
+                           email=session.get('user_email'), 
+                           user_id=session.get('user_id'))
 
 @app.route('/logout')
 def logout():
