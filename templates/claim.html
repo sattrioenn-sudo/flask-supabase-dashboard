@@ -1,0 +1,33 @@
+<div x-data="{ 
+    name: '{{ target_user }}', 
+    voucher: null, 
+    error: '',
+    async claim() {
+        const res = await fetch('/api/get-voucher', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ user_name: this.name })
+        });
+        const result = await res.json();
+        if (res.ok) { this.voucher = result.data; this.error = ''; }
+        else { this.error = result.message; this.voucher = null; }
+    }
+}" class="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+    
+    <div class="bg-white p-8 rounded-[2.5rem] shadow-xl w-full max-w-sm text-center border border-slate-100">
+        <h2 class="text-2xl font-black text-slate-800 mb-6">Nexus Claim</h2>
+        
+        <div x-show="!voucher">
+            <p class="text-sm text-slate-500 mb-4">Masukkan nama kamu untuk melihat kode voucher</p>
+            <input x-model="name" type="text" placeholder="Masukkan Nama" class="w-full p-4 bg-slate-50 rounded-2xl border-none ring-2 ring-transparent focus:ring-indigo-500 mb-4 transition-all">
+            <button @click="claim()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition-all">Lihat Kode</button>
+            <p x-text="error" class="text-red-500 text-xs mt-3 font-bold"></p>
+        </div>
+
+        <div x-show="voucher" x-cloak class="animate-bounce-in">
+            <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Kode Voucher Kamu:</p>
+            <h1 class="text-4xl font-black text-slate-800 my-4" x-text="voucher.voucher_code"></h1>
+            <div class="bg-emerald-50 text-emerald-600 py-2 px-4 rounded-full text-xs font-bold inline-block" x-text="voucher.speed + ' Active'"></div>
+        </div>
+    </div>
+</div>
