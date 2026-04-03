@@ -2,10 +2,15 @@ import os
 import sys
 
 # FIX: Tambahkan path agar folder 'modules' bisa terbaca oleh Vercel
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+# Menggunakan absolute path agar lebih presisi di environment cloud
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(CURRENT_DIR)
+if PARENT_DIR not in sys.path:
+    sys.path.append(PARENT_DIR)
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from modules.auth import login_user, logout_user
+from modules.db import supabase  # Sekarang aman diimport setelah sys.path diatur
 
 # Konfigurasi Flask
 app = Flask(__name__, 
@@ -49,12 +54,9 @@ def dashboard():
 
 @app.route('/analytics')
 def analytics():
-    """Halaman Analytics"""
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('analytics.html', email=session.get('user_email'))
-
-from modules.db import supabase  # Pastikan kamu sudah punya koneksi supabase di folder modules
 
 @app.route('/vouchers', methods=['GET', 'POST'])
 def vouchers():
@@ -63,7 +65,7 @@ def vouchers():
     
     # JIKA USER INPUT DATA (POST)
     if request.method == 'POST':
-        data = request.json # Mengambil data JSON dari frontend
+        data = request.json
         try:
             supabase.table('vouchers').insert({
                 "user_name": data.get('user_name'),
@@ -76,9 +78,11 @@ def vouchers():
             return {"status": "error", "message": str(e)}, 500
 
     # JIKA USER CUMA LIHAT HALAMAN (GET)
-    # Ambil data asli dari Supabase
-    response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
-    db_vouchers = response.data
+    try:
+        response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
+        db_vouchers = response.data
+    except Exception:
+        db_vouchers = []
     
     return render_template('vouchers.html', 
                            email=session.get('user_email'),
@@ -86,7 +90,6 @@ def vouchers():
 
 @app.route('/settings')
 def settings():
-    """Halaman Settings"""
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('settings.html', 
