@@ -2,7 +2,6 @@ import os
 import sys
 
 # FIX: Tambahkan path agar folder 'modules' bisa terbaca oleh Vercel
-# Menggunakan absolute path agar lebih presisi di environment cloud
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
 if PARENT_DIR not in sys.path:
@@ -10,7 +9,8 @@ if PARENT_DIR not in sys.path:
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from modules.auth import login_user, logout_user
-from modules.db import supabase  # Sekarang aman diimport setelah sys.path diatur
+# DISINI PERUBAHANNYA: disesuaikan dengan file 'supabase_db.py' kamu
+from modules.supabase_db import supabase  
 
 # Konfigurasi Flask
 app = Flask(__name__, 
@@ -63,7 +63,6 @@ def vouchers():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    # JIKA USER INPUT DATA (POST)
     if request.method == 'POST':
         data = request.json
         try:
@@ -77,7 +76,6 @@ def vouchers():
         except Exception as e:
             return {"status": "error", "message": str(e)}, 500
 
-    # JIKA USER CUMA LIHAT HALAMAN (GET)
     try:
         response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
         db_vouchers = response.data
