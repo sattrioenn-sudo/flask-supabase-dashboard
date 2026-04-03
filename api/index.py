@@ -72,11 +72,8 @@ def vouchers():
         return redirect(url_for('login'))
     
     if request.method == 'POST':
-        # Menggunakan get_json agar Flask menangkap data dari fetch()
         data = request.get_json(silent=True) or {}
-        
         try:
-            # Insert ke Supabase dengan proteksi nilai default
             supabase.table('vouchers').insert({
                 "user_name": data.get('user_name', 'Guest'),
                 "voucher_code": data.get('voucher_code'),
@@ -84,13 +81,10 @@ def vouchers():
                 "speed": "10Mbps",
                 "status": "Active"
             }).execute()
-            
             return jsonify({"status": "success"}), 200
         except Exception as e:
-            # Mengirimkan pesan error asli ke console log browser (F12)
             return jsonify({"status": "error", "message": str(e)}), 500
 
-    # Bagian GET: Ambil data untuk ditampilkan di tabel/grid
     try:
         response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
         db_vouchers = response.data if response.data else []
@@ -108,6 +102,32 @@ def delete_voucher(code_voucher):
     try:
         supabase.table('vouchers').delete().eq('voucher_code', code_voucher).execute()
         return jsonify({"status": "success"}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# --- FITUR BARU: CLAIM VOUCHER (PUBLIK) ---
+
+@app.route('/claim')
+def claim_page():
+    # Mengambil nama dari URL ?u=Nama
+    target_user = request.args.get('u', '')
+    return render_template('claim.html', target_user=target_user)
+
+@app.route('/api/get-voucher', methods=['POST'])
+def get_voucher_api():
+    data = request.get_json(silent=True) or {}
+    user_name = data.get('user_name')
+    
+    if not user_name:
+        return jsonify({"status": "error", "message": "Nama harus diisi"}), 400
+        
+    try:
+        # Cari di DB berdasarkan nama user (Case Sensitive)
+        response = supabase.table('vouchers').select("*").eq('user_name', user_name).limit(1).execute()
+        if response.data:
+            return jsonify({"status": "success", "data": response.data[0]}), 200
+        else:
+            return jsonify({"status": "error", "message": "Nama tidak ditemukan atau belum terdaftar"}), 404
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
