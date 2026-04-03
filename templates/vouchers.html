@@ -168,7 +168,6 @@
 
                 async addVoucher() {
                     const finalUser = this.inputUser || "User";
-                    // Jika inputCode kosong, generate otomatis
                     const finalCode = this.inputCode || (finalUser.toUpperCase().replace(/\s/g, '') + "-" + Math.floor(1000 + Math.random() * 9000));
                     
                     const payload = { 
@@ -188,7 +187,7 @@
                             this.voucherList.unshift({ ...payload, speed: "10Mbps", status: "Active" });
                             this.showModal = false;
                             this.inputUser = '';
-                            this.inputCode = ''; // Reset input code
+                            this.inputCode = '';
                         }
                     } catch (e) { alert("Error connecting to database."); }
                 },
@@ -203,9 +202,21 @@
                     window.open(`https://wa.me/?text=${encodeURIComponent(pesan)}`, '_blank');
                 },
 
-                deleteVoucher(code) {
+                async deleteVoucher(code) {
                     if(confirm('Delete this voucher?')) {
-                        this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
+                        try {
+                            const response = await fetch(`/vouchers/delete/${code}`, {
+                                method: 'DELETE'
+                            });
+                            
+                            if (response.ok) {
+                                this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
+                            } else {
+                                alert("Failed to delete from database.");
+                            }
+                        } catch (e) {
+                            alert("Error connecting to server.");
+                        }
                     }
                 }
             }
