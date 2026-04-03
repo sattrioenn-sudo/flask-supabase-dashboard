@@ -54,22 +54,35 @@ def analytics():
         return redirect(url_for('login'))
     return render_template('analytics.html', email=session.get('user_email'))
 
-@app.route('/vouchers')
+from modules.db import supabase  # Pastikan kamu sudah punya koneksi supabase di folder modules
+
+@app.route('/vouchers', methods=['GET', 'POST'])
 def vouchers():
-    """Route Baru: Manajemen Voucher WiFi"""
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    # Data dummy voucher untuk ditampilkan di templates/vouchers.html
-    active_vouchers = [
-        {"code": "NEX-2026-X1", "speed": "10Mbps", "status": "Active"},
-        {"code": "NEX-2026-X2", "speed": "10Mbps", "status": "Active"},
-        {"code": "NEX-2026-Z9", "speed": "5Mbps", "status": "Expired"}
-    ]
+    # JIKA USER INPUT DATA (POST)
+    if request.method == 'POST':
+        data = request.json # Mengambil data JSON dari frontend
+        try:
+            supabase.table('vouchers').insert({
+                "user_name": data.get('user_name'),
+                "voucher_code": data.get('voucher_code'),
+                "speed": "10Mbps",
+                "status": "Active"
+            }).execute()
+            return {"status": "success"}, 200
+        except Exception as e:
+            return {"status": "error", "message": str(e)}, 500
+
+    # JIKA USER CUMA LIHAT HALAMAN (GET)
+    # Ambil data asli dari Supabase
+    response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
+    db_vouchers = response.data
     
     return render_template('vouchers.html', 
                            email=session.get('user_email'),
-                           vouchers=active_vouchers)
+                           vouchers=db_vouchers)
 
 @app.route('/settings')
 def settings():
