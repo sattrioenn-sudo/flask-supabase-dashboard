@@ -84,7 +84,7 @@
                                 <div class="mt-6 flex gap-2 relative z-10">
                                     <button @click="copyCode(v.voucher_code)" class="flex-1 bg-slate-900 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">Copy</button>
                                     <button @click="shareWA(v.user_name, v.voucher_code, v.location)" class="flex-1 bg-emerald-500 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-emerald-600 transition-all flex items-center justify-center gap-1">
-                                        Share WA
+                                        Share WA Link
                                     </button>
                                     <button @click="deleteVoucher(v.voucher_code)" class="p-3 bg-red-50 rounded-xl text-red-400 hover:text-red-600 transition-all">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -197,8 +197,10 @@
                     alert("Code copied!");
                 },
 
+                // REVISI: Mengirim Link Claim, Bukan Kode Langsung
                 shareWA(name, code, loc) {
-                    const pesan = `Halo *${name}* (${loc}), ini voucher WiFi Nexus kamu: \n\n🚀 Kode: *${code}* \n📶 Speed: 10Mbps`;
+                    const claimUrl = `${window.location.origin}/claim?u=${encodeURIComponent(name)}`;
+                    const pesan = `Halo *${name}*, voucher WiFi kamu untuk lokasi *${loc}* sudah siap! \n\nSilakan ambil kode voucher kamu di link resmi Nexus ini: \n🔗 ${claimUrl}`;
                     window.open(`https://wa.me/?text=${encodeURIComponent(pesan)}`, '_blank');
                 },
 
