@@ -56,7 +56,17 @@ def dashboard():
 def analytics():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('analytics.html', email=session.get('user_email'))
+    
+    # Ambil data voucher untuk menghitung total
+    try:
+        response = supabase.table('vouchers').select("id", count='exact').execute()
+        total_vouchers = response.count if response.count else 0
+    except:
+        total_vouchers = 0
+
+    return render_template('analytics.html', 
+                           email=session.get('user_email'), 
+                           total_vouchers=total_vouchers)
 
 @app.route('/vouchers', methods=['GET', 'POST'])
 def vouchers():
