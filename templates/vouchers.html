@@ -197,10 +197,10 @@
                     alert("Code copied!");
                 },
 
-                // REVISI: Mengirim Link Claim, Bukan Kode Langsung
+                // REVISI: Mengirim Link Claim Umum (Tanpa Parameter Nama)
                 shareWA(name, code, loc) {
-                    const claimUrl = `${window.location.origin}/claim?u=${encodeURIComponent(name)}`;
-                    const pesan = `Halo *${name}*, voucher WiFi kamu untuk lokasi *${loc}* sudah siap! \n\nSilakan ambil kode voucher kamu di link resmi Nexus ini: \n🔗 ${claimUrl}`;
+                    const claimUrl = `${window.location.origin}/claim`;
+                    const pesan = `Halo *${name}*, voucher WiFi kamu untuk lokasi *${loc}* sudah siap! \n\nSilakan ambil kode voucher kamu di link resmi Nexus ini: \n🔗 ${claimUrl} \n\n*(Masukkan nama kamu di dalam portal untuk melihat kode)*`;
                     window.open(`https://wa.me/?text=${encodeURIComponent(pesan)}`, '_blank');
                 },
 
