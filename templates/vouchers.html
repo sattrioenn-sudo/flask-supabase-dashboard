@@ -103,7 +103,11 @@
                 <div class="space-y-6">
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">User Name</label>
-                        <input x-model="inputUser" type="text" class="w-full mt-2 bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500">
+                        <input x-model="inputUser" type="text" placeholder="Nama User" class="w-full mt-2 bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Voucher Code</label>
+                        <input x-model="inputCode" type="text" placeholder="Input kode manual" class="w-full mt-2 bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Location</label>
@@ -129,7 +133,6 @@
                 inputUser: '',
                 inputCode: '',
                 inputLocation: 'Office',
-                // MASTER LOKASI
                 locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lobby'],
                 voucherList: {{ vouchers|tojson if vouchers else [] }},
                 
@@ -165,7 +168,9 @@
 
                 async addVoucher() {
                     const finalUser = this.inputUser || "User";
-                    const finalCode = (finalUser.toUpperCase().replace(/\s/g, '') + "-" + Math.floor(1000 + Math.random() * 9000));
+                    // Jika inputCode kosong, generate otomatis
+                    const finalCode = this.inputCode || (finalUser.toUpperCase().replace(/\s/g, '') + "-" + Math.floor(1000 + Math.random() * 9000));
+                    
                     const payload = { 
                         user_name: finalUser, 
                         voucher_code: finalCode,
@@ -183,6 +188,7 @@
                             this.voucherList.unshift({ ...payload, speed: "10Mbps", status: "Active" });
                             this.showModal = false;
                             this.inputUser = '';
+                            this.inputCode = ''; // Reset input code
                         }
                     } catch (e) { alert("Error connecting to database."); }
                 },
