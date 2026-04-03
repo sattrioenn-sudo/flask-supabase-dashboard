@@ -50,17 +50,17 @@
                     <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:border-indigo-200 transition-all">
                         <div class="flex justify-between items-start relative z-10">
                             <div>
-                                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest" x-text="'User: ' + v.user"></p>
-                                <h3 class="text-2xl font-black text-slate-800 mt-1" x-text="v.code"></h3>
+                                <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest" x-text="'User: ' + v.user_name"></p>
+                                <h3 class="text-2xl font-black text-slate-800 mt-1" x-text="v.voucher_code"></h3>
                                 <div class="flex items-center gap-2 mt-2">
                                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                                     <p class="text-[11px] text-slate-400 font-bold" x-text="v.speed + ' Speed'"></p>
                                 </div>
                             </div>
-                            <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase">Active</span>
+                            <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase" x-text="v.status"></span>
                         </div>
                         <div class="mt-6 flex gap-2 relative z-10">
-                            <button @click="copyCode(v.code)" class="flex-1 bg-slate-900 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">Copy Code</button>
+                            <button @click="copyCode(v.voucher_code)" class="flex-1 bg-slate-900 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">Copy Code</button>
                             <button @click="deleteVoucher(index)" class="p-3 bg-red-50 rounded-xl text-red-400 hover:text-red-600 transition-all">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
@@ -100,26 +100,42 @@
                 showModal: false,
                 inputUser: '',
                 inputCode: '',
-                voucherList: [
-                    {user: "Satrio", code: "SATRIO-7721", speed: "10Mbps", status: "Active"},
-                ],
+                // Ambil data awal dari Flask/Supabase
+                voucherList: {{ vouchers|tojson if vouchers else [] }},
                 
-                addVoucher() {
-                    // Logic: Pakai input, kalau kosong pakai default
+                async addVoucher() {
                     const finalUser = this.inputUser || "Satrio";
                     const finalCode = this.inputCode || (finalUser.toUpperCase() + "-" + Math.floor(1000 + Math.random() * 9000));
                     
-                    this.voucherList.unshift({
-                        user: finalUser,
-                        code: finalCode,
-                        speed: "10Mbps",
-                        status: "Active"
-                    });
+                    const payload = {
+                        user_name: finalUser,
+                        voucher_code: finalCode
+                    };
 
-                    // Reset & Close
-                    this.inputUser = '';
-                    this.inputCode = '';
-                    this.showModal = false;
+                    try {
+                        const response = await fetch('/vouchers', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            this.voucherList.unshift({
+                                user_name: finalUser,
+                                voucher_code: finalCode,
+                                speed: "10Mbps",
+                                status: "Active"
+                            });
+                            this.showModal = false;
+                            this.inputUser = '';
+                            this.inputCode = '';
+                        } else {
+                            alert("Gagal menyimpan ke database Supabase!");
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert("Terjadi kesalahan koneksi.");
+                    }
                 },
 
                 copyCode(code) {
@@ -130,6 +146,7 @@
                 deleteVoucher(index) {
                     if(confirm('Delete this voucher?')) {
                         this.voucherList.splice(index, 1);
+                        // Optional: Tambahkan fetch DELETE ke server jika ingin benar-benar hapus dari DB
                     }
                 }
             }
