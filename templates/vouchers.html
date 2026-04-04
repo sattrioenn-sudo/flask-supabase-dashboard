@@ -12,33 +12,48 @@
 
 {% block content %}
 <div x-data="voucherApp()" class="space-y-8">
-    <div class="flex justify-between items-center bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+    <div class="flex justify-between items-center bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
         <div class="flex gap-3">
-            <label class="bg-emerald-600 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-lg shadow-emerald-100 hover:bg-emerald-700 cursor-pointer transition-all flex items-center gap-2">
+            <label class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-100 hover:bg-emerald-700 cursor-pointer transition-all flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                <span>Scan Excel</span>
-                <input type="file" class="hidden" accept=".xlsx, .xls" @change="importExcel($event)">
+                <span>Scan File</span>
+                <input type="file" class="hidden" accept=".xlsx, .xls, .csv" @change="importExcel($event)">
             </label>
-            <button @click="showModal = true" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-slate-800 transition-all">Add New</button>
+            <button @click="showModal = true" class="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-slate-800 transition-all">Add Voucher</button>
+        </div>
+        
+        <div class="flex gap-2">
+             <button @click="exportExcel()" class="p-3 bg-slate-50 text-slate-400 rounded-xl hover:text-emerald-600 transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+             </button>
         </div>
     </div>
 
     <template x-for="loc in locationMaster" :key="loc">
-        <div class="space-y-4" x-show="voucherList.filter(v => v.location === loc).length > 0">
-            <h2 class="text-xs font-black uppercase text-slate-400 tracking-widest" x-text="loc"></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-4 mb-10" x-show="voucherList.filter(v => v.location === loc).length > 0">
+            <div class="flex items-center gap-4">
+                <h2 class="text-xs font-black uppercase tracking-widest text-slate-400" x-text="loc"></h2>
+                <div class="h-px flex-1 bg-slate-200/60"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <template x-for="v in voucherList.filter(v => v.location === loc)" :key="v.voucher_code">
-                    <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm group hover:border-emerald-200 transition-all">
+                    <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:border-emerald-200 transition-all">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[10px] font-bold text-emerald-600 uppercase" x-text="v.user_name"></p>
-                                <h3 class="text-xl font-black text-slate-800" x-text="v.voucher_code"></h3>
+                                <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest" x-text="'User: ' + v.user_name"></p>
+                                <h3 class="text-2xl font-black text-slate-800 mt-1" x-text="v.voucher_code"></h3>
+                                <p class="text-[11px] text-slate-400 font-bold mt-2" x-text="v.speed || '15Mbps' + ' Speed'"></p>
                             </div>
-                            <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-bold" x-text="v.status"></span>
+                            <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase" x-text="v.status"></span>
                         </div>
-                        <div class="mt-4 flex gap-2">
-                            <button @click="copyCode(v.voucher_code)" class="flex-1 bg-slate-50 text-slate-600 text-[10px] py-2 rounded-lg font-bold hover:bg-emerald-50 hover:text-emerald-600 transition-all">Copy Code</button>
-                            <button @click="shareWA(v.user_name, v.voucher_code, v.location)" class="flex-1 bg-emerald-500 text-white text-[10px] py-2 rounded-lg font-bold hover:bg-emerald-600">Share WA</button>
+                        <div class="mt-6 flex gap-2">
+                            <button @click="copyCode(v.voucher_code)" class="flex-1 bg-slate-900 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">Copy</button>
+                            <button @click="shareWA(v.user_name, v.voucher_code, v.location)" class="flex-1 bg-emerald-500 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-emerald-600">Share WA</button>
+                            
+                            <button @click="deleteVoucher(v.voucher_code)" class="p-3 bg-red-50 rounded-xl text-red-400 hover:text-red-600 hover:bg-red-100 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
                         </div>
                     </div>
                 </template>
@@ -46,19 +61,21 @@
         </div>
     </template>
 
-    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl">
-            <h3 class="text-xl font-bold mb-6">Create Voucher</h3>
-            <input x-model="inputUser" type="text" placeholder="User Name" class="w-full mb-4 bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
-            <input x-model="inputCode" type="text" placeholder="Voucher Code" class="w-full mb-4 bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
-            <select x-model="inputLocation" class="w-full mb-6 bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
-                <template x-for="loc in locationMaster" :key="loc">
-                    <option :value="loc" x-text="loc"></option>
-                </template>
-            </select>
-            <div class="flex gap-3">
-                <button @click="showModal = false" class="flex-1 py-4 font-bold text-slate-400">Cancel</button>
-                <button @click="addVoucher()" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg">Save</button>
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <div @click.away="showModal = false" class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl border border-slate-100">
+            <h3 class="text-xl font-bold text-slate-800 mb-6">Create Voucher</h3>
+            <div class="space-y-4">
+                <input x-model="inputUser" type="text" placeholder="User Name" class="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                <input x-model="inputCode" type="text" placeholder="Voucher Code" class="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                <select x-model="inputLocation" class="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                    <template x-for="loc in locationMaster" :key="loc">
+                        <option :value="loc" x-text="loc"></option>
+                    </template>
+                </select>
+                <div class="flex gap-3 pt-4">
+                    <button @click="showModal = false" class="flex-1 py-4 font-bold text-slate-400">Cancel</button>
+                    <button @click="addVoucher()" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg hover:bg-emerald-700">Create</button>
+                </div>
             </div>
         </div>
     </div>
@@ -71,24 +88,91 @@
         return {
             showModal: false,
             inputUser: '', inputCode: '', inputLocation: 'Office',
-            locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lantai 1', 'Lantai 2'],
+            locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lantai 1', 'Lantai 2', 'Lantai 3', 'Lantai 4', 'Ekspedisi'],
             voucherList: {{ vouchers|tojson if vouchers else [] }},
-            
+
             async addVoucher(isSilent = false) {
-                const payload = { user_name: this.inputUser || "User", voucher_code: this.inputCode, location: this.inputLocation };
-                const res = await fetch('/vouchers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                if (res.ok) {
-                    this.voucherList.unshift({ ...payload, status: "Active" });
-                    if(!isSilent) this.showModal = false;
+                const finalUser = this.inputUser || "User";
+                const finalCode = this.inputCode || (finalUser.toUpperCase().replace(/\s/g, '') + "-" + Math.floor(1000 + Math.random() * 9000));
+                const payload = { user_name: finalUser, voucher_code: finalCode, location: this.inputLocation };
+
+                try {
+                    const response = await fetch('/vouchers', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        this.voucherList.unshift({ ...payload, speed: "15Mbps", status: "Active" });
+                        if (!isSilent) {
+                            this.showModal = false;
+                            this.inputUser = ''; this.inputCode = '';
+                        }
+                        return true;
+                    }
+                } catch (e) { return false; }
+            },
+
+            async deleteVoucher(code) {
+                if(confirm('Hapus voucher ini dari database?')) {
+                    try {
+                        const response = await fetch(`/vouchers/delete/${code}`, { method: 'DELETE' });
+                        if (response.ok) {
+                            this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
+                        }
+                    } catch (e) { alert("Gagal menghapus data."); }
                 }
             },
-            copyCode(code) { navigator.clipboard.writeText(code); alert('Copied!'); },
+
+            async importExcel(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const btn = event.target.parentElement;
+                const originalText = btn.innerHTML;
+                btn.querySelector('span').innerText = "Scanning...";
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    
+                    let successCount = 0;
+                    for (const row of jsonData) {
+                        this.inputUser = row["Nama depan"] || row["User"] || "User";
+                        this.inputCode = row["Kode voucher"] || row["Code"] || "";
+                        let rawLoc = row["Lokasi"] || row["Grup pengguna"] || "Office";
+                        
+                        // Normalisasi lokasi
+                        if (rawLoc.includes("Kantor")) rawLoc = "Office";
+                        if (rawLoc.includes("Produksi")) rawLoc = "Production";
+                        this.inputLocation = rawLoc;
+
+                        if (this.inputCode) {
+                            const success = await this.addVoucher(true);
+                            if (success) successCount++;
+                        }
+                    }
+                    alert(`Berhasil impor ${successCount} data!`);
+                    btn.innerHTML = originalText;
+                };
+                reader.readAsArrayBuffer(file);
+            },
+
+            copyCode(code) { navigator.clipboard.writeText(code); alert("Copied!"); },
+            
             shareWA(name, code, loc) {
-                const msg = `Halo *${name}*, voucher WiFi lokasi *${loc}* kamu: *${code}*`;
+                const url = `${window.location.origin}/claim`;
+                const msg = `Halo *${name}*, WiFi lokasi *${loc}* siap: \n🔗 ${url} \nKode: *${code}*`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
             },
-            async importExcel(event) {
-                // Logika import excel kamu yang lama masukkan di sini (tetap sama)
+
+            exportExcel() {
+                const data = this.voucherList.map(v => ({ 'Loc': v.location, 'User': v.user_name, 'Code': v.voucher_code }));
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Vouchers");
+                XLSX.writeFile(wb, `Nexus_Vouchers.xlsx`);
             }
         }
     }
