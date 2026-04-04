@@ -7,28 +7,53 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
         [x-cloak] { display: none !important; }
-        /* Warna Hijau Sidebar dari gambar greenwhite.png */
-        .sidebar-green { background-color: #2D5A57; } 
-        .nav-active { background-color: #A7F3D0; color: #064E3B; } /* Emerald-200 & Emerald-900 */
+        
+        /* Modern Blue Sidebar Gradient */
+        .sidebar-blue { 
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); 
+        } 
+        
+        /* Efek Hover & Active yang lebih "Glow" */
+        .nav-active { 
+            background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%); 
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-hover:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #60A5FA !important;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex">
+<body class="bg-[#F1F5F9] text-slate-900 min-h-screen flex">
 
-    <aside class="w-72 sidebar-green hidden lg:flex flex-col sticky top-0 h-screen shadow-2xl">
+    <aside class="w-80 sidebar-blue hidden lg:flex flex-col sticky top-0 h-screen shadow-[10px_0_30px_-15px_rgba(0,0,0,0.3)]">
         <div class="p-10">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-emerald-400 rounded-xl flex items-center justify-center shadow-lg">
-                    <span class="text-white font-bold text-xl">N</span>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-blue-400/30">
+                    <span class="text-white font-black text-2xl tracking-tighter">N</span>
                 </div>
-                <span class="text-xl font-extrabold tracking-tight text-white uppercase">NEXUS</span>
+                <div>
+                    <span class="text-2xl font-black tracking-tighter text-white block">NEXUS</span>
+                    <span class="text-[9px] font-bold text-blue-400 uppercase tracking-[0.3em]">Infrastructure</span>
+                </div>
             </div>
         </div>
         
         <nav class="flex-1 px-6 space-y-2">
-            <p class="text-[10px] font-bold text-emerald-200/50 uppercase tracking-[0.2em] ml-4 mb-4 italic">Main Menu</p>
+            <div class="px-4 mb-4">
+                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.25em]">System Menu</p>
+            </div>
             
             {% set nav_items = [
                 ('/dashboard', 'Dashboard', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'),
@@ -38,61 +63,88 @@
             ] %}
 
             {% for href, label, path in nav_items %}
-            <a href="{{ href }}" class="flex items-center gap-3 py-4 px-6 rounded-2xl transition-all font-bold 
-                {{ 'nav-active shadow-lg' if request.path == href else 'text-emerald-100/70 hover:bg-emerald-400/10 hover:text-white' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ path }}" />
-                </svg>
+            <a href="{{ href }}" class="flex items-center gap-3 py-4 px-6 rounded-2xl transition-all duration-300 font-bold group
+                {{ 'nav-active' if request.path == href else 'text-slate-400 nav-hover' }}">
+                <div class="p-2 rounded-lg {{ 'bg-white/20' if request.path == href else 'bg-slate-800 group-hover:bg-blue-500/20' }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ path }}" />
+                    </svg>
+                </div>
                 {{ label }}
             </a>
             {% endfor %}
         </nav>
 
-        <div class="p-8 border-t border-emerald-400/10">
-            <div class="bg-emerald-400/10 rounded-2xl p-4 border border-emerald-400/20 mb-4">
-                <p class="text-[9px] font-bold text-emerald-300 uppercase tracking-widest">Administrator</p>
-                <p class="text-xs text-white font-medium truncate">{{ email }}</p>
+        <div class="p-8 border-t border-white/5">
+            <div class="bg-blue-500/10 rounded-2xl p-4 border border-blue-500/20 mb-4 backdrop-blur-sm">
+                <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Signed in as</p>
+                <p class="text-xs text-white font-bold truncate">{{ email }}</p>
             </div>
-            <a href="/logout" class="flex items-center gap-3 py-3 px-4 rounded-xl text-emerald-200 hover:text-red-400 transition-all font-bold text-xs uppercase tracking-tighter">
+            <a href="/logout" class="flex items-center justify-center gap-3 py-3 px-4 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 font-bold text-xs uppercase tracking-widest border border-transparent hover:border-red-500/20">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 Sign Out
             </a>
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto">
-        <header class="h-24 bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-20 px-10 flex items-center justify-between">
+    <main class="flex-1 overflow-y-auto flex flex-col">
+        <header class="h-28 bg-white/70 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-20 px-12 flex items-center justify-between">
             <div>
-                <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Management System</p>
-                <h1 class="text-2xl font-extrabold text-slate-800">{% block header_title %}{% endblock %}</h1>
+                <nav class="flex mb-1" aria-label="Breadcrumb">
+                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                        <li class="inline-flex items-center">
+                            <span class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em]">Management Console</span>
+                        </li>
+                    </ol>
+                </nav>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">{% block header_title %}{% endblock %}</h1>
             </div>
             
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-600 transition-colors cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                </div>
-                <div class="h-8 w-px bg-slate-200 mx-2"></div>
-                <div class="flex items-center gap-3">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-sm font-bold text-slate-800">{{ email.split('@')[0] }}</p>
-                        <p class="text-[10px] text-emerald-500 font-bold uppercase">IT Infrastructure</p>
+            <div class="flex items-center gap-6">
+                <button class="relative w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-lg transition-all cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                    <span class="absolute top-3 right-3 w-2 h-2 bg-blue-600 rounded-full border-2 border-white"></span>
+                </button>
+
+                <div class="h-10 w-px bg-slate-200"></div>
+
+                <div class="flex items-center gap-4 group cursor-pointer">
+                    <div class="text-right">
+                        <p class="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors">{{ email.split('@')[0] | capitalize }}</p>
+                        <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-tighter">Infrastructure Admin</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-[#2D5A57] border-2 border-white shadow-md flex items-center justify-center text-emerald-400 font-black text-lg">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border-4 border-white shadow-xl flex items-center justify-center text-white font-black text-xl overflow-hidden relative group-hover:scale-105 transition-transform">
                         {{ email[0] | upper }}
+                        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
                     </div>
                 </div>
             </div>
         </header>
 
-        <div class="p-10 max-w-[1600px] mx-auto">
-            {% block content %}{% endblock %}
+        <div class="p-12 max-w-[1600px] mx-auto w-full flex-1">
+            <div class="animate-[fadeIn_0.5s_ease-out]">
+                {% block content %}{% endblock %}
+            </div>
         </div>
         
-        <footer class="px-10 py-8 text-center">
-            <p class="text-[10px] font-bold text-slate-300 uppercase tracking-[0.4em]">PT. Kemasan Ciptatama Sempurna - Infrastructure Administration</p>
+        <footer class="px-12 py-10 bg-white border-t border-slate-100 mt-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">PT. Kemasan Ciptatama Sempurna</p>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">System Operational</p>
+                </div>
+            </div>
         </footer>
     </main>
 
     {% block scripts %}{% endblock %}
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </body>
 </html>
