@@ -8,7 +8,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
-        .table-container { background: white; border-radius: 1.5rem; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+        .table-container { background: white; border-radius: 1.5rem; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
+        
+        /* Zebra Striping: Biru sangat muda untuk baris genap */
+        tbody tr:nth-child(even) { background-color: #f8fafc; }
+        tbody tr:nth-child(odd) { background-color: #ffffff; }
+        
+        /* Hover effect agar tetap interaktif */
+        tbody tr:hover { background-color: #f1f5f9 !important; transition: background-color 0.2s; }
+
         .btn-edit { background-color: #f0ad4e; color: white; padding: 6px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; }
         .btn-delete { background-color: #d9534f; color: white; padding: 6px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; }
         [x-cloak] { display: none !important; }
@@ -23,10 +31,10 @@
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </span>
-                <input x-model="searchQuery" type="text" placeholder="Cari nama atau kode..." class="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none w-64 shadow-sm">
+                <input x-model="searchQuery" type="text" placeholder="Cari nama atau kode..." class="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64 shadow-sm">
             </div>
 
-            <select x-model="perPage" @change="currentPage = 1" class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm text-slate-600 font-medium">
+            <select x-model="perPage" @change="currentPage = 1" class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-slate-600 font-medium">
                 <option value="10">10 Entries</option>
                 <option value="25">25 Entries</option>
                 <option value="50">50 Entries</option>
@@ -56,22 +64,22 @@
     <div class="table-container">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="border-b border-slate-100 bg-slate-50/50">
-                    <th class="p-4 text-sm font-bold text-slate-700 w-12 text-center">No</th>
-                    <th class="p-4 text-sm font-bold text-slate-700">Lokasi</th>
-                    <th class="p-4 text-sm font-bold text-slate-700">Nama User</th>
-                    <th class="p-4 text-sm font-bold text-slate-700">Voucher Code</th>
-                    <th class="p-4 text-sm font-bold text-slate-700 text-center">Status</th>
-                    <th class="p-4 text-sm font-bold text-slate-700 text-center">Opsi</th>
+                <tr class="bg-slate-800 text-white">
+                    <th class="p-4 text-xs font-bold uppercase tracking-wider w-12 text-center">No</th>
+                    <th class="p-4 text-xs font-bold uppercase tracking-wider">Lokasi</th>
+                    <th class="p-4 text-xs font-bold uppercase tracking-wider">Nama User</th>
+                    <th class="p-4 text-xs font-bold uppercase tracking-wider">Voucher Code</th>
+                    <th class="p-4 text-xs font-bold uppercase tracking-wider text-center">Status</th>
+                    <th class="p-4 text-xs font-bold uppercase tracking-wider text-center">Opsi</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-50">
+            <tbody class="divide-y divide-slate-100">
                 <template x-for="(v, index) in paginatedVouchers" :key="v.voucher_code">
-                    <tr class="hover:bg-slate-50/50 transition-colors">
-                        <td class="p-4 text-sm text-slate-500 text-center" x-text="(currentPage - 1) * perPage + index + 1"></td>
-                        <td class="p-4"><span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[11px] font-bold" x-text="v.location"></span></td>
+                    <tr class="transition-colors">
+                        <td class="p-4 text-sm text-slate-500 text-center font-medium" x-text="(currentPage - 1) * perPage + index + 1"></td>
+                        <td class="p-4"><span class="px-2 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded text-[11px] font-bold" x-text="v.location"></span></td>
                         <td class="p-4 text-sm font-semibold text-slate-700" x-text="v.user_name"></td>
-                        <td class="p-4 font-mono text-sm font-bold text-emerald-600" x-text="v.voucher_code"></td>
+                        <td class="p-4 font-mono text-sm font-bold text-blue-600" x-text="v.voucher_code"></td>
                         <td class="p-4 text-center">
                             <template x-if="v.is_locked == true || v.is_locked == 1">
                                 <span class="flex items-center justify-center text-red-500" title="Locked">
@@ -87,18 +95,18 @@
                         <td class="p-4 text-center">
                             <div class="flex justify-center gap-2">
                                 <template x-if="v.is_locked == true || v.is_locked == 1">
-                                    <button @click="unlockVoucher(v.voucher_code)" class="bg-indigo-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-indigo-600">Unlock</button>
+                                    <button @click="unlockVoucher(v.voucher_code)" class="bg-indigo-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-colors">Unlock</button>
                                 </template>
-                                <button @click="copyCode(v.voucher_code)" class="btn-edit">Copy</button>
-                                <button @click="shareWA(v.user_name, v.location)" class="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold">WA</button>
-                                <button @click="deleteVoucher(v.voucher_code)" class="btn-delete">Hapus</button>
+                                <button @click="copyCode(v.voucher_code)" class="btn-edit hover:opacity-90 transition-opacity">Copy</button>
+                                <button @click="shareWA(v.user_name, v.location)" class="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-emerald-600 transition-colors">WA</button>
+                                <button @click="deleteVoucher(v.voucher_code)" class="btn-delete hover:opacity-90 transition-opacity">Hapus</button>
                             </div>
                         </td>
                     </tr>
                 </template>
                 <template x-if="filteredVouchers.length === 0">
                     <tr>
-                        <td colspan="6" class="p-8 text-center text-slate-400 text-sm italic">Data tidak ditemukan...</td>
+                        <td colspan="6" class="p-10 text-center text-slate-400 text-sm italic bg-white">Data tidak ditemukan...</td>
                     </tr>
                 </template>
             </tbody>
@@ -121,14 +129,14 @@
         <div @click.away="showModal = false" class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl border border-slate-100">
             <h3 class="text-xl font-bold text-slate-800 mb-6">Create Voucher</h3>
             <div class="space-y-4">
-                <input x-model="inputUser" type="text" placeholder="User Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                <input x-model="inputCode" type="text" placeholder="Voucher Code (Optional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input x-model="inputUser" type="text" placeholder="User Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                <input x-model="inputCode" type="text" placeholder="Voucher Code (Optional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 <select x-model="inputLocation" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none">
                     <template x-for="loc in locationMaster" :key="loc"><option :value="loc" x-text="loc"></option></template>
                 </select>
                 <div class="flex gap-3 pt-6">
                     <button @click="showModal = false" class="flex-1 py-3 font-bold text-slate-400">Batal</button>
-                    <button @click="addVoucher()" class="flex-1 py-3 bg-[#2D5A57] text-white rounded-xl font-bold">Simpan</button>
+                    <button @click="addVoucher()" class="flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-colors">Simpan</button>
                 </div>
             </div>
         </div>
@@ -148,7 +156,6 @@
             locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lantai 1', 'Lantai 2', 'Lantai 3', 'Lantai 4', 'Ekspedisi'],
             rawVouchers: {{ vouchers|tojson if vouchers else [] }},
 
-            // Logic Search
             get filteredVouchers() {
                 if (!this.searchQuery) return this.rawVouchers;
                 return this.rawVouchers.filter(v => 
@@ -157,7 +164,6 @@
                 );
             },
 
-            // Logic Pagination
             get paginatedVouchers() {
                 const start = (this.currentPage - 1) * this.perPage;
                 return this.filteredVouchers.slice(start, start + parseInt(this.perPage));
@@ -217,7 +223,7 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 const rows = this.filteredVouchers.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, '15Mbps', v.is_locked ? 'Locked' : 'Available']);
-                doc.autoTable({ head: [['No', 'Location', 'User', 'Code', 'Speed', 'Status']], body: rows, startY: 20, theme: 'grid', headStyles: { fillColor: [45, 90, 87] } });
+                doc.autoTable({ head: [['No', 'Location', 'User', 'Code', 'Speed', 'Status']], body: rows, startY: 20, theme: 'grid', headStyles: { fillColor: [30, 41, 59] } });
                 doc.save("Voucher_Report.pdf");
             },
             exportExcel() {
