@@ -86,11 +86,10 @@
 
                         <td class="p-4">
                             <div class="flex justify-center gap-2">
-                                <template x-if="v.is_locked == true || v.is_locked == 1">
-                                    <button @click="unlockVoucher(v.voucher_code)" class="bg-indigo-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-all">
-                                        Unlock
-                                    </button>
-                                </template>
+                                <button @click="unlockVoucher(v.voucher_code)" class="bg-indigo-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-all">
+                                    Unlock
+                                </button>
+                                
                                 <button @click="copyCode(v.voucher_code)" class="btn-edit hover:opacity-80 transition-all">Copy</button>
                                 <button @click="shareWA(v.user_name, v.location)" class="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-emerald-600 transition-all">WA</button>
                                 <button @click="deleteVoucher(v.voucher_code)" class="btn-delete hover:opacity-80 transition-all">Hapus</button>
@@ -143,13 +142,13 @@
                         if (res.ok) {
                             const index = this.voucherList.findIndex(v => v.voucher_code === code);
                             if (index !== -1) {
-                                // Reset status ke false secara reaktif
+                                // Paksa update status di UI secara reaktif
                                 this.voucherList[index].is_locked = false;
                                 this.voucherList = [...this.voucherList]; 
                             }
                             alert("Voucher berhasil dibuka!");
                         } else {
-                            alert("Server gagal memproses unlock.");
+                            alert("Gagal menghubungi server. Pastikan route backend sudah ada.");
                         }
                     } catch (e) { 
                         console.error(e);
