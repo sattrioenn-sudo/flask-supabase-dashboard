@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-
 {% block title %}WiFi Vouchers{% endblock %}
 {% block header_title %}WiFi Management{% endblock %}
 
@@ -18,7 +17,6 @@
 
 {% block content %}
 <div x-data="voucherApp()" class="space-y-6">
-    
     <div class="flex flex-wrap justify-between items-center gap-4">
         <div class="flex gap-3">
             <label class="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm hover:bg-emerald-700 cursor-pointer transition-all flex items-center gap-2">
@@ -26,13 +24,11 @@
                 <span>Scan File</span>
                 <input type="file" class="hidden" accept=".xlsx, .xls, .csv" @change="importExcel($event)">
             </label>
-
             <button @click="showModal = true" class="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-800 transition-all flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                 Add Voucher
             </button>
         </div>
-        
         <div class="flex gap-2 bg-white p-1 rounded-xl border border-slate-200">
              <button @click="exportExcel()" title="Excel" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -51,7 +47,6 @@
                     <th class="p-4 text-sm font-bold text-slate-700">Lokasi</th>
                     <th class="p-4 text-sm font-bold text-slate-700">Nama User</th>
                     <th class="p-4 text-sm font-bold text-slate-700">Voucher Code</th>
-                    <th class="p-4 text-sm font-bold text-slate-700">Speed</th>
                     <th class="p-4 text-sm font-bold text-slate-700 text-center">Status</th>
                     <th class="p-4 text-sm font-bold text-slate-700 text-center">Opsi</th>
                 </tr>
@@ -60,39 +55,29 @@
                 <template x-for="(v, index) in voucherList" :key="v.voucher_code">
                     <tr class="hover:bg-slate-50/50 transition-colors">
                         <td class="p-4 text-sm text-slate-500 text-center" x-text="index + 1"></td>
-                        <td class="p-4">
-                            <span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[11px] font-bold" x-text="v.location"></span>
-                        </td>
+                        <td class="p-4"><span class="px-2 py-1 bg-slate-100 text-slate-600 rounded text-[11px] font-bold" x-text="v.location"></span></td>
                         <td class="p-4 text-sm font-semibold text-slate-700" x-text="v.user_name"></td>
                         <td class="p-4 font-mono text-sm font-bold text-emerald-600" x-text="v.voucher_code"></td>
-                        <td class="p-4 text-sm text-slate-500" x-text="v.speed || '15Mbps'"></td>
-                        
                         <td class="p-4 text-center">
                             <template x-if="v.is_locked == true || v.is_locked == 1">
                                 <span class="flex items-center justify-center text-red-500" title="Locked">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" /></svg>
                                 </span>
                             </template>
                             <template x-if="!(v.is_locked == true || v.is_locked == 1)">
                                 <span class="text-emerald-500 flex items-center justify-center" title="Available">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM7 7a3 3 0 016 0v2H7V7z" />
-                                    </svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM7 7a3 3 0 016 0v2H7V7z" /></svg>
                                 </span>
                             </template>
                         </td>
-
-                        <td class="p-4">
+                        <td class="p-4 text-center">
                             <div class="flex justify-center gap-2">
-                                <button @click="unlockVoucher(v.voucher_code)" class="bg-indigo-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-all">
-                                    Unlock
-                                </button>
-                                
-                                <button @click="copyCode(v.voucher_code)" class="btn-edit hover:opacity-80 transition-all">Copy</button>
-                                <button @click="shareWA(v.user_name, v.location)" class="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-emerald-600 transition-all">WA</button>
-                                <button @click="deleteVoucher(v.voucher_code)" class="btn-delete hover:opacity-80 transition-all">Hapus</button>
+                                <template x-if="v.is_locked == true || v.is_locked == 1">
+                                    <button @click="unlockVoucher(v.voucher_code)" class="bg-indigo-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-indigo-600">Unlock</button>
+                                </template>
+                                <button @click="copyCode(v.voucher_code)" class="btn-edit">Copy</button>
+                                <button @click="shareWA(v.user_name, v.location)" class="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold">WA</button>
+                                <button @click="deleteVoucher(v.voucher_code)" class="btn-delete">Hapus</button>
                             </div>
                         </td>
                     </tr>
@@ -107,10 +92,8 @@
             <div class="space-y-4">
                 <input x-model="inputUser" type="text" placeholder="User Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
                 <input x-model="inputCode" type="text" placeholder="Voucher Code (Optional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                <select x-model="inputLocation" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                    <template x-for="loc in locationMaster" :key="loc">
-                        <option :value="loc" x-text="loc"></option>
-                    </template>
+                <select x-model="inputLocation" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none">
+                    <template x-for="loc in locationMaster" :key="loc"><option :value="loc" x-text="loc"></option></template>
                 </select>
                 <div class="flex gap-3 pt-6">
                     <button @click="showModal = false" class="flex-1 py-3 font-bold text-slate-400">Batal</button>
@@ -132,102 +115,63 @@
             voucherList: {{ vouchers|tojson if vouchers else [] }},
 
             async unlockVoucher(code) {
-                if(confirm('Buka kunci voucher ini agar user bisa claim ulang?')) {
+                if(confirm('Buka kunci voucher ini?')) {
                     try {
-                        const res = await fetch(`/vouchers/unlock/${code}`, { 
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        
+                        const res = await fetch(`/vouchers/unlock/${code}`, { method: 'POST' });
                         if (res.ok) {
                             const index = this.voucherList.findIndex(v => v.voucher_code === code);
-                            if (index !== -1) {
-                                // Paksa update status di UI secara reaktif
-                                this.voucherList[index].is_locked = false;
+                            if (index !== -1) { 
+                                this.voucherList[index].is_locked = false; 
                                 this.voucherList = [...this.voucherList]; 
                             }
-                            alert("Voucher berhasil dibuka!");
-                        } else {
-                            alert("Gagal menghubungi server. Pastikan route backend sudah ada.");
                         }
-                    } catch (e) { 
-                        console.error(e);
-                        alert("Terjadi kesalahan koneksi."); 
-                    }
+                    } catch (e) { alert("Error!"); }
                 }
             },
-
-            exportPDF() {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const rows = this.voucherList.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, v.speed || '15Mbps', (v.is_locked == true || v.is_locked == 1) ? 'Locked' : 'Available']);
-                doc.autoTable({
-                    head: [['No', 'Location', 'User Name', 'Voucher Code', 'Speed', 'Status']],
-                    body: rows,
-                    startY: 20,
-                    theme: 'grid',
-                    headStyles: { fillColor: [45, 90, 87] }
-                });
-                doc.save("Voucher_Report.pdf");
-            },
-
             async addVoucher(isSilent = false) {
                 const finalUser = this.inputUser || "User";
                 const finalCode = this.inputCode || (finalUser.toUpperCase().replace(/\s/g, '') + "-" + Math.floor(1000 + Math.random() * 9000));
                 const payload = { user_name: finalUser, voucher_code: finalCode, location: this.inputLocation };
                 try {
                     const response = await fetch('/vouchers', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
                     if (response.ok) {
                         this.voucherList.unshift({ ...payload, speed: "15Mbps", is_locked: false });
-                        if (!isSilent) { 
-                            this.showModal = false; 
-                            this.inputUser = ''; 
-                            this.inputCode = ''; 
-                        }
+                        if (!isSilent) { this.showModal = false; this.inputUser = ''; this.inputCode = ''; }
                         return true;
                     }
                 } catch (e) { return false; }
             },
-
             async deleteVoucher(code) {
-                if(confirm('Hapus voucher ini?')) {
+                if(confirm('Hapus?')) {
                     try {
                         const res = await fetch(`/vouchers/delete/${code}`, { method: 'DELETE' });
-                        if (res.ok) {
-                            this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
-                        }
-                    } catch(e) { alert("Gagal menghapus."); }
+                        if (res.ok) this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
+                    } catch(e) { alert("Gagal!"); }
                 }
             },
-
+            exportPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const rows = this.voucherList.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, v.speed || '15Mbps', v.is_locked ? 'Locked' : 'Available']);
+                doc.autoTable({ head: [['No', 'Location', 'User', 'Code', 'Speed', 'Status']], body: rows, startY: 20, theme: 'grid', headStyles: { fillColor: [45, 90, 87] } });
+                doc.save("Voucher_Report.pdf");
+            },
             exportExcel() {
-                const data = this.voucherList.map(v => ({ 
-                    'Location': v.location, 
-                    'User': v.user_name, 
-                    'Code': v.voucher_code, 
-                    'Status': (v.is_locked == true || v.is_locked == 1) ? 'Locked' : 'Available' 
-                }));
+                const data = this.voucherList.map(v => ({ 'Location': v.location, 'User': v.user_name, 'Code': v.voucher_code, 'Status': v.is_locked ? 'Locked' : 'Available' }));
                 const ws = XLSX.utils.json_to_sheet(data);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Vouchers");
                 XLSX.writeFile(wb, "Nexus_Vouchers.xlsx");
             },
-
-            copyCode(code) { 
-                navigator.clipboard.writeText(code); 
-                alert("Copied: " + code); 
-            },
-            
+            copyCode(code) { navigator.clipboard.writeText(code); alert("Copied!"); },
             shareWA(name, loc) {
                 const urlClaim = `${window.location.origin}/claim`;
-                const msg = `Halo *${name}*,\n\nUntuk akses WiFi lokasi *${loc}*, silakan ambil kode voucher kamu melalui link portal resmi di bawah ini:\n\n🔗 ${urlClaim}\n\nCari nama kamu di daftar tersebut. Terima kasih!`;
+                const msg = `Halo *${name}*,\n\nAmbil voucher WiFi lokasi *${loc}* di sini:\n🔗 ${urlClaim}`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
             },
-
             async importExcel(event) {
                 const file = event.target.files[0];
                 if (!file) return;
