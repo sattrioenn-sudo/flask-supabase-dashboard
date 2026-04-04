@@ -1,158 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus - Analytics</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .bar-grow { transition: height 1s ease-in-out; }
-    </style>
-</head>
-<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex">
+{% extends "base.html" %}
 
-    <aside class="w-72 bg-white border-r border-slate-200 hidden lg:flex flex-col sticky top-0 h-screen">
-        <div class="p-8">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                    <span class="text-white font-bold text-xl">N</span>
-                </div>
-                <span class="text-xl font-bold tracking-tight text-slate-800">NEXUS</span>
+{% block title %}Analytics{% endblock %}
+{% block header_title %}Analytics Overview{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div class="flex items-center justify-between mb-10">
+            <div>
+                <h3 class="text-xl font-bold text-slate-800">Weekly Distribution</h3>
+                <p class="text-sm text-slate-400">Voucher usage analytics</p>
             </div>
+            <select class="bg-slate-50 border-none rounded-xl text-xs font-bold p-3 text-slate-500 focus:ring-2 focus:ring-emerald-500">
+                <option>Last 7 Days</option>
+                <option>This Month</option>
+            </select>
         </div>
-        <nav class="flex-1 px-6 space-y-2">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-4 mb-4">Main Menu</p>
-            <a href="/dashboard" class="flex items-center gap-3 py-3 px-4 rounded-2xl text-slate-500 hover:bg-slate-50 transition-all font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                Dashboard
-            </a>
-            <a href="/analytics" class="flex items-center gap-3 py-3 px-4 rounded-2xl bg-indigo-50 text-indigo-700 font-semibold shadow-sm shadow-indigo-100">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                Analytics
-            </a>
-            <a href="/vouchers" class="flex items-center gap-3 py-3 px-4 rounded-2xl text-slate-500 hover:bg-slate-50 transition-all font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z" /></svg>
-                WiFi Vouchers
-            </a>
-            <a href="/settings" class="flex items-center gap-3 py-3 px-4 rounded-2xl text-slate-500 hover:bg-slate-50 transition-all font-medium">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                Settings
-            </a>
-        </nav>
-        <div class="p-6 border-t border-slate-100">
-            <a href="/logout" class="flex items-center gap-3 py-3 px-4 rounded-2xl text-red-500 hover:bg-red-50 transition-all font-semibold text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                Sign Out
-            </a>
+        
+        <div class="flex items-end justify-between gap-4 h-64 px-4 border-b border-slate-100 pb-2">
+            <div class="w-full bg-slate-100 rounded-t-xl h-[40%] hover:bg-emerald-400 transition-all cursor-pointer"></div>
+            <div class="w-full bg-emerald-600 rounded-t-xl h-[85%]"></div>
+            <div class="w-full bg-slate-100 rounded-t-xl h-[60%] hover:bg-emerald-400 transition-all cursor-pointer"></div>
+            <div class="w-full bg-emerald-500 rounded-t-xl h-[95%]"></div>
+            <div class="w-full bg-slate-100 rounded-t-xl h-[30%] hover:bg-emerald-400 transition-all cursor-pointer"></div>
         </div>
-    </aside>
-
-    <main class="flex-1 overflow-y-auto">
-        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-20 px-10 flex items-center justify-between">
-            <h1 class="text-lg font-bold text-slate-800">Analytics Overview</h1>
-            <div class="flex items-center gap-4">
-                <div class="text-right hidden md:block">
-                    <p class="text-xs font-bold text-slate-400 uppercase">Current User</p>
-                    <p class="text-sm font-semibold text-slate-700">{{ email }}</p>
-                </div>
-                <div class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white font-bold">
-                    {{ email[0] | upper }}
-                </div>
-            </div>
-        </header>
-
-        <div class="p-10 max-w-7xl mx-auto space-y-8">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Total Active Database</p>
-                    <h3 class="text-4xl font-black text-slate-800 mt-2">{{ total_vouchers }} <span class="text-sm font-medium text-slate-400 block mt-1 uppercase tracking-tight">Records Managed</span></h3>
-                </div>
-                <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Server Status</p>
-                        <h3 class="text-2xl font-black text-emerald-500 mt-2 uppercase">Operational</h3>
-                    </div>
-                    <div class="flex h-4 w-4 relative">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-                <div class="flex items-center justify-between mb-10">
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-800">Weekly Performance</h3>
-                        <p class="text-sm text-slate-400">Data distribution analytics</p>
-                    </div>
-                    <select class="bg-slate-50 border-none rounded-xl text-xs font-bold p-3 text-slate-500 focus:ring-2 focus:ring-indigo-500">
-                        <option>Real-time Data</option>
-                        <option>Static Report</option>
-                    </select>
-                </div>
-                
-                <div class="flex items-end justify-between gap-4 h-64 px-4 border-b border-slate-100 pb-2">
-                    <div class="w-full bg-slate-100 rounded-t-xl h-[40%] hover:bg-indigo-400 transition-all cursor-pointer relative group">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all">40%</span>
-                    </div>
-                    <div class="w-full bg-indigo-600 rounded-t-xl h-[85%] relative group cursor-pointer">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all">85%</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-t-xl h-[60%] hover:bg-indigo-400 transition-all cursor-pointer relative group">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all">60%</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-t-xl h-[45%] hover:bg-indigo-400 transition-all cursor-pointer relative group">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all">45%</span>
-                    </div>
-                    <div class="w-full bg-indigo-500 rounded-t-xl h-[95%] relative group cursor-pointer">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all">95%</span>
-                    </div>
-                    <div class="w-full bg-slate-100 rounded-t-xl h-[30%] hover:bg-indigo-400 transition-all cursor-pointer relative group">
-                        <span class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all">30%</span>
-                    </div>
-                </div>
-                <div class="flex justify-between mt-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
-                <div class="p-8 border-b border-slate-50">
-                    <h3 class="font-bold text-slate-800">System Activity</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50/50">
-                                <th class="px-8 py-4">Process</th>
-                                <th class="px-8 py-4">Status</th>
-                                <th class="px-8 py-4">Response Time</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-sm text-slate-600">
-                            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-all">
-                                <td class="px-8 py-4 font-medium italic">Supabase Sync (Vouchers)</td>
-                                <td class="px-8 py-4"><span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Connected</span></td>
-                                <td class="px-8 py-4 text-slate-400">12ms</td>
-                            </tr>
-                            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-all">
-                                <td class="px-8 py-4 font-medium italic">User Session Verification</td>
-                                <td class="px-8 py-4"><span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Verified</span></td>
-                                <td class="px-8 py-4 text-slate-400">5ms</td>
-                            </tr>
-                            <tr class="hover:bg-slate-50/50 transition-all">
-                                <td class="px-8 py-4 font-medium italic">Analytics Engine</td>
-                                <td class="px-8 py-4"><span class="bg-indigo-50 text-indigo-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Active</span></td>
-                                <td class="px-8 py-4 text-slate-400">8ms</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <div class="flex justify-between mt-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span>
         </div>
-    </main>
-</body>
-</html>
+    </div>
+</div>
+{% endblock %}
