@@ -44,9 +44,10 @@
                     <p class="text-sm text-slate-400">Vouchers grouped by location.</p>
                 </div>
                 <div class="flex gap-3">
-                    <label class="bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold text-sm shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2 cursor-pointer">
-                        <span>Scan File</span>
-                        <input type="file" class="hidden" accept=".xlsx, .xls" @change="importExcel($event)">
+                    <label class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-100 hover:bg-emerald-700 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <span>Scan April File</span>
+                        <input type="file" class="hidden" accept=".xlsx, .xls, .csv" @change="importExcel($event)">
                     </label>
 
                     <div class="relative" x-data="{ open: false }">
@@ -138,11 +139,11 @@
                 inputUser: '',
                 inputCode: '',
                 inputLocation: 'Office',
-                locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lobby'],
+                locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lobby', 'Lantai 1', 'Lantai 2', 'Lantai 3', 'Lantai 4', 'Ekspedisi'],
                 voucherList: {{ vouchers|tojson if vouchers else [] }},
-                
-                // Fungsi Baru: Scan File Excel dan Auto Create
-                importExcel(event) {
+
+                // FUNGSI SCAN KHUSUS FORMAT FILE APRIL ANDA
+                async importExcel(event) {
                     const file = event.target.files[0];
                     if (!file) return;
 
@@ -153,24 +154,39 @@
                         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                         const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
-                        if (jsonData.length === 0) {
-                            alert("File kosong!");
-                            return;
+                        let successCount = 0;
+                        
+                        // Menampilkan Loading Sederhana
+                        const btn = event.target.parentElement;
+                        const originalText = btn.innerText;
+                        btn.innerText = "Processing...";
+
+                        for (const row of jsonData) {
+                            // Mapping Kolom sesuai File Upload Anda
+                            const rawName = row["Nama depan"] || "";
+                            const rawCode = row["Kode voucher"] || "";
+                            let rawLoc = row["Lokasi"] || row["Grup pengguna"] || "Office";
+
+                            // Pembersihan nama (jika kosong abaikan baris tersebut)
+                            if (!rawCode) continue;
+
+                            // Normalisasi Lokasi agar masuk ke kategori yang ada
+                            if (rawLoc.includes("Kantor")) rawLoc = "Office";
+                            if (rawLoc.includes("Produksi")) rawLoc = "Production";
+                            if (rawLoc.includes("Gudang")) rawLoc = "Warehouse";
+
+                            this.inputUser = rawName;
+                            this.inputCode = rawCode;
+                            this.inputLocation = rawLoc;
+
+                            // Panggil fungsi addVoucher asli
+                            const success = await this.addVoucher(true); 
+                            if (success) successCount++;
                         }
 
-                        if(confirm(`Deteksi ${jsonData.length} data. Lanjutkan impor?`)) {
-                            for (const row of jsonData) {
-                                // Ambil data dari kolom Excel (Sesuaikan nama kolom di Excel Anda)
-                                // Pastikan di Excel ada header: user_name, voucher_code, location
-                                this.inputUser = row.user_name || row.User || "User";
-                                this.inputCode = row.voucher_code || row.Code || "";
-                                this.inputLocation = row.location || row.Location || "Office";
-                                
-                                await this.addVoucher();
-                            }
-                            alert("Proses impor selesai!");
-                        }
-                        event.target.value = ''; // Reset input file
+                        alert(`Berhasil mengimpor ${successCount} voucher!`);
+                        btn.innerText = originalText;
+                        event.target.value = ''; 
                     };
                     reader.readAsArrayBuffer(file);
                 },
@@ -205,15 +221,14 @@
                     doc.save(`Nexus_Report_${new Date().toLocaleDateString()}.pdf`);
                 },
 
-                async addVoucher() {
+                async addVoucher(isSilent = false) {
                     const finalUser = this.inputUser || "User";
                     const finalCode = this.inputCode || (finalUser.toUpperCase().replace(/\s/g, '') + "-" + Math.floor(1000 + Math.random() * 9000));
-                    const finalLoc = this.locationMaster.includes(this.inputLocation) ? this.inputLocation : this.locationMaster[0];
                     
                     const payload = { 
                         user_name: finalUser, 
                         voucher_code: finalCode,
-                        location: finalLoc 
+                        location: this.inputLocation 
                     };
 
                     try {
@@ -224,13 +239,18 @@
                         });
 
                         if (response.ok) {
-                            // Tambah ke list lokal agar tampilan terupdate otomatis
-                            this.voucherList.unshift({ ...payload, speed: "10Mbps", status: "Active" });
-                            this.inputUser = '';
-                            this.inputCode = '';
-                            this.showModal = false;
+                            this.voucherList.unshift({ ...payload, speed: "15Mbps", status: "Active" });
+                            if (!isSilent) {
+                                this.showModal = false;
+                                this.inputUser = '';
+                                this.inputCode = '';
+                            }
+                            return true;
                         }
-                    } catch (e) { console.error("Error saving data"); }
+                    } catch (e) { 
+                        if (!isSilent) alert("Error connecting to database."); 
+                        return false;
+                    }
                 },
 
                 copyCode(code) {
@@ -250,11 +270,8 @@
                             const response = await fetch(`/vouchers/delete/${code}`, {
                                 method: 'DELETE'
                             });
-                            
                             if (response.ok) {
                                 this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
-                            } else {
-                                alert("Failed to delete from database.");
                             }
                         } catch (e) {
                             alert("Error connecting to server.");
