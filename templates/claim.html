@@ -6,21 +6,6 @@
     <title>Claim Wi-Fi Voucher</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        [x-cloak] { display: none !important; }
-    </style>
-</head>
-<body class="bg-[#f8fafc] min-h-screen flex items-center justify-center p-6">
-a<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claim Wi-Fi Voucher</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -29,32 +14,19 @@ a<!DOCTYPE html>
             background: radial-gradient(circle at top right, #e0e7ff 0%, #f8fafc 50%, #f1f5f9 100%);
         }
         [x-cloak] { display: none !important; }
-        
         .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
-
         .shimmer {
-            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
             background-size: 200% 100%;
-            animation: shimmer 2s infinite;
+            animation: shimmer 3s infinite;
         }
-
         @keyframes shimmer {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
-        }
-
-        .bounce-in {
-            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes bounceIn {
-            0% { transform: scale(0.9); opacity: 0; }
-            70% { transform: scale(1.05); }
-            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -67,7 +39,7 @@ a<!DOCTYPE html>
         errorMsg: '',
         launchConfetti() {
             confetti({
-                particleCount: 100,
+                particleCount: 120,
                 spread: 70,
                 origin: { y: 0.6 },
                 colors: ['#4f46e5', '#10b981', '#3b82f6']
@@ -88,7 +60,7 @@ a<!DOCTYPE html>
                 if (res.ok) {
                     const statusLock = result.data.is_locked;
                     if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        this.errorMsg = 'Voucher sudah diklaim. Hubungi Admin jika lupa.';
+                        this.errorMsg = 'Voucher sudah diklaim. Hubungi Administrator.';
                         this.voucher = null;
                     } else {
                         this.voucher = result.data;
@@ -112,192 +84,75 @@ a<!DOCTYPE html>
                     body: JSON.stringify({ id: id })
                 });
             } catch (e) {
-                console.error('Auto-lock failed');
+                console.error('Lock failed');
             }
         }
-    }" class="w-full max-w-sm text-center">
+    }" class="w-full max-w-sm">
 
-        <div class="glass-card p-10 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white relative overflow-hidden">
-            <div class="absolute -top-24 -right-24 w-48 h-48 bg-indigo-100 rounded-full blur-3xl opacity-50"></div>
+        <div class="glass-card p-10 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white relative overflow-hidden text-center">
             
-            <div class="relative w-16 h-16 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-200 transform hover:rotate-12 transition-transform">
+            <div class="relative w-16 h-16 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
                 </svg>
             </div>
 
-            <div x-show="!voucher" class="relative">
-                <h1 class="text-2xl font-black text-slate-800 mb-2">Connect to Wi-Fi</h1>
-                <p class="text-sm text-slate-400 mb-8 px-4">Masukkan nama Anda untuk mengambil akses internet premium.</p>
-                
-                <div class="relative mb-4">
-                    <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Nama Lengkap" 
-                           class="w-full p-5 bg-white/50 border border-slate-100 rounded-2xl text-center font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300">
+            <template x-if="!voucher">
+                <div class="transition-all duration-500">
+                    <h1 class="text-2xl font-black text-slate-800 mb-2">Wi-Fi Portal</h1>
+                    <p class="text-sm text-slate-400 mb-8 px-4">Input nama Anda untuk mendapatkan voucher.</p>
+                    
+                    <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Nama kamu..." 
+                           class="w-full p-5 bg-white border border-slate-100 rounded-2xl text-center font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all mb-4">
+                    
+                    <button @click="getVoucher()" :disabled="loading"
+                            class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50">
+                        <span x-show="!loading">Cek Voucher</span>
+                        <span x-show="loading" class="flex items-center justify-center gap-2">
+                             <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                             Mencari...
+                        </span>
+                    </button>
+                    <p x-text="errorMsg" class="text-red-500 text-xs font-bold mt-4" x-show="errorMsg" x-cloak></p>
                 </div>
-                
-                <button @click="getVoucher()" :disabled="loading"
-                        class="group relative w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50 overflow-hidden">
-                    <div x-show="!loading" class="flex items-center justify-center gap-2">
-                        <span>Dapatkan Voucher</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                    </div>
-                    <div x-show="loading" class="flex items-center justify-center gap-2">
-                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </div>
-                </button>
-                
-                <p x-text="errorMsg" class="text-red-500 text-xs font-bold mt-4 animate-bounce" x-show="errorMsg" x-cloak></p>
-            </div>
+            </template>
 
-            <div x-show="voucher" x-cloak class="bounce-in">
-                <div class="mb-4">
-                    <span class="px-4 py-1.5 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full">Success Claimed</span>
-                </div>
-                <h2 class="text-xl font-bold text-slate-800 mb-6" x-text="'Enjoy, ' + (voucher ? voucher.user_name : '') + '!'"></h2>
-                
-                <div class="relative py-10 bg-slate-900 rounded-[2.5rem] mb-6 overflow-hidden shadow-2xl shadow-indigo-100 group">
-                    <div class="shimmer absolute inset-0 opacity-10"></div>
-                    <p class="relative z-10 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Voucher Code</p>
-                    <h1 class="relative z-10 text-4xl font-black text-white tracking-widest" x-text="voucher ? voucher.voucher_code : ''"></h1>
-                </div>
+            <template x-if="voucher">
+                <div class="transition-all duration-500 scale-in">
+                    <span class="px-4 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded-full">Success!</span>
+                    <h2 class="text-xl font-bold text-slate-800 mt-4 mb-6" x-text="'Halo, ' + voucher.user_name"></h2>
+                    
+                    <div class="relative py-10 bg-slate-900 rounded-[2.5rem] mb-6 overflow-hidden shadow-2xl">
+                        <div class="shimmer absolute inset-0"></div>
+                        <p class="relative z-10 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Voucher Code</p>
+                        <h1 class="relative z-10 text-4xl font-black text-white tracking-widest" x-text="voucher.voucher_code"></h1>
+                    </div>
 
-                <div class="grid grid-cols-2 gap-3 mb-8">
-                    <div class="p-3 bg-emerald-50 rounded-2xl">
-                        <p class="text-[9px] text-emerald-600 font-bold uppercase mb-1">Speed</p>
-                        <p class="text-sm font-black text-emerald-700" x-text="voucher ? (voucher.speed || 'High Speed') : ''"></p>
+                    <div class="grid grid-cols-2 gap-3 mb-8 text-xs">
+                        <div class="p-3 bg-slate-50 rounded-2xl">
+                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 8px;">Speed</p>
+                            <p class="font-black text-slate-700" x-text="voucher.speed || '15Mbps'"></p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-2xl">
+                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 8px;">Location</p>
+                            <p class="font-black text-slate-700" x-text="voucher.location"></p>
+                        </div>
                     </div>
-                    <div class="p-3 bg-slate-50 rounded-2xl">
-                        <p class="text-[9px] text-slate-400 font-bold uppercase mb-1">Location</p>
-                        <p class="text-sm font-black text-slate-700" x-text="voucher ? voucher.location : 'Public Area'"></p>
-                    </div>
+                    
+                    <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode disalin!')" 
+                            class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
+                        Salin Kode
+                    </button>
+                    
+                    <button @click="voucher = null; inputName = ''" class="mt-6 text-xs font-bold text-slate-400 hover:text-indigo-600 uppercase tracking-widest transition-colors">
+                        ← Kembali
+                    </button>
                 </div>
-                
-                <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode disalin!')" 
-                        class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center justify-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                    Salin Kode
-                </button>
-                
-                <button @click="voucher = null; inputName = ''" class="mt-6 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-wider">
-                    ← Kembali
-                </button>
-            </div>
+            </template>
+
         </div>
         
-        <div class="mt-8 space-y-2">
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Premium Wi-Fi Access</p>
-            <p class="text-[9px] font-medium text-slate-300 italic">Developed by Satrio Eko</p>
-        </div>
-    </div>
-
-</body>
-</html>
-    <div x-data="{ 
-        inputName: '', 
-        voucher: null, 
-        loading: false, 
-        errorMsg: '',
-        async getVoucher() {
-            if(!this.inputName) { this.errorMsg = 'Masukkan nama dulu bro!'; return; }
-            this.loading = true;
-            this.errorMsg = '';
-            try {
-                const res = await fetch('/api/get-voucher', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ user_name: this.inputName })
-                });
-                const result = await res.json();
-                
-                if (res.ok) {
-                    // REVISI LOGIKA: Cek status lock secara menyeluruh (boolean atau integer)
-                    const statusLock = result.data.is_locked;
-                    if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        this.errorMsg = 'Voucher sudah diklaim. Hubungi Administrator untuk reset jika lupa kode.';
-                        this.voucher = null;
-                    } else {
-                        this.voucher = result.data;
-                        // Otomatis kunci voucher setelah berhasil ditampilkan di layar
-                        this.lockVoucher(result.data.id);
-                    }
-                } else {
-                    this.errorMsg = result.message;
-                }
-            } catch (e) {
-                this.errorMsg = 'Gagal terhubung ke server.';
-            } finally {
-                this.loading = false;
-            }
-        },
-        async lockVoucher(id) {
-            try {
-                await fetch('/api/lock-voucher', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ id: id })
-                });
-            } catch (e) {
-                console.error('Gagal mengunci voucher secara otomatis');
-            }
-        }
-    }" class="w-full max-w-sm text-center">
-
-        <div class="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-            <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-indigo-100">
-                <span class="text-white font-bold text-2xl">N</span>
-            </div>
-
-            <div x-show="!voucher">
-                <h1 class="text-2xl font-black text-slate-800 mb-2">WiFi Portal</h1>
-                <p class="text-sm text-slate-400 mb-8">Masukkan nama terdaftar untuk melihat kode voucher.</p>
-                
-                <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Siapa nama kamu?" 
-                       class="w-full p-5 bg-slate-50 border-none rounded-2xl text-center font-bold text-slate-700 focus:ring-2 focus:ring-indigo-500 transition-all placeholder:font-medium mb-4">
-                
-                <button @click="getVoucher()" :disabled="loading"
-                        class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all disabled:opacity-50">
-                    <span x-show="!loading">Cek Voucher Saya</span>
-                    <span x-show="loading" class="flex items-center justify-center gap-2 italic text-sm">
-                        Sedang mencari...
-                    </span>
-                </button>
-                
-                <p x-text="errorMsg" class="text-red-500 text-xs font-bold mt-4 leading-relaxed" x-show="errorMsg" x-cloak></p>
-            </div>
-
-            <div x-show="voucher" x-cloak class="animate-in fade-in zoom-in duration-500">
-                <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">Voucher Ditemukan!</p>
-                <h2 class="text-lg font-bold text-slate-800 mb-6" x-text="'Halo, ' + (voucher ? voucher.user_name : '')"></h2>
-                
-                <div class="py-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 mb-6 group relative">
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Kode WiFi</p>
-                    <h1 class="text-4xl font-black text-slate-900 tracking-tighter" x-text="voucher ? voucher.voucher_code : ''"></h1>
-                </div>
-
-                <div class="flex items-center justify-center gap-4 text-xs font-bold text-slate-500 mb-8">
-                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full" x-text="voucher ? (voucher.speed || '15Mbps') : ''"></span>
-                    <span class="px-3 py-1 bg-slate-100 rounded-full" x-text="voucher ? voucher.location : ''"></span>
-                </div>
-                
-                <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode disalin!')" 
-                        class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
-                    Salin Kode
-                </button>
-                
-                <button @click="voucher = null; inputName = ''" class="mt-4 text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors">
-                    Cek nama lain
-                </button>
-            </div>
-        </div>
-        
-        <p class="mt-8 text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">DESIGN BY SATRIO EKO</p>
+        <p class="mt-8 text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] text-center">DESIGN BY SATRIO EKO</p>
     </div>
 
 </body>
