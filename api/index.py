@@ -89,7 +89,8 @@ def vouchers():
                 "voucher_code": data.get('voucher_code'),
                 "location": data.get('location', 'Office'),
                 "speed": "15Mbps",
-                "status": "Active"
+                "status": "Active",
+                "is_locked": False # Memastikan default saat insert baru
             }).execute()
             return jsonify({"status": "success"}), 200
         except Exception as e:
@@ -113,6 +114,21 @@ def delete_voucher(code_voucher):
         supabase.table('vouchers').delete().eq('voucher_code', code_voucher).execute()
         return jsonify({"status": "success"}), 200
     except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# --- ROUTE BARU: UNLOCK VOUCHER ---
+@app.route('/vouchers/unlock/<code_voucher>', methods=['POST'])
+def unlock_voucher(code_voucher):
+    # Route ini bisa diakses tanpa login jika memang untuk publik (sales)
+    # Tapi tetap menggunakan koneksi supabase yang sudah didefinisikan
+    try:
+        # Update kolom is_locked menjadi False di database
+        supabase.table('vouchers').update({"is_locked": False}).eq('voucher_code', code_voucher).execute()
+        
+        print(f"Voucher {code_voucher} unlocked successfully")
+        return jsonify({"status": "success", "message": "Voucher unlocked"}), 200
+    except Exception as e:
+        print(f"Error Unlock: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 # --- FITUR BARU: CLAIM VOUCHER (PUBLIK) ---
