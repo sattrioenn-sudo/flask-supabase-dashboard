@@ -52,7 +52,7 @@
                         </div>
                         <div class="mt-6 flex gap-2">
                             <button @click="copyCode(v.voucher_code)" class="flex-1 bg-slate-900 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-slate-800 transition-all">Copy</button>
-                            <button @click="shareWA(v.user_name, v.voucher_code, v.location)" class="flex-1 bg-emerald-500 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-emerald-600">Share WA</button>
+                            <button @click="shareWA(v.user_name, v.voucher_code, v.location)" class="flex-1 bg-emerald-500 text-white text-[10px] py-3 rounded-xl font-bold hover:bg-emerald-600">Share Link</button>
                             <button @click="deleteVoucher(v.voucher_code)" class="p-3 bg-red-50 rounded-xl text-red-400 hover:text-red-600 transition-all">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                             </button>
@@ -62,8 +62,26 @@
             </div>
         </div>
     </template>
-    
+
+    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+        <div @click.away="showModal = false" class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl border border-slate-100">
+            <h3 class="text-xl font-bold text-slate-800 mb-6">Create Voucher</h3>
+            <div class="space-y-4">
+                <input x-model="inputUser" type="text" placeholder="User Name" class="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                <input x-model="inputCode" type="text" placeholder="Voucher Code" class="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                <select x-model="inputLocation" class="w-full bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                    <template x-for="loc in locationMaster" :key="loc">
+                        <option :value="loc" x-text="loc"></option>
+                    </template>
+                </select>
+                <div class="flex gap-3 pt-4">
+                    <button @click="showModal = false" class="flex-1 py-4 font-bold text-slate-400">Cancel</button>
+                    <button @click="addVoucher()" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg hover:bg-emerald-700">Create</button>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -75,37 +93,26 @@
             locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lantai 1', 'Lantai 2', 'Lantai 3', 'Lantai 4', 'Ekspedisi'],
             voucherList: {{ vouchers|tojson if vouchers else [] }},
 
-            // --- PDF EXPORT (Yang Tadi Lupa) ---
             exportPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-                
                 doc.setFontSize(18);
                 doc.text("Nexus WiFi Voucher Report", 14, 20);
                 doc.setFontSize(10);
                 doc.setTextColor(100);
                 doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
 
-                const rows = this.voucherList.map(v => [
-                    v.location, 
-                    v.user_name, 
-                    v.voucher_code, 
-                    v.speed || '15Mbps', 
-                    v.status
-                ]);
-
+                const rows = this.voucherList.map(v => [v.location, v.user_name, v.voucher_code, v.speed || '15Mbps', v.status]);
                 doc.autoTable({
                     head: [['Location', 'User Name', 'Voucher Code', 'Speed', 'Status']],
                     body: rows,
                     startY: 35,
                     theme: 'grid',
-                    headStyles: { fillStyle: [16, 185, 129] } // Warna Emerald Emerald-600
+                    headStyles: { fillStyle: [16, 185, 129] }
                 });
-
                 doc.save(`Nexus_Report_${new Date().toISOString().split('T')[0]}.pdf`);
             },
 
-            // --- FUNGSI LAINNYA ---
             async addVoucher(isSilent = false) {
                 const finalUser = this.inputUser || "User";
                 const finalCode = this.inputCode || (finalUser.toUpperCase().replace(/\s/g, '') + "-" + Math.floor(1000 + Math.random() * 9000));
@@ -141,8 +148,10 @@
 
             copyCode(code) { navigator.clipboard.writeText(code); alert("Copied!"); },
             
-            shareWA(name, code, loc) {
-                const msg = `Halo *${name}*, WiFi lokasi *${loc}* kamu: *${code}*`;
+            // REVISI: Mengarahkan ke link portal claim umum
+            shareWA(name, loc) {
+                const urlClaim = `${window.location.origin}/claim`;
+                const msg = `Halo *${name}*,\n\nUntuk akses WiFi lokasi *${loc}*, silakan ambil kode voucher kamu melalui link portal resmi di bawah ini:\n\n🔗 ${urlClaim}\n\nCari nama kamu di daftar tersebut. Terima kasih!`;
                 window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
             },
 
