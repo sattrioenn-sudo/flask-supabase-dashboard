@@ -30,8 +30,17 @@
                     body: JSON.stringify({ user_name: this.inputName })
                 });
                 const result = await res.json();
+                
                 if (res.ok) {
-                    this.voucher = result.data;
+                    // Cek jika status voucher sudah terkunci
+                    if (result.data.is_locked) {
+                        this.errorMsg = 'Voucher sudah diklaim. Hubungi Administrator untuk reset jika lupa kode.';
+                        this.voucher = null;
+                    } else {
+                        this.voucher = result.data;
+                        // Otomatis kunci voucher setelah berhasil ditampilkan di layar
+                        this.lockVoucher(result.data.id);
+                    }
                 } else {
                     this.errorMsg = result.message;
                 }
@@ -39,6 +48,17 @@
                 this.errorMsg = 'Gagal terhubung ke server.';
             } finally {
                 this.loading = false;
+            }
+        },
+        async lockVoucher(id) {
+            try {
+                await fetch('/api/lock-voucher', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id: id })
+                });
+            } catch (e) {
+                console.error('Gagal mengunci voucher secara otomatis');
             }
         }
     }" class="w-full max-w-sm text-center">
@@ -63,7 +83,7 @@
                     </span>
                 </button>
                 
-                <p x-text="errorMsg" class="text-red-500 text-xs font-bold mt-4" x-show="errorMsg" x-cloak></p>
+                <p x-text="errorMsg" class="text-red-500 text-xs font-bold mt-4 leading-relaxed" x-show="errorMsg" x-cloak></p>
             </div>
 
             <div x-show="voucher" x-cloak class="animate-in fade-in zoom-in duration-500">
