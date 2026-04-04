@@ -49,7 +49,17 @@ def login():
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('dashboard.html', email=session.get('user_email'))
+    
+    # Ambil data voucher agar angka statistik di dashboard berelasi dengan data asli
+    try:
+        response = supabase.table('vouchers').select("*").execute()
+        db_vouchers = response.data if response.data else []
+    except Exception:
+        db_vouchers = []
+
+    return render_template('dashboard.html', 
+                           email=session.get('user_email'), 
+                           vouchers=db_vouchers)
 
 @app.route('/analytics')
 def analytics():
@@ -78,7 +88,7 @@ def vouchers():
                 "user_name": data.get('user_name', 'Guest'),
                 "voucher_code": data.get('voucher_code'),
                 "location": data.get('location', 'Office'),
-                "speed": "10Mbps",
+                "speed": "15Mbps",
                 "status": "Active"
             }).execute()
             return jsonify({"status": "success"}), 200
@@ -109,7 +119,6 @@ def delete_voucher(code_voucher):
 
 @app.route('/claim')
 def claim_page():
-    # Mengambil nama dari URL ?u=Nama
     target_user = request.args.get('u', '')
     return render_template('claim.html', target_user=target_user)
 
@@ -122,7 +131,6 @@ def get_voucher_api():
         return jsonify({"status": "error", "message": "Nama harus diisi"}), 400
         
     try:
-        # Cari di DB berdasarkan nama user (Case Sensitive)
         response = supabase.table('vouchers').select("*").eq('user_name', user_name).limit(1).execute()
         if response.data:
             return jsonify({"status": "success", "data": response.data[0]}), 200
