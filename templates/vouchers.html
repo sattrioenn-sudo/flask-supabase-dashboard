@@ -19,21 +19,26 @@
 <div x-data="voucherApp()" class="space-y-6">
     
     <div class="flex flex-wrap justify-between items-center gap-4">
-        <div class="flex gap-2">
-            <button @click="showModal = true" class="bg-[#5bc0de] text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm hover:opacity-90 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                Entry Voucher
-            </button>
-            <label class="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm cursor-pointer hover:bg-emerald-700 transition-all flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                Import Excel
+        <div class="flex gap-3">
+            <label class="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-sm hover:bg-emerald-700 cursor-pointer transition-all flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <span>Scan File</span>
                 <input type="file" class="hidden" accept=".xlsx, .xls, .csv" @change="importExcel($event)">
             </label>
+
+            <button @click="showModal = true" class="bg-slate-900 text-white px-6 py-2.5 rounded-lg font-bold text-sm hover:bg-slate-800 transition-all flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Add Voucher
+            </button>
         </div>
         
         <div class="flex gap-2 bg-white p-1 rounded-xl border border-slate-200">
-             <button @click="exportExcel()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-lg transition-all">Excel</button>
-             <button @click="exportPDF()" class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 rounded-lg transition-all">PDF</button>
+             <button @click="exportExcel()" title="Excel" class="p-2.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+             </button>
+             <button @click="exportPDF()" title="PDF" class="p-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+             </button>
         </div>
     </div>
 
@@ -74,41 +79,24 @@
                         </td>
                     </tr>
                 </template>
-                <template x-if="voucherList.length === 0">
-                    <tr>
-                        <td colspan="7" class="p-20 text-center text-slate-400 text-sm italic">Belum ada data voucher...</td>
-                    </tr>
-                </template>
             </tbody>
         </table>
     </div>
 
     <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
         <div @click.away="showModal = false" class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl border border-slate-100">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold text-slate-800 tracking-tight">Create Voucher</h3>
-                <button @click="showModal = false" class="text-slate-400 hover:text-slate-600">&times;</button>
-            </div>
+            <h3 class="text-xl font-bold text-slate-800 mb-6">Create Voucher</h3>
             <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Nama User</label>
-                    <input x-model="inputUser" type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Kode Voucher</label>
-                    <input x-model="inputCode" type="text" placeholder="Auto-generate if empty" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Lokasi Penempatan</label>
-                    <select x-model="inputLocation" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-                        <template x-for="loc in locationMaster" :key="loc">
-                            <option :value="loc" x-text="loc"></option>
-                        </template>
-                    </select>
-                </div>
+                <input x-model="inputUser" type="text" placeholder="User Name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                <input x-model="inputCode" type="text" placeholder="Voucher Code (Optional)" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                <select x-model="inputLocation" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <template x-for="loc in locationMaster" :key="loc">
+                        <option :value="loc" x-text="loc"></option>
+                    </template>
+                </select>
                 <div class="flex gap-3 pt-6">
-                    <button @click="showModal = false" class="flex-1 py-3 font-bold text-slate-400 hover:text-slate-600">Batal</button>
-                    <button @click="addVoucher()" class="flex-1 py-3 bg-[#2D5A57] text-white rounded-xl font-bold shadow-lg shadow-emerald-100 hover:opacity-90">Simpan Data</button>
+                    <button @click="showModal = false" class="flex-1 py-3 font-bold text-slate-400">Batal</button>
+                    <button @click="addVoucher()" class="flex-1 py-3 bg-[#2D5A57] text-white rounded-xl font-bold">Simpan</button>
                 </div>
             </div>
         </div>
@@ -125,19 +113,19 @@
             locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lantai 1', 'Lantai 2', 'Lantai 3', 'Lantai 4', 'Ekspedisi'],
             voucherList: {{ vouchers|tojson if vouchers else [] }},
 
+            // ... (Semua fungsi JS exportPDF, addVoucher, deleteVoucher, importExcel, copyCode, shareWA tetap sama dan aman)
             exportPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-                doc.text("Nexus WiFi Voucher Report", 14, 20);
                 const rows = this.voucherList.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, v.speed || '15Mbps', v.status]);
                 doc.autoTable({
                     head: [['No', 'Location', 'User Name', 'Voucher Code', 'Speed', 'Status']],
                     body: rows,
-                    startY: 30,
+                    startY: 20,
                     theme: 'grid',
                     headStyles: { fillStyle: [45, 90, 87] }
                 });
-                doc.save(`WiFi_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+                doc.save("Voucher_Report.pdf");
             },
 
             async addVoucher(isSilent = false) {
