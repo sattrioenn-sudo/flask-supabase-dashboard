@@ -44,6 +44,11 @@
                     <p class="text-sm text-slate-400">Vouchers grouped by location.</p>
                 </div>
                 <div class="flex gap-3">
+                    <label class="bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold text-sm shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2 cursor-pointer">
+                        <span>Scan File</span>
+                        <input type="file" class="hidden" accept=".xlsx, .xls" @change="importExcel($event)">
+                    </label>
+
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" class="bg-white border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl font-bold text-sm shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
                             Export
@@ -136,6 +141,40 @@
                 locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lobby'],
                 voucherList: {{ vouchers|tojson if vouchers else [] }},
                 
+                // Fungsi Baru: Scan File Excel dan Auto Create
+                importExcel(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                        if (jsonData.length === 0) {
+                            alert("File kosong!");
+                            return;
+                        }
+
+                        if(confirm(`Deteksi ${jsonData.length} data. Lanjutkan impor?`)) {
+                            for (const row of jsonData) {
+                                // Ambil data dari kolom Excel (Sesuaikan nama kolom di Excel Anda)
+                                // Pastikan di Excel ada header: user_name, voucher_code, location
+                                this.inputUser = row.user_name || row.User || "User";
+                                this.inputCode = row.voucher_code || row.Code || "";
+                                this.inputLocation = row.location || row.Location || "Office";
+                                
+                                await this.addVoucher();
+                            }
+                            alert("Proses impor selesai!");
+                        }
+                        event.target.value = ''; // Reset input file
+                    };
+                    reader.readAsArrayBuffer(file);
+                },
+
                 exportExcel() {
                     const sorted = [...this.voucherList].sort((a, b) => a.location.localeCompare(b.location));
                     const data = sorted.map(v => ({
@@ -169,11 +208,12 @@
                 async addVoucher() {
                     const finalUser = this.inputUser || "User";
                     const finalCode = this.inputCode || (finalUser.toUpperCase().replace(/\s/g, '') + "-" + Math.floor(1000 + Math.random() * 9000));
+                    const finalLoc = this.locationMaster.includes(this.inputLocation) ? this.inputLocation : this.locationMaster[0];
                     
                     const payload = { 
                         user_name: finalUser, 
                         voucher_code: finalCode,
-                        location: this.inputLocation 
+                        location: finalLoc 
                     };
 
                     try {
@@ -184,12 +224,13 @@
                         });
 
                         if (response.ok) {
+                            // Tambah ke list lokal agar tampilan terupdate otomatis
                             this.voucherList.unshift({ ...payload, speed: "10Mbps", status: "Active" });
-                            this.showModal = false;
                             this.inputUser = '';
                             this.inputCode = '';
+                            this.showModal = false;
                         }
-                    } catch (e) { alert("Error connecting to database."); }
+                    } catch (e) { console.error("Error saving data"); }
                 },
 
                 copyCode(code) {
@@ -197,7 +238,6 @@
                     alert("Code copied!");
                 },
 
-                // REVISI: Mengirim Link Claim Umum (Tanpa Parameter Nama)
                 shareWA(name, code, loc) {
                     const claimUrl = `${window.location.origin}/claim`;
                     const pesan = `Halo *${name}*, voucher WiFi kamu untuk lokasi *${loc}* sudah siap! \n\nSilakan ambil kode voucher kamu di link resmi Nexus ini: \n🔗 ${claimUrl} \n\n*(Masukkan nama kamu di dalam portal untuk melihat kode)*`;
