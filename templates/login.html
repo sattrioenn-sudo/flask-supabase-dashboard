@@ -3,78 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Modern Dashboard</title>
+    <title>Single Sign-On (SSO)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at top left, #f8fafc, #e2e8f0);
+            margin: 0;
+            overflow: hidden;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+        .bg-gradient-custom {
+            background: linear-gradient(135deg, #2b4cc4 0%, #4a90e2 100%);
+        }
+        /* Membuat lekukan gelombang di sisi kiri panel biru */
+        .wave-shape {
+            position: absolute;
+            left: -100px;
+            top: 0;
+            height: 100%;
+            width: 150px;
+            background: inherit;
+            border-radius: 50% 0 0 50%;
+            transform: scaleX(0.8);
+        }
+        .icon-bg-pattern {
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            opacity: 0.1;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="flex min-h-screen bg-white">
 
-    <div class="fixed top-0 left-0 w-64 h-64 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-    <div class="fixed bottom-0 right-0 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-
-    <div class="w-full max-w-md glass-card rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.05)] p-10 relative z-10">
-        <div class="text-center mb-10">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-slate-900 rounded-2xl mb-4 shadow-lg">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+    <div class="hidden lg:flex w-1/2 flex-col justify-between p-12 relative">
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
                 </svg>
             </div>
-            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Welcome Back</h1>
-            <p class="text-slate-500 mt-2 font-medium">Enter your credentials to access your account</p>
+            <div>
+                <h2 class="text-blue-600 font-bold leading-tight">Single sign-on<br><span class="text-blue-500 font-medium">(SSO)</span></h2>
+            </div>
         </div>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="mb-6 p-4 rounded-2xl text-sm bg-red-50 text-red-600 border border-red-100 flex items-center animate-pulse">
-                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+        <div class="max-w-md">
+            <h1 class="text-4xl font-bold text-blue-500 mb-4">WELCOME BACK !</h1>
+            <p class="text-xl text-blue-400">Enter your ID and Password to continue</p>
+        </div>
 
-        <form action="/login" method="POST" class="space-y-5">
-            <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2 ml-1">Email Address</label>
-                <input type="email" name="email" required 
-                    class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all placeholder:text-slate-400"
-                    placeholder="name@company.com">
-            </div>
+        <div class="text-slate-400 text-sm">
+            Copyright © 2026 Commlink Info Tech Ltd. All rights reserved.
+        </div>
+    </div>
 
-            <div>
-                <div class="flex justify-between mb-2 ml-1">
-                    <label class="text-sm font-bold text-slate-700">Password</label>
-                    <a href="#" class="text-xs font-semibold text-pink-600 hover:text-pink-700">Forgot Password?</a>
+    <div class="w-full lg:w-1/2 bg-gradient-custom relative flex items-center justify-center p-6 lg:p-0">
+        <div class="hidden lg:block wave-shape bg-gradient-custom"></div>
+        <div class="absolute inset-0 icon-bg-pattern pointer-events-none"></div>
+
+        <div class="w-full max-w-sm relative z-10 text-white text-center">
+            <h2 class="text-3xl font-bold mb-2 tracking-wide">SIGN IN</h2>
+            <p class="text-sm font-light mb-10 opacity-90 uppercase tracking-widest">To Access The Portal</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="mb-4 p-3 rounded-xl text-xs bg-red-500/20 border border-red-400/50 text-white backdrop-blur-sm">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form action="/login" method="POST" class="space-y-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
+                    </span>
+                    <input type="email" name="email" required 
+                        class="w-full pl-12 pr-4 py-4 rounded-full border-none bg-white text-slate-900 focus:ring-4 focus:ring-blue-300 transition-all placeholder:text-slate-400"
+                        placeholder="Enter User Name Here">
                 </div>
-                <input type="password" name="password" required 
-                    class="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-white/50 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition-all placeholder:text-slate-400"
-                    placeholder="••••••••">
+
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                    </span>
+                    <input type="password" name="password" required 
+                        class="w-full pl-12 pr-4 py-4 rounded-full border-none bg-white text-slate-900 focus:ring-4 focus:ring-blue-300 transition-all placeholder:text-slate-400"
+                        placeholder="Enter Password">
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" 
+                        class="w-full bg-[#00c853] hover:bg-[#00a846] text-white font-bold py-4 rounded-full shadow-lg transition-all active:scale-95 text-lg">
+                        Login
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6">
+                <a href="#" class="text-sm text-white/80 hover:text-white underline underline-offset-4 decoration-white/40">Forget Password?</a>
             </div>
 
-            <div class="pt-2">
-                <button type="submit" 
-                    class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-2xl shadow-xl shadow-slate-200 transition-all transform hover:-translate-y-1 active:scale-[0.98]">
-                    Sign In
-                </button>
+            <div class="lg:hidden mt-20 text-white/50 text-[10px]">
+                Copyright © 2026 Commlink Info Tech Ltd.
             </div>
-        </form>
-
-        <div class="mt-10 pt-8 border-t border-slate-100 text-center">
-            <p class="text-slate-400 text-[10px] tracking-[0.2em] uppercase font-bold">
-                Design by <span class="text-slate-600">Satrio Eko</span>
-            </p>
         </div>
     </div>
 
