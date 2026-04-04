@@ -46,7 +46,7 @@
                 <div class="flex gap-3">
                     <label class="bg-emerald-600 text-white px-5 py-3 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-100 hover:bg-emerald-700 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                        <span>Scan April File</span>
+                        <span>Scan File</span>
                         <input type="file" class="hidden" accept=".xlsx, .xls, .csv" @change="importExcel($event)">
                     </label>
 
@@ -139,10 +139,10 @@
                 inputUser: '',
                 inputCode: '',
                 inputLocation: 'Office',
+                // Master lokasi yang mencakup data dari file scan Anda
                 locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lobby', 'Lantai 1', 'Lantai 2', 'Lantai 3', 'Lantai 4', 'Ekspedisi'],
                 voucherList: {{ vouchers|tojson if vouchers else [] }},
 
-                // FUNGSI SCAN KHUSUS FORMAT FILE APRIL ANDA
                 async importExcel(event) {
                     const file = event.target.files[0];
                     if (!file) return;
@@ -155,70 +155,37 @@
                         const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
                         let successCount = 0;
-                        
-                        // Menampilkan Loading Sederhana
                         const btn = event.target.parentElement;
-                        const originalText = btn.innerText;
-                        btn.innerText = "Processing...";
+                        const originalText = btn.innerHTML; // Simpan ikon dan teks
+                        btn.classList.add('opacity-50');
+                        btn.querySelector('span').innerText = "Scanning...";
 
                         for (const row of jsonData) {
-                            // Mapping Kolom sesuai File Upload Anda
-                            const rawName = row["Nama depan"] || "";
-                            const rawCode = row["Kode voucher"] || "";
+                            const rawName = row["Nama depan"] || row["User"] || "User";
+                            const rawCode = row["Kode voucher"] || row["Code"] || "";
                             let rawLoc = row["Lokasi"] || row["Grup pengguna"] || "Office";
 
-                            // Pembersihan nama (jika kosong abaikan baris tersebut)
                             if (!rawCode) continue;
 
-                            // Normalisasi Lokasi agar masuk ke kategori yang ada
+                            // Normalisasi lokasi agar sesuai dengan master data web
                             if (rawLoc.includes("Kantor")) rawLoc = "Office";
                             if (rawLoc.includes("Produksi")) rawLoc = "Production";
-                            if (rawLoc.includes("Gudang")) rawLoc = "Warehouse";
+                            if (rawLoc.includes("Gudang") || rawLoc.includes("Expedisi")) rawLoc = "Warehouse";
 
                             this.inputUser = rawName;
                             this.inputCode = rawCode;
                             this.inputLocation = rawLoc;
 
-                            // Panggil fungsi addVoucher asli
                             const success = await this.addVoucher(true); 
                             if (success) successCount++;
                         }
 
                         alert(`Berhasil mengimpor ${successCount} voucher!`);
-                        btn.innerText = originalText;
+                        btn.classList.remove('opacity-50');
+                        btn.innerHTML = originalText; // Kembalikan ikon dan teks "Scan File"
                         event.target.value = ''; 
                     };
                     reader.readAsArrayBuffer(file);
-                },
-
-                exportExcel() {
-                    const sorted = [...this.voucherList].sort((a, b) => a.location.localeCompare(b.location));
-                    const data = sorted.map(v => ({
-                        'Location': v.location,
-                        'User Name': v.user_name,
-                        'Voucher Code': v.voucher_code,
-                        'Speed': v.speed,
-                        'Status': v.status
-                    }));
-                    const worksheet = XLSX.utils.json_to_sheet(data);
-                    const workbook = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(workbook, worksheet, "Vouchers");
-                    XLSX.writeFile(workbook, `Nexus_Report_${new Date().toLocaleDateString()}.xlsx`);
-                },
-
-                exportPDF() {
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
-                    const sorted = [...this.voucherList].sort((a, b) => a.location.localeCompare(b.location));
-                    doc.text("Nexus WiFi Voucher Report", 14, 15);
-                    const rows = sorted.map(v => [v.location, v.user_name, v.voucher_code, v.speed, v.status]);
-                    doc.autoTable({
-                        head: [['Location', 'User', 'Code', 'Speed', 'Status']],
-                        body: rows,
-                        startY: 20,
-                        theme: 'grid'
-                    });
-                    doc.save(`Nexus_Report_${new Date().toLocaleDateString()}.pdf`);
                 },
 
                 async addVoucher(isSilent = false) {
@@ -253,29 +220,34 @@
                     }
                 },
 
-                copyCode(code) {
-                    navigator.clipboard.writeText(code);
-                    alert("Code copied!");
+                // Fungsi pendukung lainnya (Export, Copy, Share, Delete) tetap sama...
+                exportExcel() {
+                    const sorted = [...this.voucherList].sort((a, b) => a.location.localeCompare(b.location));
+                    const data = sorted.map(v => ({ 'Location': v.location, 'User Name': v.user_name, 'Voucher Code': v.voucher_code, 'Speed': v.speed, 'Status': v.status }));
+                    const worksheet = XLSX.utils.json_to_sheet(data);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Vouchers");
+                    XLSX.writeFile(workbook, `Nexus_Report_${new Date().toLocaleDateString()}.xlsx`);
                 },
-
+                exportPDF() {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    const sorted = [...this.voucherList].sort((a, b) => a.location.localeCompare(b.location));
+                    doc.text("Nexus WiFi Voucher Report", 14, 15);
+                    const rows = sorted.map(v => [v.location, v.user_name, v.voucher_code, v.speed, v.status]);
+                    doc.autoTable({ head: [['Location', 'User', 'Code', 'Speed', 'Status']], body: rows, startY: 20, theme: 'grid' });
+                    doc.save(`Nexus_Report_${new Date().toLocaleDateString()}.pdf`);
+                },
+                copyCode(code) { navigator.clipboard.writeText(code); alert("Code copied!"); },
                 shareWA(name, code, loc) {
                     const claimUrl = `${window.location.origin}/claim`;
-                    const pesan = `Halo *${name}*, voucher WiFi kamu untuk lokasi *${loc}* sudah siap! \n\nSilakan ambil kode voucher kamu di link resmi Nexus ini: \n🔗 ${claimUrl} \n\n*(Masukkan nama kamu di dalam portal untuk melihat kode)*`;
+                    const pesan = `Halo *${name}*, voucher WiFi kamu untuk lokasi *${loc}* sudah siap! \n\nSilakan ambil kode voucher kamu di link resmi Nexus ini: \n🔗 ${claimUrl}`;
                     window.open(`https://wa.me/?text=${encodeURIComponent(pesan)}`, '_blank');
                 },
-
                 async deleteVoucher(code) {
                     if(confirm('Delete this voucher?')) {
-                        try {
-                            const response = await fetch(`/vouchers/delete/${code}`, {
-                                method: 'DELETE'
-                            });
-                            if (response.ok) {
-                                this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
-                            }
-                        } catch (e) {
-                            alert("Error connecting to server.");
-                        }
+                        const response = await fetch(`/vouchers/delete/${code}`, { method: 'DELETE' });
+                        if (response.ok) this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
                     }
                 }
             }
