@@ -7,144 +7,153 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
         [x-cloak] { display: none !important; }
-        
-        /* Modern Blue Sidebar Gradient */
-        .sidebar-blue { 
-            background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%); 
-        } 
-        
-        /* Efek Hover & Active yang lebih "Glow" */
-        .nav-active { 
-            background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%); 
+
+        /* Custom Soft Background */
+        .bg-main { background-color: #f8fafc; background-image: radial-gradient(#e2e8f0 0.5px, transparent 0.5px); background-size: 24px 24px; }
+
+        /* Sidebar Glass Effect */
+        .sidebar-glass {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Nav Active: Liquid Style */
+        .nav-active {
+            position: relative;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
             color: white !important;
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        }
+        .nav-active::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            width: 5px;
+            height: 20px;
+            background: #818cf8;
+            border-radius: 10px;
+            filter: blur(2px);
         }
 
-        .nav-hover:hover {
-            background-color: rgba(59, 130, 246, 0.1);
-            color: #60A5FA !important;
+        /* Smooth Hover */
+        .nav-link { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-link:hover:not(.nav-active) {
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateX(5px);
+            color: #818cf8 !important;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        /* Animation */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-content { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-[#F1F5F9] text-slate-900 min-h-screen flex">
+<body class="bg-main text-slate-900 min-h-screen flex overflow-hidden">
 
-    <aside class="w-80 sidebar-blue hidden lg:flex flex-col sticky top-0 h-screen shadow-[10px_0_30px_-15px_rgba(0,0,0,0.3)]">
-        <div class="p-10">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-blue-400/30">
-                    <span class="text-white font-black text-2xl tracking-tighter">N</span>
-                </div>
-                <div>
-                    <span class="text-2xl font-black tracking-tighter text-white block">NEXUS</span>
-                    <span class="text-[9px] font-bold text-blue-400 uppercase tracking-[0.3em]">Infrastructure</span>
+    <aside class="w-72 sidebar-glass hidden lg:flex flex-col h-screen z-30">
+        <div class="p-8">
+            <div class="relative group cursor-pointer">
+                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                <div class="relative flex items-center gap-3 bg-slate-900 px-4 py-3 rounded-xl border border-white/10">
+                    <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-black">N</span>
+                    </div>
+                    <span class="text-lg font-extrabold tracking-tighter text-white">NEXUS <span class="text-indigo-400">.</span></span>
                 </div>
             </div>
         </div>
         
-        <nav class="flex-1 px-6 space-y-2">
-            <div class="px-4 mb-4">
-                <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-[0.25em]">System Menu</p>
+        <nav class="flex-1 px-4 space-y-1.5 overflow-y-auto">
+            <div class="px-4 py-4 mt-2">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Main Operations</p>
             </div>
             
             {% set nav_items = [
-                ('/dashboard', 'Dashboard', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'),
-                ('/analytics', 'Analytics', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'),
-                ('/vouchers', 'WiFi Vouchers', 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z'),
-                ('/settings', 'Settings', 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z')
+                ('/dashboard', 'Overview', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'),
+                ('/analytics', 'Traffic Insights', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'),
+                ('/vouchers', 'Voucher Center', 'M15 5v2m0 4v2m0 4v2M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z'),
+                ('/settings', 'Configuration', 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z')
             ] %}
 
             {% for href, label, path in nav_items %}
-            <a href="{{ href }}" class="flex items-center gap-3 py-4 px-6 rounded-2xl transition-all duration-300 font-bold group
-                {{ 'nav-active' if request.path == href else 'text-slate-400 nav-hover' }}">
-                <div class="p-2 rounded-lg {{ 'bg-white/20' if request.path == href else 'bg-slate-800 group-hover:bg-blue-500/20' }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ path }}" />
-                    </svg>
-                </div>
+            <a href="{{ href }}" class="nav-link flex items-center gap-3 py-3 px-4 rounded-xl font-semibold text-sm
+                {{ 'nav-active' if request.path == href else 'text-slate-400' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="{{ path }}" />
+                </svg>
                 {{ label }}
             </a>
             {% endfor %}
         </nav>
 
-        <div class="p-8 border-t border-white/5">
-            <div class="bg-blue-500/10 rounded-2xl p-4 border border-blue-500/20 mb-4 backdrop-blur-sm">
-                <p class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Signed in as</p>
-                <p class="text-xs text-white font-bold truncate">{{ email }}</p>
+        <div class="p-4 mx-4 mb-8 bg-slate-800/40 rounded-2xl border border-white/5 backdrop-blur-md">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white font-bold border border-white/20">
+                    {{ email[0] | upper }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-bold text-white truncate">{{ email.split('@')[0] }}</p>
+                    <div class="flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                        <span class="text-[9px] font-medium text-slate-400">Admin Active</span>
+                    </div>
+                </div>
             </div>
-            <a href="/logout" class="flex items-center justify-center gap-3 py-3 px-4 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-300 font-bold text-xs uppercase tracking-widest border border-transparent hover:border-red-500/20">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <a href="/logout" class="block w-full py-2 text-center rounded-lg bg-slate-700/50 hover:bg-red-500/10 text-slate-400 hover:text-red-400 text-[10px] font-bold uppercase tracking-widest transition-all">
                 Sign Out
             </a>
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto flex flex-col">
-        <header class="h-28 bg-white/70 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-20 px-12 flex items-center justify-between">
-            <div>
-                <nav class="flex mb-1" aria-label="Breadcrumb">
-                    <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                        <li class="inline-flex items-center">
-                            <span class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em]">Management Console</span>
-                        </li>
-                    </ol>
-                </nav>
-                <h1 class="text-3xl font-black text-slate-800 tracking-tight">{% block header_title %}{% endblock %}</h1>
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-20 bg-white/50 backdrop-blur-xl border-b border-slate-200/60 px-8 flex items-center justify-between z-20">
+            <div class="flex items-center gap-4">
+                <div class="lg:hidden w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">N</div>
+                <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">{% block header_title %}{% endblock %}</h1>
             </div>
-            
-            <div class="flex items-center gap-6">
-                <button class="relative w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:shadow-lg transition-all cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                    <span class="absolute top-3 right-3 w-2 h-2 bg-blue-600 rounded-full border-2 border-white"></span>
-                </button>
 
-                <div class="h-10 w-px bg-slate-200"></div>
-
-                <div class="flex items-center gap-4 group cursor-pointer">
-                    <div class="text-right">
-                        <p class="text-sm font-black text-slate-800 group-hover:text-blue-600 transition-colors">{{ email.split('@')[0] | capitalize }}</p>
-                        <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-tighter">Infrastructure Admin</p>
-                    </div>
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 border-4 border-white shadow-xl flex items-center justify-center text-white font-black text-xl overflow-hidden relative group-hover:scale-105 transition-transform">
-                        {{ email[0] | upper }}
-                        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors"></div>
-                    </div>
+            <div class="flex items-center gap-3">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-full">
+                    <div class="w-2 h-2 bg-indigo-600 rounded-full animate-pulse"></div>
+                    <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-tight">Pasuruan Plant</span>
                 </div>
+                
+                <div class="w-[1px] h-6 bg-slate-200 mx-2"></div>
+                
+                <button class="p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                </button>
             </div>
         </header>
 
-        <div class="p-12 max-w-[1600px] mx-auto w-full flex-1">
-            <div class="animate-[fadeIn_0.5s_ease-out]">
+        <div class="flex-1 overflow-y-auto bg-[#F8FAFC]">
+            <div class="p-8 max-w-[1400px] mx-auto animate-content">
+                <div class="flex items-center gap-2 mb-6 ml-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Dashboard</span>
+                    <svg class="w-3 h-3 text-slate-300" fill="currentColor" viewBox="0 0 20 20"><path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path></svg>
+                    <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-[0.2em]">{% block title %}{% endblock %}</span>
+                </div>
+
                 {% block content %}{% endblock %}
             </div>
-        </div>
-        
-        <footer class="px-12 py-10 bg-white border-t border-slate-100 mt-auto">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em]">PT. Kemasan Ciptatama Sempurna</p>
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                    <p class="text-[10px] font-bold text-blue-600 uppercase tracking-widest">System Operational</p>
+
+            <footer class="mt-auto px-8 py-8 border-t border-slate-200/60 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">© 2026 PT. KCS Pasuruan</p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-[10px] font-bold text-slate-400 hover:text-indigo-500 transition-colors uppercase tracking-widest">Support IT</a>
+                    <a href="#" class="text-[10px] font-bold text-slate-400 hover:text-indigo-500 transition-colors uppercase tracking-widest">Documentation</a>
                 </div>
-            </div>
-        </footer>
+            </footer>
+        </div>
     </main>
 
     {% block scripts %}{% endblock %}
-    
-    <style>
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
 </body>
 </html>
