@@ -10,71 +10,56 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
         [x-cloak] { display: none !important; }
         
-        /* Sidebar: Ocean Blue Gradient */
-        .sidebar-ocean { 
-            background: linear-gradient(180deg, #075985 0%, #0c4a6e 100%); /* Blue-800 ke Blue-900 */
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        /* Minimalist Solid Sidebar */
+        .sidebar-minimalist { 
+            background-color: #075985; /* Solid Ocean Blue */
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
         } 
         
-        /* Nav Active: Bright Sky Blue Glow */
+        /* Nav Active: Simple Pill Style */
         .nav-active { 
-            background: white !important;
-            color: #0369a1 !important; /* Blue-700 */
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            color: white !important;
             position: relative;
         }
 
-        .nav-active::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            width: 4px;
-            height: 20px;
-            background: #0ea5e9; /* Sky-500 */
-            border-radius: 0 4px 4px 0;
-        }
-
+        /* Nav Hover */
         .nav-hover:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.08);
             color: white !important;
-            transform: translateX(4px);
         }
 
-        /* Glassmorphism Header */
+        /* Subtle Header Glass */
         .glass-header {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e2e8f0;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-page { animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .animate-page { animation: fadeIn 0.4s ease-out; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-[#f0f9ff] text-slate-900 min-h-screen flex overflow-hidden">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex overflow-hidden">
 
-    <aside class="w-72 sidebar-ocean hidden lg:flex flex-col h-screen sticky top-0 z-30 shadow-2xl">
-        <div class="p-8">
-            <div class="flex items-center gap-3 group cursor-pointer">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <span class="text-[#075985] font-black text-xl tracking-tighter">N</span>
+    <aside class="w-64 sidebar-minimalist hidden lg:flex flex-col h-screen sticky top-0 z-30">
+        <div class="p-8 mb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-white rounded-lg flex items-center justify-center">
+                    <span class="text-[#075985] font-black text-lg tracking-tighter">N</span>
                 </div>
-                <div>
-                    <span class="text-xl font-extrabold tracking-tighter text-white block">IT-KEMASAN</span>
-                    <span class="text-[8px] font-bold text-sky-200 uppercase tracking-[0.4em]">Infrastructure</span>
+                <div class="leading-none">
+                    <span class="text-lg font-extrabold tracking-tighter text-white block">IT-KEMASAN</span>
+                    <span class="text-[7px] font-bold text-sky-300 uppercase tracking-[0.4em]">Infrastructure</span>
                 </div>
             </div>
         </div>
         
-        <nav class="flex-1 px-4 space-y-1">
-            <div class="px-4 py-4 mt-2">
-                <p class="text-[10px] font-black text-sky-300/50 uppercase tracking-[0.2em]">Operations</p>
-            </div>
-            
+        <nav class="flex-1 px-3 space-y-1">
             {% set nav_items = [
                 ('/dashboard', 'Dashboard', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'),
                 ('/analytics', 'Analytics', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'),
@@ -83,9 +68,9 @@
             ] %}
 
             {% for href, label, path in nav_items %}
-            <a href="{{ href }}" class="flex items-center gap-3 py-3 px-5 rounded-xl transition-all duration-300 font-bold text-sm group
-                {{ 'nav-active' if request.path == href else 'text-sky-100/70 nav-hover' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a href="{{ href }}" class="flex items-center gap-3 py-2.5 px-4 rounded-lg transition-all duration-200 font-semibold text-xs group
+                {{ 'nav-active' if request.path == href else 'text-sky-100/60 nav-hover' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ path }}" />
                 </svg>
                 {{ label }}
@@ -93,53 +78,54 @@
             {% endfor %}
         </nav>
 
-        <div class="p-6 border-t border-white/10">
-            <div class="bg-black/10 rounded-2xl p-4 border border-white/5 mb-4 backdrop-blur-sm">
-                <p class="text-[9px] font-black text-sky-200 uppercase tracking-widest mb-1 leading-none">Administrator</p>
-                <p class="text-xs text-white font-bold truncate">{{ email }}</p>
+        <div class="p-4">
+            <div class="bg-white/5 border border-white/10 rounded-xl p-4 mb-4">
+                <p class="text-[8px] font-black text-sky-300 uppercase tracking-widest mb-1">Signed in as</p>
+                <p class="text-[10px] text-white font-bold truncate opacity-80">{{ email }}</p>
             </div>
-            <a href="/logout" class="flex items-center justify-center gap-3 py-3 px-4 rounded-xl text-sky-100 hover:bg-white/10 transition-all duration-300 font-bold text-[10px] uppercase tracking-[0.2em]">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <a href="/logout" class="flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sky-200/50 hover:text-white transition-colors font-bold text-[9px] uppercase tracking-widest">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 Sign Out
             </a>
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto flex flex-col h-screen overflow-x-hidden bg-[#F8FAFC]">
-        <header class="h-24 glass-header border-b border-slate-200 sticky top-0 z-20 px-10 flex items-center justify-between">
-            <div>
-                <p class="text-[9px] font-black text-[#0369a1] uppercase tracking-[0.4em] mb-1">Infrastructure Admin</p>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight">{% block header_title %}{% endblock %}</h1>
+    <main class="flex-1 overflow-y-auto flex flex-col h-screen bg-[#F8FAFC]">
+        <header class="h-16 glass-header sticky top-0 z-20 px-8 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h1 class="text-sm font-black text-slate-800 uppercase tracking-widest">{% block header_title %}{% endblock %}</h1>
+                <span class="text-slate-300 text-xs font-light">|</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Console</span>
             </div>
             
-            <div class="flex items-center gap-6">
-                <div class="flex items-center gap-2 px-3 py-1 bg-sky-50 border border-sky-100 rounded-full">
-                    <span class="w-1.5 h-1.5 bg-sky-500 rounded-full"></span>
-                    <span class="text-[9px] font-black text-sky-700 uppercase">Operational</span>
+            <div class="flex items-center gap-5">
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase">Pasuruan Plant</span>
                 </div>
 
-                <div class="h-10 w-px bg-slate-200"></div>
+                <div class="h-4 w-px bg-slate-200"></div>
 
-                <div class="flex items-center gap-4 group cursor-pointer">
-                    <div class="text-right">
-                        <p class="text-sm font-black text-slate-800 group-hover:text-sky-600 transition-colors">{{ email.split('@')[0] | capitalize }}</p>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">Pasuruan Plant</p>
+                <div class="flex items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-[11px] font-bold text-slate-800 leading-none">{{ email.split('@')[0] }}</p>
+                        <p class="text-[8px] text-slate-400 font-semibold uppercase tracking-tighter">Admin</p>
                     </div>
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-600 to-blue-800 shadow-lg flex items-center justify-center text-white font-black text-lg group-hover:rotate-3 transition-transform">
+                    <div class="w-8 h-8 rounded-lg bg-[#075985] flex items-center justify-center text-white font-black text-xs shadow-sm">
                         {{ email[0] | upper }}
                     </div>
                 </div>
             </div>
         </header>
 
-        <div class="p-8 lg:p-10 max-w-[1600px] w-full mx-auto flex-1 animate-page">
+        <div class="p-8 max-w-[1400px] w-full mx-auto flex-1 animate-page">
             {% block content %}{% endblock %}
         </div>
         
-        <footer class="px-10 py-8 bg-white border-t border-slate-100 mt-auto">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.5em]">PT. Kemasan Ciptatama Sempurna</p>
-                <p class="text-[9px] font-bold text-sky-600 uppercase tracking-widest bg-sky-50 px-3 py-1 rounded-full">Kemasan Group</p>
+        <footer class="px-8 py-6 border-t border-slate-100 mt-auto">
+            <div class="flex justify-between items-center">
+                <p class="text-[9px] font-bold text-slate-300 uppercase tracking-widest">© 2026 PT. KCS</p>
+                <p class="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Kemasan Group</p>
             </div>
         </footer>
     </main>
