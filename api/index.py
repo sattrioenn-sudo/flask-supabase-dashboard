@@ -50,7 +50,6 @@ def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    # Ambil data voucher agar angka statistik di dashboard berelasi dengan data asli
     try:
         response = supabase.table('vouchers').select("*").execute()
         db_vouchers = response.data if response.data else []
@@ -90,7 +89,7 @@ def vouchers():
                 "location": data.get('location', 'Office'),
                 "speed": "15Mbps",
                 "status": "Active",
-                "is_locked": False # Memastikan default saat insert baru
+                "is_locked": False 
             }).execute()
             return jsonify({"status": "success"}), 200
         except Exception as e:
@@ -116,22 +115,16 @@ def delete_voucher(code_voucher):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# --- ROUTE BARU: UNLOCK VOUCHER ---
 @app.route('/vouchers/unlock/<code_voucher>', methods=['POST'])
 def unlock_voucher(code_voucher):
-    # Route ini bisa diakses tanpa login jika memang untuk publik (sales)
-    # Tapi tetap menggunakan koneksi supabase yang sudah didefinisikan
     try:
-        # Update kolom is_locked menjadi False di database
+        # Update kolom is_locked menjadi False agar bisa diklaim lagi
         supabase.table('vouchers').update({"is_locked": False}).eq('voucher_code', code_voucher).execute()
-        
-        print(f"Voucher {code_voucher} unlocked successfully")
         return jsonify({"status": "success", "message": "Voucher unlocked"}), 200
     except Exception as e:
-        print(f"Error Unlock: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
-# --- FITUR BARU: CLAIM VOUCHER (PUBLIK) ---
+# --- FITUR CLAIM VOUCHER (PUBLIK) ---
 
 @app.route('/claim')
 def claim_page():
@@ -141,17 +134,42 @@ def claim_page():
 @app.route('/api/get-voucher', methods=['POST'])
 def get_voucher_api():
     data = request.get_json(silent=True) or {}
-    user_name = data.get('user_name')
+    user_name = data.get('user_name', '').strip()
     
     if not user_name:
         return jsonify({"status": "error", "message": "Nama harus diisi"}), 400
         
     try:
         response = supabase.table('vouchers').select("*").eq('user_name', user_name).limit(1).execute()
+        
         if response.data:
-            return jsonify({"status": "success", "data": response.data[0]}), 200
+            voucher_data = response.data[0]
+            
+            # CEK PROTEKSI: Jika status sudah terkunci (is_locked=True), tolak permintaan
+            if voucher_data.get('is_locked'):
+                return jsonify({
+                    "status": "error", 
+                    "message": "Voucher sudah diklaim. Hubungi Administrator untuk reset jika lupa kode."
+                }), 403 
+                
+            return jsonify({"status": "success", "data": voucher_data}), 200
         else:
             return jsonify({"status": "error", "message": "Nama tidak ditemukan atau belum terdaftar"}), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/lock-voucher', methods=['POST'])
+def lock_voucher_api():
+    data = request.get_json(silent=True) or {}
+    voucher_id = data.get('id')
+    
+    if not voucher_id:
+        return jsonify({"status": "error", "message": "ID tidak valid"}), 400
+        
+    try:
+        # Kunci voucher di database setelah user melihat kodenya
+        supabase.table('vouchers').update({"is_locked": True}).eq('id', voucher_id).execute()
+        return jsonify({"status": "success", "message": "Voucher locked"}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
