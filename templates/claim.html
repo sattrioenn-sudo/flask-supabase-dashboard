@@ -32,8 +32,9 @@
                 const result = await res.json();
                 
                 if (res.ok) {
-                    // Cek jika status voucher sudah terkunci
-                    if (result.data.is_locked) {
+                    // REVISI LOGIKA: Cek status lock secara menyeluruh (boolean atau integer)
+                    const statusLock = result.data.is_locked;
+                    if (statusLock === true || statusLock === 1 || statusLock === 'true') {
                         this.errorMsg = 'Voucher sudah diklaim. Hubungi Administrator untuk reset jika lupa kode.';
                         this.voucher = null;
                     } else {
@@ -88,16 +89,16 @@
 
             <div x-show="voucher" x-cloak class="animate-in fade-in zoom-in duration-500">
                 <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">Voucher Ditemukan!</p>
-                <h2 class="text-lg font-bold text-slate-800 mb-6" x-text="'Halo, ' + voucher.user_name"></h2>
+                <h2 class="text-lg font-bold text-slate-800 mb-6" x-text="'Halo, ' + (voucher ? voucher.user_name : '')"></h2>
                 
                 <div class="py-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 mb-6 group relative">
                     <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Kode WiFi</p>
-                    <h1 class="text-4xl font-black text-slate-900 tracking-tighter" x-text="voucher.voucher_code"></h1>
+                    <h1 class="text-4xl font-black text-slate-900 tracking-tighter" x-text="voucher ? voucher.voucher_code : ''"></h1>
                 </div>
 
                 <div class="flex items-center justify-center gap-4 text-xs font-bold text-slate-500 mb-8">
-                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full" x-text="voucher.speed"></span>
-                    <span class="px-3 py-1 bg-slate-100 rounded-full" x-text="voucher.location"></span>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full" x-text="voucher ? (voucher.speed || '15Mbps') : ''"></span>
+                    <span class="px-3 py-1 bg-slate-100 rounded-full" x-text="voucher ? voucher.location : ''"></span>
                 </div>
                 
                 <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode disalin!')" 
