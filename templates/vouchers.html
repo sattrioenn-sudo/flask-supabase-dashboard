@@ -68,14 +68,14 @@
                         <td class="p-4 text-sm text-slate-500" x-text="v.speed || '15Mbps'"></td>
                         
                         <td class="p-4 text-center">
-                            <template x-if="v.is_locked">
+                            <template x-if="v.is_locked == true || v.is_locked == 1">
                                 <span class="flex items-center justify-center text-red-500" title="Locked">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                                     </svg>
                                 </span>
                             </template>
-                            <template x-if="!v.is_locked">
+                            <template x-if="!(v.is_locked == true || v.is_locked == 1)">
                                 <span class="text-emerald-500 flex items-center justify-center" title="Available">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM7 7a3 3 0 016 0v2H7V7z" />
@@ -86,7 +86,7 @@
 
                         <td class="p-4">
                             <div class="flex justify-center gap-2">
-                                <template x-if="v.is_locked">
+                                <template x-if="v.is_locked == true || v.is_locked == 1">
                                     <button @click="unlockVoucher(v.voucher_code)" class="bg-indigo-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-all">
                                         Unlock
                                     </button>
@@ -132,7 +132,6 @@
             locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lantai 1', 'Lantai 2', 'Lantai 3', 'Lantai 4', 'Ekspedisi'],
             voucherList: {{ vouchers|tojson if vouchers else [] }},
 
-            // FUNGSI UNLOCK - DIREVISI AGAR REAKTIF
             async unlockVoucher(code) {
                 if(confirm('Buka kunci voucher ini agar user bisa claim ulang?')) {
                     try {
@@ -142,11 +141,10 @@
                         });
                         
                         if (res.ok) {
-                            // Cari data di list lokal dan ubah statusnya secara reaktif
                             const index = this.voucherList.findIndex(v => v.voucher_code === code);
                             if (index !== -1) {
+                                // Reset status ke false secara reaktif
                                 this.voucherList[index].is_locked = false;
-                                // Paksa refresh list agar Alpine mendeteksi perubahan properti objek
                                 this.voucherList = [...this.voucherList]; 
                             }
                             alert("Voucher berhasil dibuka!");
@@ -163,7 +161,7 @@
             exportPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-                const rows = this.voucherList.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, v.speed || '15Mbps', v.is_locked ? 'Locked' : 'Available']);
+                const rows = this.voucherList.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, v.speed || '15Mbps', (v.is_locked == true || v.is_locked == 1) ? 'Locked' : 'Available']);
                 doc.autoTable({
                     head: [['No', 'Location', 'User Name', 'Voucher Code', 'Speed', 'Status']],
                     body: rows,
@@ -212,7 +210,7 @@
                     'Location': v.location, 
                     'User': v.user_name, 
                     'Code': v.voucher_code, 
-                    'Status': v.is_locked ? 'Locked' : 'Available' 
+                    'Status': (v.is_locked == true || v.is_locked == 1) ? 'Locked' : 'Available' 
                 }));
                 const ws = XLSX.utils.json_to_sheet(data);
                 const wb = XLSX.utils.book_new();
