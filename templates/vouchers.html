@@ -12,6 +12,7 @@
         .table-container { background: white; border-radius: 1.5rem; border: 1px solid #f1f5f9; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); }
         .btn-edit { background-color: #f0ad4e; color: white; padding: 6px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; }
         .btn-delete { background-color: #d9534f; color: white; padding: 6px 16px; border-radius: 6px; font-weight: bold; font-size: 12px; }
+        [x-cloak] { display: none !important; }
     </style>
 {% endblock %}
 
@@ -51,7 +52,7 @@
                     <th class="p-4 text-sm font-bold text-slate-700">Nama User</th>
                     <th class="p-4 text-sm font-bold text-slate-700">Voucher Code</th>
                     <th class="p-4 text-sm font-bold text-slate-700">Speed</th>
-                    <th class="p-4 text-sm font-bold text-slate-700">Status</th>
+                    <th class="p-4 text-sm font-bold text-slate-700 text-center">Status</th>
                     <th class="p-4 text-sm font-bold text-slate-700 text-center">Opsi</th>
                 </tr>
             </thead>
@@ -65,13 +66,31 @@
                         <td class="p-4 text-sm font-semibold text-slate-700" x-text="v.user_name"></td>
                         <td class="p-4 font-mono text-sm font-bold text-emerald-600" x-text="v.voucher_code"></td>
                         <td class="p-4 text-sm text-slate-500" x-text="v.speed || '15Mbps'"></td>
-                        <td class="p-4">
-                            <span class="text-[11px] font-bold uppercase px-2 py-1 rounded" 
-                                  :class="v.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'"
-                                  x-text="v.status"></span>
+                        
+                        <td class="p-4 text-center">
+                            <template x-if="v.is_locked">
+                                <span class="flex items-center justify-center text-red-500" title="Locked">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                            </template>
+                            <template x-if="!v.is_locked">
+                                <span class="text-emerald-500 flex items-center justify-center" title="Available">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM7 7a3 3 0 016 0v2H7V7z" />
+                                    </svg>
+                                </span>
+                            </template>
                         </td>
+
                         <td class="p-4">
                             <div class="flex justify-center gap-2">
+                                <template x-if="v.is_locked">
+                                    <button @click="unlockVoucher(v.voucher_code)" class="bg-indigo-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-indigo-600 transition-all">
+                                        Unlock
+                                    </button>
+                                </template>
                                 <button @click="copyCode(v.voucher_code)" class="btn-edit hover:opacity-80 transition-all">Copy</button>
                                 <button @click="shareWA(v.user_name, v.location)" class="bg-emerald-500 text-white px-3 py-1.5 rounded-md text-[11px] font-bold hover:bg-emerald-600 transition-all">WA</button>
                                 <button @click="deleteVoucher(v.voucher_code)" class="btn-delete hover:opacity-80 transition-all">Hapus</button>
@@ -113,17 +132,44 @@
             locationMaster: ['Office', 'Warehouse', 'Production', 'Server Room', 'Lantai 1', 'Lantai 2', 'Lantai 3', 'Lantai 4', 'Ekspedisi'],
             voucherList: {{ vouchers|tojson if vouchers else [] }},
 
-            // ... (Semua fungsi JS exportPDF, addVoucher, deleteVoucher, importExcel, copyCode, shareWA tetap sama dan aman)
+            // FUNGSI UNLOCK - DIREVISI AGAR REAKTIF
+            async unlockVoucher(code) {
+                if(confirm('Buka kunci voucher ini agar user bisa claim ulang?')) {
+                    try {
+                        const res = await fetch(`/vouchers/unlock/${code}`, { 
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        
+                        if (res.ok) {
+                            // Cari data di list lokal dan ubah statusnya secara reaktif
+                            const index = this.voucherList.findIndex(v => v.voucher_code === code);
+                            if (index !== -1) {
+                                this.voucherList[index].is_locked = false;
+                                // Paksa refresh list agar Alpine mendeteksi perubahan properti objek
+                                this.voucherList = [...this.voucherList]; 
+                            }
+                            alert("Voucher berhasil dibuka!");
+                        } else {
+                            alert("Server gagal memproses unlock.");
+                        }
+                    } catch (e) { 
+                        console.error(e);
+                        alert("Terjadi kesalahan koneksi."); 
+                    }
+                }
+            },
+
             exportPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-                const rows = this.voucherList.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, v.speed || '15Mbps', v.status]);
+                const rows = this.voucherList.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, v.speed || '15Mbps', v.is_locked ? 'Locked' : 'Available']);
                 doc.autoTable({
                     head: [['No', 'Location', 'User Name', 'Voucher Code', 'Speed', 'Status']],
                     body: rows,
                     startY: 20,
                     theme: 'grid',
-                    headStyles: { fillStyle: [45, 90, 87] }
+                    headStyles: { fillColor: [45, 90, 87] }
                 });
                 doc.save("Voucher_Report.pdf");
             },
@@ -139,8 +185,12 @@
                         body: JSON.stringify(payload)
                     });
                     if (response.ok) {
-                        this.voucherList.unshift({ ...payload, speed: "15Mbps", status: "Active" });
-                        if (!isSilent) { this.showModal = false; this.inputUser = ''; this.inputCode = ''; }
+                        this.voucherList.unshift({ ...payload, speed: "15Mbps", is_locked: false });
+                        if (!isSilent) { 
+                            this.showModal = false; 
+                            this.inputUser = ''; 
+                            this.inputCode = ''; 
+                        }
                         return true;
                     }
                 } catch (e) { return false; }
@@ -148,20 +198,32 @@
 
             async deleteVoucher(code) {
                 if(confirm('Hapus voucher ini?')) {
-                    const res = await fetch(`/vouchers/delete/${code}`, { method: 'DELETE' });
-                    if (res.ok) this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
+                    try {
+                        const res = await fetch(`/vouchers/delete/${code}`, { method: 'DELETE' });
+                        if (res.ok) {
+                            this.voucherList = this.voucherList.filter(v => v.voucher_code !== code);
+                        }
+                    } catch(e) { alert("Gagal menghapus."); }
                 }
             },
 
             exportExcel() {
-                const data = this.voucherList.map(v => ({ 'Location': v.location, 'User': v.user_name, 'Code': v.voucher_code }));
+                const data = this.voucherList.map(v => ({ 
+                    'Location': v.location, 
+                    'User': v.user_name, 
+                    'Code': v.voucher_code, 
+                    'Status': v.is_locked ? 'Locked' : 'Available' 
+                }));
                 const ws = XLSX.utils.json_to_sheet(data);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Vouchers");
                 XLSX.writeFile(wb, "Nexus_Vouchers.xlsx");
             },
 
-            copyCode(code) { navigator.clipboard.writeText(code); alert("Copied!"); },
+            copyCode(code) { 
+                navigator.clipboard.writeText(code); 
+                alert("Copied: " + code); 
+            },
             
             shareWA(name, loc) {
                 const urlClaim = `${window.location.origin}/claim`;
