@@ -60,7 +60,7 @@
                 if (res.ok) {
                     const statusLock = result.data.is_locked;
                     if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        this.errorMsg = 'Voucher sudah diklaim. Hubungi Administrator.';
+                        this.errorMsg = 'Voucher sudah diklaim. Hubungi IT-Kemasan.';
                         this.voucher = null;
                     } else {
                         this.voucher = result.data;
