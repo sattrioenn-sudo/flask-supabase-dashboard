@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claim Wi-Fi Voucher</title>
+    <title>Claim Wi-Fi Voucher | PT. KCS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -11,12 +11,12 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #0f172a; /* Slate 900 */
+            background: #020617; 
         }
         [x-cloak] { display: none !important; }
         
         .bg-mesh {
-            background-color: #0f172a;
+            background-color: #020617;
             background-image: 
                 radial-gradient(at 0% 0%, hsla(222,47%,11%,1) 0, transparent 50%), 
                 radial-gradient(at 100% 0%, hsla(217,91%,60%,0.15) 0, transparent 50%), 
@@ -24,10 +24,11 @@
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         .shimmer {
@@ -41,15 +42,58 @@
             100% { background-position: 200% 0; }
         }
 
+        /* Running Text Animation */
+        .marquee {
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+            background: rgba(59, 130, 246, 0.1);
+            border-y: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 10px 0;
+        }
+
+        .marquee p {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 15s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
         .glow-button {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .glow-button:hover {
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6 bg-mesh relative overflow-hidden">
+<body class="min-h-screen flex flex-col items-center justify-center bg-mesh relative overflow-hidden">
 
-    <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px]"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-600/20 rounded-full blur-[120px]"></div>
+    <div class="fixed top-0 w-full marquee z-50 backdrop-blur-sm border-b border-white/5">
+        <p class="text-blue-400 font-bold text-sm tracking-widest uppercase">
+            Selamat Datang User Wi-Fi PT. Kemasan Ciptatama Sempurna — Silahkan masukkan nama anda untuk klaim voucher internet — Tetap produktif dan gunakan internet dengan bijak —
+        </p>
+    </div>
+
+    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]"></div>
 
     <div x-data="{ 
         inputName: '', 
@@ -106,80 +150,81 @@
                 console.error('Lock failed');
             }
         }
-    }" class="w-full max-w-sm z-10">
+    }" class="w-full max-w-sm z-10 px-4">
 
-        <div class="glass-card p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden text-center border border-blue-500/20">
+        <div class="glass-card p-8 md:p-10 rounded-[3rem] relative overflow-hidden text-center floating">
             
-            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 glow-button">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+            <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-3xl flex items-center justify-center mx-auto mb-8 glow-button rotate-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
                 </svg>
             </div>
 
             <template x-if="!voucher">
-                <div class="animate-in fade-in duration-700">
-                    <h1 class="text-2xl font-black text-white mb-2 tracking-tight">Wi-Fi Claim</h1>
-                    <p class="text-xs text-blue-200/60 mb-8 uppercase tracking-[0.2em] font-bold">IT Department Portal</p>
+                <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <h1 class="text-3xl font-black text-white mb-2 tracking-tight">Wi-Fi Portal</h1>
+                    <p class="text-[10px] text-blue-400/80 mb-8 uppercase tracking-[0.3em] font-bold">PT. Kemasan Ciptatama Sempurna</p>
                     
-                    <div class="relative mb-4">
-                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Input Nama..." 
-                               class="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-center font-bold text-white placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:bg-white/10 outline-none transition-all duration-300">
+                    <div class="relative mb-4 group">
+                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Masukkan Nama Anda" 
+                               class="w-full px-6 py-5 bg-slate-900/50 border border-white/10 rounded-2xl text-center font-bold text-white placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300 group-hover:bg-slate-900/80">
                     </div>
                     
                     <button @click="getVoucher()" :disabled="loading"
                             class="w-full py-5 bg-blue-600 text-white rounded-2xl font-extrabold shadow-lg hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-50 glow-button">
-                        <span x-show="!loading" class="tracking-wider uppercase text-sm">Get Voucher Now</span>
-                        <span x-show="loading" class="flex items-center justify-center gap-2">
+                        <span x-show="!loading" class="tracking-wider uppercase text-sm">Klaim Voucher Sekarang</span>
+                        <span x-show="loading" class="flex items-center justify-center gap-2 text-sm uppercase">
                              <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                             Authenticating...
+                             Memproses...
                         </span>
                     </button>
-                    <p x-text="errorMsg" class="text-red-400 text-[10px] font-black mt-5 uppercase tracking-widest bg-red-500/10 py-2 rounded-lg" x-show="errorMsg" x-cloak></p>
+                    <p x-text="errorMsg" class="text-red-400 text-[11px] font-bold mt-6 uppercase tracking-wider bg-red-500/10 py-3 px-2 rounded-xl border border-red-500/20" x-show="errorMsg" x-cloak></p>
                 </div>
             </template>
 
             <template x-if="voucher">
                 <div class="animate-in zoom-in duration-500">
-                    <div class="inline-block px-4 py-1 bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-4">Authorized Access</div>
-                    <h2 class="text-xl font-bold text-white mb-6" x-text="voucher.user_name"></h2>
+                    <div class="inline-block px-4 py-1 bg-green-500/20 text-green-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-4 border border-green-500/20">Access Granted</div>
+                    <h2 class="text-xl font-bold text-white mb-6">Halo, <span x-text="voucher.user_name" class="text-blue-400"></span></h2>
                     
-                    <div class="relative py-12 bg-slate-950/80 border border-blue-500/30 rounded-[2rem] mb-6 overflow-hidden shadow-inner group cursor-pointer" 
-                         @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode berhasil disalin!')">
+                    <div class="relative py-10 bg-slate-950/90 border border-blue-500/30 rounded-[2.5rem] mb-6 overflow-hidden shadow-inner group cursor-pointer" 
+                         @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode disalin!')">
                         <div class="shimmer absolute inset-0"></div>
-                        <p class="relative z-10 text-[9px] font-bold text-blue-400/50 uppercase tracking-[0.3em] mb-2">Voucher Key</p>
-                        <h1 class="relative z-10 text-4xl font-black text-white tracking-[0.2em] group-hover:scale-105 transition-transform" x-text="voucher.voucher_code"></h1>
+                        <p class="relative z-10 text-[9px] font-bold text-blue-400/50 uppercase tracking-[0.3em] mb-2">Voucher Code</p>
+                        <h1 class="relative z-10 text-4xl font-black text-white tracking-[0.15em] group-hover:scale-110 transition-transform duration-300" x-text="voucher.voucher_code"></h1>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 mb-8">
-                        <div class="p-4 bg-white/5 border border-white/5 rounded-2xl">
-                            <p class="text-blue-400/40 font-bold uppercase mb-1" style="font-size: 8px;">Network</p>
-                            <p class="font-black text-white text-xs" x-text="voucher.speed || '15Mbps'"></p>
+                        <div class="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                            <p class="text-blue-400/40 font-bold uppercase mb-1" style="font-size: 8px;">Max Speed</p>
+                            <p class="font-black text-white text-xs" x-text="voucher.speed || '15 Mbps'"></p>
                         </div>
-                        <div class="p-4 bg-white/5 border border-white/5 rounded-2xl">
-                            <p class="text-blue-400/40 font-bold uppercase mb-1" style="font-size: 8px;">Area</p>
-                            <p class="font-black text-white text-xs" x-text="voucher.location"></p>
+                        <div class="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+                            <p class="text-blue-400/40 font-bold uppercase mb-1" style="font-size: 8px;">Location Area</p>
+                            <p class="font-black text-white text-xs" x-text="voucher.location || 'All Area'"></p>
                         </div>
                     </div>
                     
                     <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode berhasil disalin!')" 
-                            class="w-full py-4 bg-white text-slate-900 rounded-xl font-black hover:bg-blue-50 transition-all flex items-center justify-center gap-2">
-                        COPY CODE
+                            class="w-full py-4 bg-white text-slate-950 rounded-2xl font-black hover:bg-blue-50 transition-all flex items-center justify-center gap-2 text-sm shadow-xl">
+                        SALIN KODE
                     </button>
                     
-                    <button @click="voucher = null; inputName = ''" class="mt-8 text-[10px] font-bold text-slate-500 hover:text-blue-400 uppercase tracking-widest transition-colors">
-                        ← Exit Session
+                    <button @click="voucher = null; inputName = ''" class="mt-8 text-[10px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center justify-center mx-auto gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                        Logout Session
                     </button>
                 </div>
             </template>
 
         </div>
         
-        <div class="mt-10 text-center space-y-2">
-            <p class="text-[10px] font-black text-blue-500/40 uppercase tracking-[0.5em]">Design by Satrio Eko</p>
-            <div class="flex justify-center gap-1">
-                <div class="h-1 w-1 bg-blue-600 rounded-full"></div>
-                <div class="h-1 w-4 bg-blue-600 rounded-full"></div>
-                <div class="h-1 w-1 bg-blue-600 rounded-full"></div>
+        <div class="mt-12 text-center">
+            <p class="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] mb-4">Developed by IT Satrio Eko</p>
+            <div class="flex justify-center gap-1.5 opacity-30">
+                <div class="h-1 w-1 bg-blue-500 rounded-full animate-bounce"></div>
+                <div class="h-1 w-6 bg-blue-500 rounded-full"></div>
+                <div class="h-1 w-1 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
             </div>
         </div>
     </div>
