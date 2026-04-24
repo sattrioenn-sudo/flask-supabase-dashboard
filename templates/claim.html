@@ -3,76 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wi-Fi Access | Premium Portal</title>
+    <title>Wi-Fi Access | PT. KCS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #050505; 
+            background-color: #f8fafc;
+            color: #1e293b;
         }
         [x-cloak] { display: none !important; }
-        
-        .bg-glow {
-            background: radial-gradient(circle at 50% -20%, #1e40af 0%, rgba(5, 5, 5, 1) 70%);
+
+        /* Subtle Gradient Background */
+        .bg-soft-blue {
+            background: radial-gradient(circle at top right, #e0f2fe 0%, #f8fafc 50%);
         }
 
-        .glass-premium {
-            background: rgba(15, 15, 15, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .input-minimal {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .input-line {
+            background: transparent;
+            border-bottom: 2px solid #e2e8f0;
             transition: all 0.3s ease;
         }
 
-        .input-minimal:focus {
-            background: rgba(255, 255, 255, 0.06);
+        .input-line:focus {
+            outline: none;
             border-color: #3b82f6;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
         }
 
-        .btn-primary {
-            background: #ffffff;
-            color: #000000;
+        .btn-blue {
+            background: #3b82f6;
+            color: #ffffff;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.2);
-            background: #f1f1f1;
-        }
-
-        .marquee-container {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-        .animate-marquee {
-            display: inline-block;
-            animation: marquee 20s linear infinite;
+        .btn-blue:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center bg-glow relative px-4">
-
-    <div class="fixed top-0 w-full marquee-container z-50 py-2 overflow-hidden">
-        <div class="animate-marquee whitespace-nowrap">
-            <span class="text-[10px] text-blue-400/60 font-medium uppercase tracking-[0.3em]">
-                System Ready — Please enter your credentials to access the network — PT. Kemasan Ciptatama Sempurna — High Speed Connection Active —
-            </span>
-        </div>
-    </div>
+<body class="min-h-screen flex flex-col items-center justify-center p-6 bg-soft-blue">
 
     <div x-data="{ 
         inputName: '', 
@@ -81,14 +54,14 @@
         errorMsg: '',
         launchConfetti() {
             confetti({
-                particleCount: 80,
-                spread: 50,
+                particleCount: 100,
+                spread: 70,
                 origin: { y: 0.7 },
-                colors: ['#ffffff', '#3b82f6']
+                colors: ['#3b82f6', '#ffffff', '#93c5fd']
             });
         },
         async getVoucher() {
-            if(!this.inputName) { this.errorMsg = 'Nama diperlukan'; return; }
+            if(!this.inputName) { this.errorMsg = 'SILAHKAN MASUKKAN NAMA'; return; }
             this.loading = true;
             this.errorMsg = '';
             try {
@@ -102,7 +75,7 @@
                 if (res.ok) {
                     const statusLock = result.data.is_locked;
                     if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        this.errorMsg = 'Voucher ini sudah aktif.';
+                        this.errorMsg = 'VOUCHER TELAH DIGUNAKAN';
                         this.voucher = null;
                     } else {
                         this.voucher = result.data;
@@ -110,10 +83,10 @@
                         this.lockVoucher(result.data.id);
                     }
                 } else {
-                    this.errorMsg = result.message;
+                    this.errorMsg = result.message.toUpperCase();
                 }
             } catch (e) {
-                this.errorMsg = 'Kesalahan koneksi server.';
+                this.errorMsg = 'MASALAH JARINGAN';
             } finally {
                 this.loading = false;
             }
@@ -125,75 +98,87 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ id: id })
                 });
-            } catch (e) {
-                console.error('Lock failed');
-            }
+            } catch (e) { console.error('Lock failed'); }
         }
-    }" class="w-full max-w-md">
+    }" class="w-full max-w-sm">
 
-        <div class="glass-premium p-10 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-            
-            <div class="mb-10 flex flex-col items-center">
-                <div class="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center mb-6">
-                    <svg fill="none" class="w-6 h-6 text-blue-500" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                </div>
-                <h2 class="text-white text-xl font-semibold tracking-tight">Wireless Access</h2>
-                <p class="text-white/40 text-xs mt-1 tracking-widest uppercase">PT. KCS Network</p>
+        <div class="mb-12 text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-white rounded-2xl shadow-sm border border-blue-50 mb-4">
+                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+                </svg>
             </div>
+            <h1 class="text-xs font-bold tracking-[0.4em] text-blue-400 uppercase">PT. KCS Portal</h1>
+        </div>
 
+        <div class="bg-white/80 backdrop-blur-md p-10 rounded-[2.5rem] border border-white shadow-xl shadow-blue-900/5">
+            
             <template x-if="!voucher">
-                <div class="space-y-6">
-                    <div class="relative">
-                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Full Name" 
-                               class="input-minimal w-full px-6 py-4 rounded-2xl text-white placeholder:text-white/20 outline-none text-center tracking-wide">
+                <div class="space-y-8 animate-in fade-in duration-500">
+                    <div class="text-center space-y-2">
+                        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Welcome</h2>
+                        <p class="text-sm text-slate-400">Please identify yourself to connect.</p>
+                    </div>
+
+                    <div class="pt-4">
+                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Your full name" 
+                               class="input-line w-full py-3 text-center text-lg font-medium placeholder:text-slate-300">
                     </div>
                     
                     <button @click="getVoucher()" :disabled="loading"
-                            class="btn-primary w-full py-4 rounded-2xl font-bold text-sm tracking-widest uppercase disabled:opacity-30">
-                        <span x-show="!loading">Connect Device</span>
+                            class="btn-blue w-full py-4 rounded-2xl font-bold text-[11px] tracking-[0.15em] uppercase shadow-md disabled:opacity-50">
+                        <span x-show="!loading">Request Access</span>
                         <span x-show="loading" class="flex items-center justify-center gap-2">
-                             <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                             Verifying...
+                            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            Verifying...
                         </span>
                     </button>
 
-                    <div x-show="errorMsg" x-transition class="bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
-                        <p x-text="errorMsg" class="text-red-400 text-[10px] font-bold text-center uppercase tracking-widest"></p>
+                    <div x-show="errorMsg" x-cloak class="mt-4">
+                        <p x-text="errorMsg" class="text-red-400 text-[10px] font-bold text-center tracking-widest"></p>
                     </div>
                 </div>
             </template>
 
             <template x-if="voucher">
-                <div class="text-center animate-in fade-in zoom-in duration-500">
-                    <p class="text-blue-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-2">Access Granted</p>
-                    <h3 class="text-white text-lg font-medium mb-8">Welcome back, <span x-text="voucher.user_name"></span></h3>
+                <div class="text-center animate-in zoom-in duration-300">
+                    <div class="mb-8">
+                        <span class="px-3 py-1 bg-green-50 text-green-500 text-[10px] font-bold uppercase tracking-wider rounded-full border border-green-100">
+                            Verified Connection
+                        </span>
+                    </div>
+
+                    <div class="mb-8 p-6 bg-blue-50/50 rounded-3xl border border-blue-100/50 group cursor-pointer"
+                         @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Copied!')">
+                        <p class="text-blue-400/60 text-[9px] font-bold uppercase tracking-[0.2em] mb-2">Voucher Code</p>
+                        <p class="text-4xl font-bold text-blue-600 tracking-widest" x-text="voucher.voucher_code"></p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-left">
+                            <p class="text-[8px] text-slate-400 uppercase font-bold">Speed</p>
+                            <p class="text-xs font-bold text-slate-700" x-text="voucher.speed || '15 Mbps'"></p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-left">
+                            <p class="text-[8px] text-slate-400 uppercase font-bold">Zone</p>
+                            <p class="text-xs font-bold text-slate-700" x-text="voucher.location || 'All Area'"></p>
+                        </div>
+                    </div>
+
+                    <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Code Copied!')" 
+                            class="text-[11px] font-bold tracking-widest uppercase border-2 border-blue-500 text-blue-500 w-full py-4 rounded-2xl hover:bg-blue-500 hover:text-white transition-all">
+                        Copy to Clipboard
+                    </button>
                     
-                    <div class="mb-8 p-8 bg-white/5 border border-white/10 rounded-[2rem] group cursor-pointer active:scale-95 transition-transform"
-                         @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Code Copied!')">
-                        <p class="text-white/30 text-[9px] uppercase tracking-widest mb-3">Voucher Token</p>
-                        <p class="text-4xl font-bold text-white tracking-[0.2em]" x-text="voucher.voucher_code"></p>
-                    </div>
-
-                    <div class="flex gap-2 mb-8">
-                        <div class="flex-1 p-3 bg-white/5 rounded-xl border border-white/5">
-                            <p class="text-[8px] text-white/30 uppercase">Speed</p>
-                            <p class="text-xs text-white font-semibold" x-text="voucher.speed || '15 Mbps'"></p>
-                        </div>
-                        <div class="flex-1 p-3 bg-white/5 rounded-xl border border-white/5">
-                            <p class="text-[8px] text-white/30 uppercase">Region</p>
-                            <p class="text-xs text-white font-semibold" x-text="voucher.location || 'Default'"></p>
-                        </div>
-                    </div>
-
-                    <button @click="voucher = null; inputName = ''" class="text-white/20 hover:text-white/60 text-[10px] uppercase tracking-widest transition-colors">
-                        Clear Session
+                    <button @click="voucher = null; inputName = ''" class="mt-8 text-slate-400 hover:text-red-400 text-[10px] font-bold uppercase tracking-widest transition-colors">
+                        Close Session
                     </button>
                 </div>
             </template>
         </div>
-        
-        <div class="mt-8 text-center">
-            <p class="text-[9px] font-medium text-white/20 uppercase tracking-[0.4em]">Integrated Infrastructure v2.0</p>
+
+        <div class="mt-12 text-center">
+            <p class="text-[10px] font-bold text-slate-400/60 uppercase tracking-[0.4em]">Developed by IT Satrio</p>
         </div>
     </div>
 
