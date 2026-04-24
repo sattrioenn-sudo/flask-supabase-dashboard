@@ -3,97 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claim Wi-Fi Voucher | PT. KCS</title>
+    <title>Wi-Fi Access | Premium Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #020617; 
+            background-color: #050505; 
         }
         [x-cloak] { display: none !important; }
         
-        .bg-mesh {
-            background-color: #020617;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(222,47%,11%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(217,91%,60%,0.15) 0, transparent 50%), 
-                radial-gradient(at 50% 100%, hsla(217,91%,60%,0.1) 0, transparent 50%);
+        .bg-glow {
+            background: radial-gradient(circle at 50% -20%, #1e40af 0%, rgba(5, 5, 5, 1) 70%);
         }
 
-        .glass-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        .glass-premium {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .shimmer {
-            background: linear-gradient(90deg, rgba(59,130,246,0) 0%, rgba(59,130,246,0.2) 50%, rgba(59,130,246,0) 100%);
-            background-size: 200% 100%;
-            animation: shimmer 2.5s infinite;
+        .input-minimal {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
         }
 
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
+        .input-minimal:focus {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: #3b82f6;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
         }
 
-        /* Running Text Animation */
-        .marquee {
-            white-space: nowrap;
-            overflow: hidden;
-            position: relative;
-            background: rgba(59, 130, 246, 0.1);
-            border-y: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 10px 0;
+        .btn-primary {
+            background: #ffffff;
+            color: #000000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .marquee p {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 15s linear infinite;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.2);
+            background: #f1f1f1;
+        }
+
+        .marquee-container {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.3);
         }
 
         @keyframes marquee {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
-
-        .floating {
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .glow-button {
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-            transition: all 0.3s ease;
-        }
-        
-        .glow-button:hover {
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
-            transform: translateY(-2px);
+        .animate-marquee {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center bg-mesh relative overflow-hidden">
+<body class="min-h-screen flex flex-col items-center justify-center bg-glow relative px-4">
 
-    <div class="fixed top-0 w-full marquee z-50 backdrop-blur-sm border-b border-white/5">
-        <p class="text-blue-400 font-bold text-sm tracking-widest uppercase">
-            Selamat Datang User Wi-Fi PT. Kemasan Ciptatama Sempurna — Silahkan masukkan nama anda untuk klaim voucher internet — Tetap produktif dan gunakan internet dengan bijak —
-        </p>
+    <div class="fixed top-0 w-full marquee-container z-50 py-2 overflow-hidden">
+        <div class="animate-marquee whitespace-nowrap">
+            <span class="text-[10px] text-blue-400/60 font-medium uppercase tracking-[0.3em]">
+                System Ready — Please enter your credentials to access the network — PT. Kemasan Ciptatama Sempurna — High Speed Connection Active —
+            </span>
+        </div>
     </div>
-
-    <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 rounded-full blur-[120px]"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 rounded-full blur-[120px]"></div>
 
     <div x-data="{ 
         inputName: '', 
@@ -102,14 +81,14 @@
         errorMsg: '',
         launchConfetti() {
             confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#3b82f6', '#60a5fa', '#ffffff']
+                particleCount: 80,
+                spread: 50,
+                origin: { y: 0.7 },
+                colors: ['#ffffff', '#3b82f6']
             });
         },
         async getVoucher() {
-            if(!this.inputName) { this.errorMsg = 'Ketik namamu dulu, Bos!'; return; }
+            if(!this.inputName) { this.errorMsg = 'Nama diperlukan'; return; }
             this.loading = true;
             this.errorMsg = '';
             try {
@@ -123,7 +102,7 @@
                 if (res.ok) {
                     const statusLock = result.data.is_locked;
                     if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        this.errorMsg = 'Voucher sudah diklaim. Hubungi IT Support.';
+                        this.errorMsg = 'Voucher ini sudah aktif.';
                         this.voucher = null;
                     } else {
                         this.voucher = result.data;
@@ -134,7 +113,7 @@
                     this.errorMsg = result.message;
                 }
             } catch (e) {
-                this.errorMsg = 'Koneksi bermasalah.';
+                this.errorMsg = 'Kesalahan koneksi server.';
             } finally {
                 this.loading = false;
             }
@@ -150,82 +129,71 @@
                 console.error('Lock failed');
             }
         }
-    }" class="w-full max-w-sm z-10 px-4">
+    }" class="w-full max-w-md">
 
-        <div class="glass-card p-8 md:p-10 rounded-[3rem] relative overflow-hidden text-center floating">
+        <div class="glass-premium p-10 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
             
-            <div class="w-20 h-20 bg-gradient-to-tr from-blue-600 to-indigo-500 rounded-3xl flex items-center justify-center mx-auto mb-8 glow-button rotate-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                </svg>
+            <div class="mb-10 flex flex-col items-center">
+                <div class="w-12 h-12 border-2 border-blue-500 rounded-full flex items-center justify-center mb-6">
+                    <svg fill="none" class="w-6 h-6 text-blue-500" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </div>
+                <h2 class="text-white text-xl font-semibold tracking-tight">Wireless Access</h2>
+                <p class="text-white/40 text-xs mt-1 tracking-widest uppercase">PT. KCS Network</p>
             </div>
 
             <template x-if="!voucher">
-                <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <h1 class="text-3xl font-black text-white mb-2 tracking-tight">Wi-Fi Portal</h1>
-                    <p class="text-[10px] text-blue-400/80 mb-8 uppercase tracking-[0.3em] font-bold">PT. Kemasan Ciptatama Sempurna</p>
-                    
-                    <div class="relative mb-4 group">
-                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Masukkan Nama Anda" 
-                               class="w-full px-6 py-5 bg-slate-900/50 border border-white/10 rounded-2xl text-center font-bold text-white placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all duration-300 group-hover:bg-slate-900/80">
+                <div class="space-y-6">
+                    <div class="relative">
+                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Full Name" 
+                               class="input-minimal w-full px-6 py-4 rounded-2xl text-white placeholder:text-white/20 outline-none text-center tracking-wide">
                     </div>
                     
                     <button @click="getVoucher()" :disabled="loading"
-                            class="w-full py-5 bg-blue-600 text-white rounded-2xl font-extrabold shadow-lg hover:bg-blue-500 active:scale-95 transition-all disabled:opacity-50 glow-button">
-                        <span x-show="!loading" class="tracking-wider uppercase text-sm">Klaim Voucher Sekarang</span>
-                        <span x-show="loading" class="flex items-center justify-center gap-2 text-sm uppercase">
-                             <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                             Memproses...
+                            class="btn-primary w-full py-4 rounded-2xl font-bold text-sm tracking-widest uppercase disabled:opacity-30">
+                        <span x-show="!loading">Connect Device</span>
+                        <span x-show="loading" class="flex items-center justify-center gap-2">
+                             <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                             Verifying...
                         </span>
                     </button>
-                    <p x-text="errorMsg" class="text-red-400 text-[11px] font-bold mt-6 uppercase tracking-wider bg-red-500/10 py-3 px-2 rounded-xl border border-red-500/20" x-show="errorMsg" x-cloak></p>
+
+                    <div x-show="errorMsg" x-transition class="bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
+                        <p x-text="errorMsg" class="text-red-400 text-[10px] font-bold text-center uppercase tracking-widest"></p>
+                    </div>
                 </div>
             </template>
 
             <template x-if="voucher">
-                <div class="animate-in zoom-in duration-500">
-                    <div class="inline-block px-4 py-1 bg-green-500/20 text-green-400 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-4 border border-green-500/20">Access Granted</div>
-                    <h2 class="text-xl font-bold text-white mb-6">Halo, <span x-text="voucher.user_name" class="text-blue-400"></span></h2>
+                <div class="text-center animate-in fade-in zoom-in duration-500">
+                    <p class="text-blue-400 text-[10px] font-bold uppercase tracking-[0.3em] mb-2">Access Granted</p>
+                    <h3 class="text-white text-lg font-medium mb-8">Welcome back, <span x-text="voucher.user_name"></span></h3>
                     
-                    <div class="relative py-10 bg-slate-950/90 border border-blue-500/30 rounded-[2.5rem] mb-6 overflow-hidden shadow-inner group cursor-pointer" 
-                         @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode disalin!')">
-                        <div class="shimmer absolute inset-0"></div>
-                        <p class="relative z-10 text-[9px] font-bold text-blue-400/50 uppercase tracking-[0.3em] mb-2">Voucher Code</p>
-                        <h1 class="relative z-10 text-4xl font-black text-white tracking-[0.15em] group-hover:scale-110 transition-transform duration-300" x-text="voucher.voucher_code"></h1>
+                    <div class="mb-8 p-8 bg-white/5 border border-white/10 rounded-[2rem] group cursor-pointer active:scale-95 transition-transform"
+                         @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Code Copied!')">
+                        <p class="text-white/30 text-[9px] uppercase tracking-widest mb-3">Voucher Token</p>
+                        <p class="text-4xl font-bold text-white tracking-[0.2em]" x-text="voucher.voucher_code"></p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 mb-8">
-                        <div class="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors">
-                            <p class="text-blue-400/40 font-bold uppercase mb-1" style="font-size: 8px;">Max Speed</p>
-                            <p class="font-black text-white text-xs" x-text="voucher.speed || '15 Mbps'"></p>
+                    <div class="flex gap-2 mb-8">
+                        <div class="flex-1 p-3 bg-white/5 rounded-xl border border-white/5">
+                            <p class="text-[8px] text-white/30 uppercase">Speed</p>
+                            <p class="text-xs text-white font-semibold" x-text="voucher.speed || '15 Mbps'"></p>
                         </div>
-                        <div class="p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors">
-                            <p class="text-blue-400/40 font-bold uppercase mb-1" style="font-size: 8px;">Location Area</p>
-                            <p class="font-black text-white text-xs" x-text="voucher.location || 'All Area'"></p>
+                        <div class="flex-1 p-3 bg-white/5 rounded-xl border border-white/5">
+                            <p class="text-[8px] text-white/30 uppercase">Region</p>
+                            <p class="text-xs text-white font-semibold" x-text="voucher.location || 'Default'"></p>
                         </div>
                     </div>
-                    
-                    <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Kode berhasil disalin!')" 
-                            class="w-full py-4 bg-white text-slate-950 rounded-2xl font-black hover:bg-blue-50 transition-all flex items-center justify-center gap-2 text-sm shadow-xl">
-                        SALIN KODE
-                    </button>
-                    
-                    <button @click="voucher = null; inputName = ''" class="mt-8 text-[10px] font-bold text-slate-500 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center justify-center mx-auto gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                        Logout Session
+
+                    <button @click="voucher = null; inputName = ''" class="text-white/20 hover:text-white/60 text-[10px] uppercase tracking-widest transition-colors">
+                        Clear Session
                     </button>
                 </div>
             </template>
-
         </div>
         
-        <div class="mt-12 text-center">
-            <p class="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] mb-4">Developed by IT Satrio Eko</p>
-            <div class="flex justify-center gap-1.5 opacity-30">
-                <div class="h-1 w-1 bg-blue-500 rounded-full animate-bounce"></div>
-                <div class="h-1 w-6 bg-blue-500 rounded-full"></div>
-                <div class="h-1 w-1 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-            </div>
+        <div class="mt-8 text-center">
+            <p class="text-[9px] font-medium text-white/20 uppercase tracking-[0.4em]">Integrated Infrastructure v2.0</p>
         </div>
     </div>
 
