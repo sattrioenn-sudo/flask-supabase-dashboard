@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claim Wi-Fi Voucher | PT. KCS</title>
+    <title>Premium Access Portal | PT. KCS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -11,74 +11,97 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #e0f2fe; /* Biru Muda Clean */
+            background: #f0f7ff;
+            overflow-x: hidden;
         }
         [x-cloak] { display: none !important; }
-        
-        /* Running Text */
-        .marquee-container {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+
+        /* Background Animated Particles (Gila!) */
+        .bg-pattern {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 50% 50%, #e0f2fe 0%, #f0f7ff 100%);
+        }
+        .blob {
+            position: absolute;
+            width: 500px; height: 500px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%);
+            filter: blur(80px);
+            border-radius: 50%;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        /* Marquee Modern Glass */
+        .marquee-glass {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
         }
         .marquee-text {
             display: inline-block;
             white-space: nowrap;
             padding-left: 100%;
-            animation: marquee 20s linear infinite;
+            animation: marquee 25s linear infinite;
         }
         @keyframes marquee {
             0% { transform: translateX(0); }
             100% { transform: translateX(-100%); }
         }
 
-        /* Voucher Code Mengkilap (Metallic Shimmer) */
-        .shiny-card {
-            position: relative;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            overflow: hidden;
-            border: 1px solid #3b82f633;
-        }
-        .shiny-card::after {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                to bottom right,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0) 40%,
-                rgba(255, 255, 255, 0.8) 50%,
-                rgba(255, 255, 255, 0) 60%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: rotate(45deg);
-            animation: shine 3s infinite;
-        }
-        @keyframes shine {
-            0% { transform: translateX(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) rotate(45deg); }
+        /* 3D Floating Effect */
+        .card-3d {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 
+                0 10px 30px -5px rgba(59, 130, 246, 0.1),
+                0 30px 60px -10px rgba(59, 130, 246, 0.2);
+            transition: transform 0.3s ease;
         }
 
-        /* Kreatif Notification Line */
-        .success-line {
-            height: 2px;
-            background: #3b82f6;
-            animation: expand 0.8s ease-out forwards;
+        /* Ultra Shiny Voucher Box */
+        .shiny-voucher {
+            background: linear-gradient(110deg, #1e40af 0%, #3b82f6 50%, #1e40af 100%);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite linear;
+            box-shadow: 0 15px 35px -10px rgba(59, 130, 246, 0.5);
         }
-        @keyframes expand {
-            0% { width: 0; opacity: 0; }
-            100% { width: 100%; opacity: 1; }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Creative Notification */
+        .notif-badge {
+            background: #ffffff;
+            border: 1px solid #3b82f6;
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="fixed top-0 w-full marquee-container z-50 py-3">
+    <div class="bg-pattern">
+        <div class="blob" style="top: -100px; left: -100px;"></div>
+        <div class="blob" style="bottom: -100px; right: -100px; animation-delay: -5s;"></div>
+    </div>
+
+    <div class="fixed top-0 w-full marquee-glass z-50 py-4">
         <div class="marquee-text">
-            <span class="text-blue-600 font-bold text-[11px] tracking-widest uppercase">
+            <span class="text-blue-600 font-extrabold text-[10px] tracking-[0.3em] uppercase">
                 Selamat Datang User Wi-Fi PT. Kemasan Ciptatama Sempurna — Silahkan masukkan nama anda untuk klaim voucher internet — Tetap produktif dan gunakan internet dengan bijak —
             </span>
         </div>
@@ -89,17 +112,17 @@
         voucher: null, 
         loading: false, 
         errorMsg: '',
-        showSuccessLabel: false,
+        showNotif: false,
         launchConfetti() {
             confetti({
-                particleCount: 120,
-                spread: 70,
-                origin: { y: 0.7 },
-                colors: ['#3b82f6', '#ffffff']
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#3b82f6', '#ffffff', '#60a5fa']
             });
         },
         async getVoucher() {
-            if(!this.inputName) { this.errorMsg = 'Masukkan namamu dulu!'; return; }
+            if(!this.inputName) { this.errorMsg = 'NAMA DIPERLUKAN'; return; }
             this.loading = true;
             this.errorMsg = '';
             try {
@@ -113,19 +136,19 @@
                 if (res.ok) {
                     const statusLock = result.data.is_locked;
                     if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        this.errorMsg = 'Voucher sudah diklaim. Hubungi IT Support.';
+                        this.errorMsg = 'MAAF, VOUCHER SUDAH TERPAKAI.';
                         this.voucher = null;
                     } else {
                         this.voucher = result.data;
-                        this.showSuccessLabel = true;
+                        this.showNotif = true;
                         this.launchConfetti();
                         this.lockVoucher(result.data.id);
                     }
                 } else {
-                    this.errorMsg = result.message;
+                    this.errorMsg = result.message.toUpperCase();
                 }
             } catch (e) {
-                this.errorMsg = 'Koneksi bermasalah.';
+                this.errorMsg = 'SERVER OFFLINE.';
             } finally {
                 this.loading = false;
             }
@@ -139,76 +162,83 @@
                 });
             } catch (e) { console.error('Lock failed'); }
         }
-    }" class="w-full max-w-sm z-10 px-4">
+    }" class="w-full max-w-sm">
 
-        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl shadow-blue-200 text-center relative overflow-hidden">
+        <div class="card-3d p-12 rounded-[4rem] relative overflow-hidden group">
             
             <template x-if="!voucher">
-                <div class="animate-in fade-in duration-700">
-                    <div class="w-14 h-14 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3v8h8a10.003 10.003 0 00-10 10c0-1.574.364-3.064 1.012-4.387"></path></svg>
+                <div class="animate-in fade-in zoom-in duration-700">
+                    <div class="relative w-20 h-20 mx-auto mb-10">
+                        <div class="absolute inset-0 bg-blue-400 blur-2xl opacity-20 animate-pulse"></div>
+                        <div class="relative bg-gradient-to-tr from-blue-600 to-blue-400 rounded-3xl w-full h-full flex items-center justify-center shadow-xl rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                        </div>
                     </div>
-                    <h1 class="text-2xl font-black text-slate-800 mb-1 tracking-tight">KCS Access</h1>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-10">IT Department Portal</p>
-                    
-                    <div class="mb-8">
-                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Type your name..." 
-                               class="w-full bg-slate-50 border-none rounded-2xl py-4 px-6 text-center font-bold text-slate-700 placeholder:text-slate-300 focus:ring-2 focus:ring-blue-400 transition-all outline-none">
-                    </div>
-                    
-                    <button @click="getVoucher()" :disabled="loading"
-                            class="w-full py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl font-bold text-xs tracking-widest uppercase transition-all shadow-lg shadow-blue-200">
-                        <span x-show="!loading">Claim Access</span>
-                        <span x-show="loading" class="animate-pulse">Checking...</span>
-                    </button>
 
-                    <p x-show="errorMsg" x-text="errorMsg" class="mt-6 text-red-400 text-[10px] font-bold uppercase tracking-wider"></p>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tighter mb-2">Connect.</h1>
+                    <p class="text-[9px] font-bold text-blue-500 uppercase tracking-[0.4em] mb-12">PT. Kemasan Ciptatama Sempurna</p>
+                    
+                    <div class="space-y-6">
+                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="What's your name?" 
+                               class="w-full bg-slate-100/50 border-2 border-transparent rounded-2xl py-4 px-6 text-center font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 transition-all outline-none">
+                        
+                        <button @click="getVoucher()" :disabled="loading"
+                                class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold text-xs tracking-[0.2em] uppercase hover:bg-blue-600 transition-all shadow-2xl active:scale-95 disabled:opacity-50">
+                            <span x-show="!loading">Request Access</span>
+                            <span x-show="loading" class="flex items-center justify-center gap-3 italic">
+                                <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                Authorizing
+                            </span>
+                        </button>
+                    </div>
+
+                    <p x-show="errorMsg" x-text="errorMsg" class="mt-8 text-red-500 text-[9px] font-black tracking-widest"></p>
                 </div>
             </template>
 
             <template x-if="voucher">
-                <div class="animate-in slide-in-from-top-4 duration-500">
-                    <div x-show="showSuccessLabel" class="mb-6">
-                        <div class="flex items-center justify-center gap-2 mb-1">
-                            <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path></svg>
-                            <span class="text-[11px] font-extrabold text-blue-600 uppercase tracking-tighter">Selamat voucher sudah diclaim</span>
-                        </div>
-                        <div class="success-line mx-auto rounded-full"></div>
-                    </div>
-
-                    <h2 class="text-lg font-bold text-slate-800 mb-6">Hello, <span x-text="voucher.user_name" class="text-blue-500"></span></h2>
+                <div class="animate-in slide-in-from-bottom-8 duration-500">
                     
-                    <div class="shiny-card rounded-[2rem] py-10 mb-6 cursor-pointer" 
-                         @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Copied!')">
-                        <p class="relative z-10 text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Voucher Token</p>
-                        <h1 class="relative z-10 text-4xl font-black text-slate-800 tracking-[0.2em]" x-text="voucher.voucher_code"></h1>
+                    <div x-show="showNotif" class="notif-badge inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8">
+                        <span class="flex h-2 w-2 rounded-full bg-blue-500"></span>
+                        <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-tighter">Selamat voucher sudah diclaim</span>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="p-4 bg-slate-50 rounded-2xl text-left border border-slate-100">
-                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 8px;">Speed</p>
-                            <p class="font-bold text-slate-700 text-xs" x-text="voucher.speed || '15 Mbps'"></p>
+                    <h2 class="text-xl font-bold text-slate-900 mb-8">Welcome back, <br><span x-text="voucher.user_name" class="text-blue-600"></span></h2>
+                    
+                    <div class="shiny-voucher rounded-[2.5rem] py-12 px-4 mb-8 cursor-pointer transform hover:scale-105 transition-transform" 
+                         @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Token Copied!')">
+                        <p class="text-[8px] font-bold text-white/50 uppercase tracking-[0.3em] mb-3">Your Secure Token</p>
+                        <h1 class="text-4xl font-black text-white tracking-[0.15em] drop-shadow-lg" x-text="voucher.voucher_code"></h1>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-10">
+                        <div class="p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 7px;">Speed</p>
+                            <p class="font-black text-slate-800 text-xs" x-text="voucher.speed || '15 Mbps'"></p>
                         </div>
-                        <div class="p-4 bg-slate-50 rounded-2xl text-left border border-slate-100">
-                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 8px;">Area</p>
-                            <p class="font-bold text-slate-700 text-xs" x-text="voucher.location || 'All Area'"></p>
+                        <div class="p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 7px;">Network</p>
+                            <p class="font-black text-slate-800 text-xs">Verified</p>
                         </div>
                     </div>
                     
                     <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Berhasil disalin!')" 
-                            class="w-full py-4 border-2 border-slate-200 text-slate-600 rounded-2xl font-bold text-[10px] tracking-widest hover:border-blue-500 hover:text-blue-500 transition-all">
-                        COPY CODE
+                            class="w-full py-4 bg-blue-50 border-2 border-blue-100 text-blue-600 rounded-2xl font-black text-[10px] tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                        COPY TOKEN
                     </button>
                     
-                    <button @click="voucher = null; inputName = ''; showSuccessLabel = false" class="mt-8 text-[9px] font-bold text-slate-300 hover:text-red-400 uppercase tracking-widest transition-colors">
-                        Logout Session
+                    <button @click="voucher = null; inputName = ''; showNotif = false" class="mt-8 text-[9px] font-bold text-slate-300 hover:text-red-400 uppercase tracking-widest transition-colors">
+                        End Session
                     </button>
                 </div>
             </template>
         </div>
         
-        <div class="mt-12 text-center">
-            <p class="text-[10px] font-bold text-blue-900/30 uppercase tracking-[0.5em]">Developed by IT Satrio</p>
+        <div class="mt-16 text-center">
+            <div class="inline-block px-6 py-2 bg-white/50 backdrop-blur-sm rounded-full border border-white">
+                <p class="text-[9px] font-black text-blue-900/40 uppercase tracking-[0.5em]">Developed by IT Satrio</p>
+            </div>
         </div>
     </div>
 
