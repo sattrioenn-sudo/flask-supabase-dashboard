@@ -16,16 +16,16 @@
         }
         [x-cloak] { display: none !important; }
 
-        /* Background Image with Overlay */
+        /* REVISI: Background Gedung Modern */
         .bg-office {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            background-image: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.8)), 
-                              url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600');
+            background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.75)), 
+                              url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=2000');
             background-size: cover;
             background-position: center;
-            filter: saturate(1.2);
+            filter: saturate(1.1);
         }
 
         .blob {
@@ -42,7 +42,6 @@
             to { transform: translate(15%, 15%) scale(1.1); }
         }
 
-        /* Marquee Modern Glass */
         .marquee-glass {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
@@ -59,14 +58,11 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* 3D Floating Glass Card */
         .card-3d {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 1);
-            box-shadow: 
-                0 20px 50px -12px rgba(0, 0, 0, 0.5),
-                0 0 20px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2);
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .card-3d:hover {
@@ -74,7 +70,6 @@
             box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
         }
 
-        /* Ultra Shiny Voucher Box */
         .shiny-voucher {
             background: linear-gradient(110deg, #1e3a8a 0%, #3b82f6 50%, #1e3a8a 100%);
             background-size: 200% 100%;
@@ -248,7 +243,7 @@
         
         <div class="mt-12 text-center">
             <div class="inline-block px-8 py-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                <p class="text-[10px] font-bold text-white/60 uppercase tracking-[0.4em]">Developed By IT Satrio</p>
+                <p class="text-[10px] font-bold text-white/60 uppercase tracking-[0.4em]">developed it satrio</p>
             </div>
         </div>
     </div>
