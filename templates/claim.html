@@ -11,65 +11,72 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #f0f7ff;
+            background: #0f172a;
             overflow-x: hidden;
         }
         [x-cloak] { display: none !important; }
 
-        /* Background Animated Particles (Gila!) */
-        .bg-pattern {
+        /* Background Image with Overlay */
+        .bg-office {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #e0f2fe 0%, #f0f7ff 100%);
+            background-image: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.8)), 
+                              url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1600');
+            background-size: cover;
+            background-position: center;
+            filter: saturate(1.2);
         }
+
         .blob {
             position: absolute;
-            width: 500px; height: 500px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 197, 253, 0.1) 100%);
-            filter: blur(80px);
+            width: 600px; height: 600px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(30, 64, 175, 0.2) 100%);
+            filter: blur(100px);
             border-radius: 50%;
-            animation: move 20s infinite alternate;
+            animation: move 25s infinite alternate;
         }
 
         @keyframes move {
-            from { transform: translate(-10%, -10%); }
-            to { transform: translate(20%, 20%); }
+            from { transform: translate(-10%, -10%) scale(1); }
+            to { transform: translate(15%, 15%) scale(1.1); }
         }
 
         /* Marquee Modern Glass */
         .marquee-glass {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         .marquee-text {
             display: inline-block;
             white-space: nowrap;
             padding-left: 100%;
-            animation: marquee 25s linear infinite;
+            animation: marquee 30s linear infinite;
         }
         @keyframes marquee {
             0% { transform: translateX(0); }
             100% { transform: translateX(-100%); }
         }
 
-        /* 3D Floating Effect */
+        /* 3D Floating Glass Card */
         .card-3d {
-            transform-style: preserve-3d;
-            perspective: 1000px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 1);
             box-shadow: 
-                0 10px 30px -5px rgba(59, 130, 246, 0.1),
-                0 30px 60px -10px rgba(59, 130, 246, 0.2);
-            transition: transform 0.3s ease;
+                0 20px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 20px rgba(59, 130, 246, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-3d:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
         }
 
         /* Ultra Shiny Voucher Box */
         .shiny-voucher {
-            background: linear-gradient(110deg, #1e40af 0%, #3b82f6 50%, #1e40af 100%);
+            background: linear-gradient(110deg, #1e3a8a 0%, #3b82f6 50%, #1e3a8a 100%);
             background-size: 200% 100%;
             animation: shimmer 3s infinite linear;
             box-shadow: 0 15px 35px -10px rgba(59, 130, 246, 0.5);
@@ -79,9 +86,8 @@
             100% { background-position: 200% 0; }
         }
 
-        /* Creative Notification */
         .notif-badge {
-            background: #ffffff;
+            background: #f8fafc;
             border: 1px solid #3b82f6;
             animation: pulse-border 2s infinite;
         }
@@ -94,15 +100,16 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="bg-pattern">
-        <div class="blob" style="top: -100px; left: -100px;"></div>
-        <div class="blob" style="bottom: -100px; right: -100px; animation-delay: -5s;"></div>
+    <div class="bg-office"></div>
+    <div class="fixed inset-0 overflow-hidden -z-10">
+        <div class="blob" style="top: -150px; left: -150px;"></div>
+        <div class="blob" style="bottom: -150px; right: -150px; animation-delay: -5s;"></div>
     </div>
 
-    <div class="fixed top-0 w-full marquee-glass z-50 py-4">
+    <div class="fixed top-0 w-full marquee-glass z-50 py-3">
         <div class="marquee-text">
-            <span class="text-blue-600 font-extrabold text-[10px] tracking-[0.3em] uppercase">
-                Selamat Datang User Wi-Fi PT. Kemasan Ciptatama Sempurna — Silahkan masukkan nama anda untuk klaim voucher internet — Tetap produktif dan gunakan internet dengan bijak —
+            <span class="text-blue-400 font-bold text-[11px] tracking-[0.25em] uppercase">
+                PT. Kemasan Ciptatama Sempurna Wi-Fi Service — Please enter your name to claim your voucher — Use internet wisely for productivity — Support: IT Department —
             </span>
         </div>
     </div>
@@ -118,7 +125,7 @@
                 particleCount: 150,
                 spread: 80,
                 origin: { y: 0.6 },
-                colors: ['#3b82f6', '#ffffff', '#60a5fa']
+                colors: ['#3b82f6', '#ffffff', '#1e3a8a']
             });
         },
         async getVoucher() {
@@ -164,80 +171,84 @@
         }
     }" class="w-full max-w-sm">
 
-        <div class="card-3d p-12 rounded-[4rem] relative overflow-hidden group">
+        <div class="card-3d p-10 rounded-[3rem] relative overflow-hidden group">
             
             <template x-if="!voucher">
-                <div class="animate-in fade-in zoom-in duration-700">
-                    <div class="relative w-20 h-20 mx-auto mb-10">
-                        <div class="absolute inset-0 bg-blue-400 blur-2xl opacity-20 animate-pulse"></div>
-                        <div class="relative bg-gradient-to-tr from-blue-600 to-blue-400 rounded-3xl w-full h-full flex items-center justify-center shadow-xl rotate-12 group-hover:rotate-0 transition-transform duration-500">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <div class="animate-in fade-in zoom-in duration-500">
+                    <div class="relative w-24 h-24 mx-auto mb-8">
+                        <div class="absolute inset-0 bg-blue-500 blur-3xl opacity-20 animate-pulse"></div>
+                        <div class="relative bg-gradient-to-br from-blue-700 to-blue-500 rounded-3xl w-full h-full flex items-center justify-center shadow-2xl transform transition-transform duration-500 group-hover:scale-105">
+                            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                         </div>
                     </div>
 
-                    <h1 class="text-3xl font-black text-slate-900 tracking-tighter mb-2">Connect.</h1>
-                    <p class="text-[9px] font-bold text-blue-500 uppercase tracking-[0.4em] mb-12">PT. Kemasan Ciptatama Sempurna</p>
+                    <div class="text-center mb-10">
+                        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">KCS Connect</h1>
+                        <p class="text-[10px] font-bold text-blue-600 uppercase tracking-[0.3em] mt-1">Voucher Claim System</p>
+                    </div>
                     
-                    <div class="space-y-6">
-                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="What's your name?" 
-                               class="w-full bg-slate-100/50 border-2 border-transparent rounded-2xl py-4 px-6 text-center font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 transition-all outline-none">
+                    <div class="space-y-5">
+                        <div class="relative">
+                            <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Employee Name" 
+                                   class="w-full bg-slate-100 border-2 border-slate-200 rounded-2xl py-4 px-6 text-center font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-blue-500 transition-all outline-none">
+                        </div>
                         
                         <button @click="getVoucher()" :disabled="loading"
-                                class="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold text-xs tracking-[0.2em] uppercase hover:bg-blue-600 transition-all shadow-2xl active:scale-95 disabled:opacity-50">
-                            <span x-show="!loading">Request Access</span>
+                                class="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase hover:bg-blue-600 transition-all shadow-xl active:scale-95 disabled:opacity-50">
+                            <span x-show="!loading">GET ACCESS TOKEN</span>
                             <span x-show="loading" class="flex items-center justify-center gap-3 italic">
                                 <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                                Authorizing
+                                PROCESSING
                             </span>
                         </button>
                     </div>
 
-                    <p x-show="errorMsg" x-text="errorMsg" class="mt-8 text-red-500 text-[9px] font-black tracking-widest"></p>
+                    <p x-show="errorMsg" x-text="errorMsg" class="mt-6 text-center text-red-500 text-[10px] font-black tracking-widest"></p>
                 </div>
             </template>
 
             <template x-if="voucher">
                 <div class="animate-in slide-in-from-bottom-8 duration-500">
                     
-                    <div x-show="showNotif" class="notif-badge inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8">
-                        <span class="flex h-2 w-2 rounded-full bg-blue-500"></span>
-                        <span class="text-[10px] font-extrabold text-blue-600 uppercase tracking-tighter">Selamat voucher sudah diclaim</span>
+                    <div x-show="showNotif" class="notif-badge flex items-center justify-center gap-2 px-4 py-2 rounded-full mb-6 mx-auto w-fit">
+                        <span class="flex h-2 w-2 rounded-full bg-green-500"></span>
+                        <span class="text-[10px] font-extrabold text-slate-600 uppercase tracking-tighter">Voucher Successfully Claimed</span>
                     </div>
 
-                    <h2 class="text-xl font-bold text-slate-900 mb-8">Welcome back, <br><span x-text="voucher.user_name" class="text-blue-600"></span></h2>
+                    <h2 class="text-xl font-bold text-slate-900 text-center mb-8">Hello, <br><span x-text="voucher.user_name" class="text-blue-600 font-black"></span></h2>
                     
-                    <div class="shiny-voucher rounded-[2.5rem] py-12 px-4 mb-8 cursor-pointer transform hover:scale-105 transition-transform" 
+                    <div class="shiny-voucher rounded-[2.5rem] py-10 px-4 mb-6 cursor-pointer transform transition-all text-center" 
                          @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Token Copied!')">
-                        <p class="text-[8px] font-bold text-white/50 uppercase tracking-[0.3em] mb-3">Your Secure Token</p>
-                        <h1 class="text-4xl font-black text-white tracking-[0.15em] drop-shadow-lg" x-text="voucher.voucher_code"></h1>
+                        <p class="text-[9px] font-bold text-white/60 uppercase tracking-[0.3em] mb-2">Wi-Fi Token Code</p>
+                        <h1 class="text-4xl font-black text-white tracking-[0.1em] drop-shadow-xl" x-text="voucher.voucher_code"></h1>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 mb-10">
-                        <div class="p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 7px;">Speed</p>
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner text-center">
+                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 8px;">Network Speed</p>
                             <p class="font-black text-slate-800 text-xs" x-text="voucher.speed || '15 Mbps'"></p>
                         </div>
-                        <div class="p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
-                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 7px;">Network</p>
-                            <p class="font-black text-slate-800 text-xs">Verified</p>
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner text-center">
+                            <p class="text-slate-400 font-bold uppercase mb-1" style="font-size: 8px;">Device Status</p>
+                            <p class="font-black text-slate-800 text-xs text-green-600 uppercase">Verified</p>
                         </div>
                     </div>
                     
                     <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Berhasil disalin!')" 
-                            class="w-full py-4 bg-blue-50 border-2 border-blue-100 text-blue-600 rounded-2xl font-black text-[10px] tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                            class="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-[11px] tracking-widest hover:bg-blue-700 transition-all shadow-lg">
                         COPY TOKEN
                     </button>
                     
-                    <button @click="voucher = null; inputName = ''; showNotif = false" class="mt-8 text-[9px] font-bold text-slate-300 hover:text-red-400 uppercase tracking-widest transition-colors">
-                        End Session
+                    <button @click="voucher = null; inputName = ''; showNotif = false" class="w-full mt-6 text-[9px] font-bold text-slate-400 hover:text-red-500 uppercase tracking-widest transition-colors text-center">
+                        Clear & Exit
                     </button>
                 </div>
             </template>
         </div>
         
-        <div class="mt-16 text-center">
-            <div class="inline-block px-6 py-2 bg-white/50 backdrop-blur-sm rounded-full border border-white">
-                <p class="text-[9px] font-black text-blue-900/40 uppercase tracking-[0.5em]">Developed by IT Satrio</p>
+        <div class="mt-12 text-center">
+            <div class="inline-block px-8 py-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+                <p class="text-[10px] font-bold text-white/60 uppercase tracking-[0.4em]">IT Infrastructure • Satrio</p>
             </div>
         </div>
     </div>
