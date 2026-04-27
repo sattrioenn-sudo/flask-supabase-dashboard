@@ -11,38 +11,27 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #f0f4f8; /* Abu-abu sangat terang khas background web KCS */
+            background: #f0f4f8; 
             overflow-x: hidden;
         }
         [x-cloak] { display: none !important; }
 
-        /* REVISI: Background Bersih Nuansa KCS */
-        .bg-kcs {
+        /* REVISI: Background Persis Foto Katalog KCS */
+        .bg-kcs-custom {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            /* Gradasi Biru Cerah ke Putih */
-            background: linear-gradient(135deg, #e0f2fe 0%, #ffffff 100%);
-        }
-
-        /* Ornamen Lingkaran Biru Lembut */
-        .blob-kcs {
-            position: absolute;
-            width: 800px; height: 800px;
-            background: radial-gradient(circle, rgba(14, 165, 233, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
-            filter: blur(80px);
-            border-radius: 50%;
-            animation: move-kcs 30s infinite alternate;
-        }
-
-        @keyframes move-kcs {
-            from { transform: translate(-20%, -20%) scale(1); }
-            to { transform: translate(10%, 10%) scale(1.2); }
+            /* Menggunakan gambar katalog yang diupload */
+            background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(240, 249, 255, 0.4)), 
+                              url('wpkcspack.JPG'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
         }
 
         .marquee-glass {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
             border-bottom: 2px solid #0ea5e9;
         }
         
@@ -58,15 +47,15 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* Card yang lebih bersih dan putih */
+        /* Card transparan sedikit agar background katalog tetap terasa */
         .card-kcs {
-            background: rgba(255, 255, 255, 1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(14, 165, 233, 0.2);
-            box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.25);
+            box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.3);
             border-radius: 3rem;
         }
 
-        /* Voucher dengan Biru KCS */
         .shiny-voucher-kcs {
             background: linear-gradient(110deg, #075985 0%, #0ea5e9 50%, #075985 100%);
             background-size: 200% 100%;
@@ -82,11 +71,7 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="bg-kcs"></div>
-    <div class="fixed inset-0 overflow-hidden -z-10">
-        <div class="blob-kcs" style="top: -200px; left: -200px;"></div>
-        <div class="blob-kcs" style="bottom: -200px; right: -200px; animation-delay: -5s;"></div>
-    </div>
+    <div class="bg-kcs-custom"></div>
 
     <div class="fixed top-0 w-full marquee-glass z-50 py-3">
         <div class="marquee-text">
@@ -230,11 +215,10 @@
         </div>
         
         <div class="mt-12 text-center">
-            <div class="inline-block px-8 py-3 bg-white shadow-sm rounded-full border border-sky-100">
+            <div class="inline-block px-8 py-3 bg-white/90 shadow-sm rounded-full border border-sky-100">
                 <p class="text-[10px] font-bold text-sky-600/60 uppercase tracking-[0.4em]">Developed By IT SATRIO</p>
             </div>
         </div>
     </div>
-
 </body>
 </html>
