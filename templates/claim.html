@@ -11,22 +11,21 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #f0f4f8; 
+            background: #ffffff; 
             overflow: hidden;
         }
         [x-cloak] { display: none !important; }
 
-        /* Background Updated with provided URL */
+        /* REVISI: Background Fit (Kelihatan Semua) */
         .bg-kcs-full {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            /* Menggunakan URL gambar baru dengan overlay transparan tipis */
-            background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), 
-                              url('https://imgs.search.brave.com/yrr_jlT-frCPUQ5xMZ2xxCHFuFN5NIH_D5Dmtcb2kJw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rZW1h/c2FuY2lwdGEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIx/LzAxL2Nyb3BwZWQt/Y3JvcHBlZC1XRUJT/SVRFLUtDUy1sb2dv/LTIwMjUucG5n'); 
-            background-size: cover;
+            background-image: url('https://imgs.search.brave.com/yrr_jlT-frCPUQ5xMZ2xxCHFuFN5NIH_D5Dmtcb2kJw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rZW1h/c2FuY2lwdGEu/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDIxLzAxL2Nyb3Bw/ZWQtY3JvcHBlZC1X/RUJTSVRFLUtDUy1s/b2dvLTIwMjUucG5n'); 
+            background-size: contain; 
             background-position: center;
             background-repeat: no-repeat;
+            background-color: #ffffff;
         }
 
         .marquee-glass {
