@@ -16,14 +16,14 @@
         }
         [x-cloak] { display: none !important; }
 
-        /* REVISI FINAL: Background Persis Foto Katalog KCS */
+        /* Background Updated with provided URL */
         .bg-kcs-full {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            /* Memanggil file wpkcspack.JPG */
-            background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)), 
-                              url('wpkcspack.JPG'); 
+            /* Menggunakan URL gambar baru dengan overlay transparan tipis */
+            background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2)), 
+                              url('https://imgs.search.brave.com/yrr_jlT-frCPUQ5xMZ2xxCHFuFN5NIH_D5Dmtcb2kJw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rZW1h/c2FuY2lwdGEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIx/LzAxL2Nyb3BwZWQt/Y3JvcHBlZC1XRUJT/SVRFLUtDUy1sb2dv/LTIwMjUucG5n'); 
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -47,7 +47,6 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* Card Transparan (Glassmorphism) agar background KCS tetap terlihat eksklusif */
         .card-kcs {
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(15px);
