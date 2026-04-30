@@ -16,7 +16,7 @@
         }
         [x-cloak] { display: none !important; }
 
-        /* REVISI: Container Background */
+        /* Container Background */
         .bg-kcs-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -34,7 +34,7 @@
         }
 
         .marquee-glass {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
             border-bottom: 2px solid #0ea5e9;
         }
@@ -51,11 +51,13 @@
             100% { transform: translateX(-100%); }
         }
 
+        /* REVISI: Kotak Transparan (Glassmorphism) */
         .card-kcs {
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.4); /* Opasitas dikurangi agar lebih transparan */
+            backdrop-filter: blur(20px); /* Efek blur kaca diperkuat */
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
             border-radius: 3rem;
         }
 
@@ -74,7 +76,6 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- Background dengan Image Tag agar lebih stabil munculnya -->
     <div class="bg-kcs-container">
         <img src="https://imgs.search.brave.com/yrr_jlT-frCPUQ5xMZ2xxCHFuFN5NIH_D5Dmtcb2kJw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rZW1h/c2FuY2lwdGEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIx/LzAxL2Nyb3BwZWQt/Y3JvcHBlZC1XRUJT/SVRFLUtDUy1sb2dv/LTIwMjUucG5n" alt="Logo KCS">
     </div>
@@ -161,8 +162,9 @@
                     </div>
                     
                     <div class="space-y-5">
+                        <!-- Input juga dibuat semi-transparan agar serasi -->
                         <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Employee Name" 
-                               class="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl py-4 px-6 text-center font-bold text-slate-700 focus:bg-white focus:border-sky-500 transition-all outline-none">
+                               class="w-full bg-white/50 backdrop-blur-sm border-2 border-slate-200/50 rounded-2xl py-4 px-6 text-center font-bold text-slate-700 focus:bg-white focus:border-sky-500 transition-all outline-none">
                         
                         <button @click="getVoucher()" :disabled="loading"
                                 class="w-full py-5 bg-sky-600 text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase hover:bg-sky-700 shadow-xl active:scale-95 disabled:opacity-50">
@@ -179,7 +181,7 @@
 
             <template x-if="voucher">
                 <div class="animate-in slide-in-from-bottom-8 duration-500">
-                    <div x-show="showNotif" class="bg-sky-50 flex items-center justify-center gap-2 px-4 py-2 rounded-full mb-6 mx-auto w-fit border border-sky-200">
+                    <div x-show="showNotif" class="bg-sky-50/80 backdrop-blur-sm flex items-center justify-center gap-2 px-4 py-2 rounded-full mb-6 mx-auto w-fit border border-sky-200">
                         <span class="flex h-2 w-2 rounded-full bg-sky-500"></span>
                         <span class="text-[10px] font-extrabold text-sky-700 uppercase">Voucher Successfully Claimed</span>
                     </div>
@@ -193,11 +195,11 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100 text-center">
+                        <div class="p-4 bg-white/50 backdrop-blur-sm rounded-2xl border border-sky-100 text-center">
                             <p class="text-sky-400 font-bold uppercase mb-1" style="font-size: 8px;">Network Speed</p>
                             <p class="font-black text-sky-800 text-xs" x-text="voucher.speed || '15 Mbps'"></p>
                         </div>
-                        <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100 text-center">
+                        <div class="p-4 bg-white/50 backdrop-blur-sm rounded-2xl border border-sky-100 text-center">
                             <p class="text-sky-400 font-bold uppercase mb-1" style="font-size: 8px;">Device Status</p>
                             <p class="font-black text-sky-800 text-xs text-green-600 uppercase">Verified</p>
                         </div>
@@ -216,7 +218,7 @@
         </div>
         
         <div class="mt-12 text-center">
-            <div class="inline-block px-8 py-3 bg-white/80 shadow-sm rounded-full border border-sky-100">
+            <div class="inline-block px-8 py-3 bg-white/50 backdrop-blur-md shadow-sm rounded-full border border-sky-100/50">
                 <p class="text-[10px] font-bold text-sky-600/60 uppercase tracking-[0.4em]">Developed By IT SATRIO</p>
             </div>
         </div>
