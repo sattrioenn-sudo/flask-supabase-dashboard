@@ -16,16 +16,21 @@
         }
         [x-cloak] { display: none !important; }
 
-        /* REVISI: Background Fit (Kelihatan Semua) */
-        .bg-kcs-full {
+        /* REVISI: Container Background */
+        .bg-kcs-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            background-image: url('https://imgs.search.brave.com/yrr_jlT-frCPUQ5xMZ2xxCHFuFN5NIH_D5Dmtcb2kJw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rZW1h/c2FuY2lwdGEu/Y29tL3dwLWNvbnRl/bnQvdXBsb2Fkcy8y/MDIxLzAxL2Nyb3Bw/ZWQtY3JvcHBlZC1X/RUJTSVRFLUtDUy1s/b2dvLTIwMjUucG5n'); 
-            background-size: contain; 
-            background-position: center;
-            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background-color: #ffffff;
+        }
+        
+        .bg-kcs-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         .marquee-glass {
@@ -69,7 +74,10 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div class="bg-kcs-full"></div>
+    <!-- Background dengan Image Tag agar lebih stabil munculnya -->
+    <div class="bg-kcs-container">
+        <img src="https://imgs.search.brave.com/yrr_jlT-frCPUQ5xMZ2xxCHFuFN5NIH_D5Dmtcb2kJw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rZW1h/c2FuY2lwdGEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIx/LzAxL2Nyb3BwZWQt/Y3JvcHBlZC1XRUJT/SVRFLUtDUy1sb2dv/LTIwMjUucG5n" alt="Logo KCS">
+    </div>
 
     <div class="fixed top-0 w-full marquee-glass z-50 py-3">
         <div class="marquee-text">
