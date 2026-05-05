@@ -11,12 +11,12 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #ffffff; 
+            background: #000; 
             overflow: hidden;
         }
         [x-cloak] { display: none !important; }
 
-        /* Container Background dengan Office Image */
+        /* Container Background dengan Office Image & Overlay */
         .bg-kcs-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -24,23 +24,26 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* Menambahkan Background Office */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1920');
+            /* Background Office dengan overlay gelap agar lebih sinematik */
+            background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)), 
+                              url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1920');
             background-size: cover;
             background-position: center;
         }
         
         .bg-kcs-container img {
-            max-width: 80%;
-            max-height: 40%;
+            max-width: 70%;
+            max-height: 35%;
             object-fit: contain;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); /* Memberi glow pada logo agar stand out */
+            opacity: 0.4; /* Logo KCS dibuat agak transparan agar menyatu dengan latar */
+            filter: brightness(0) invert(1); /* Membuat logo menjadi putih agar terlihat clean */
         }
 
         .marquee-glass {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 2px solid #0ea5e9;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .marquee-text {
@@ -55,21 +58,21 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* Kotak Transparan (Glassmorphism) */
+        /* REVISI: Ultra Clean Transparent Card (Glassmorphism) */
         .card-kcs {
-            background: rgba(255, 255, 255, 0.6); /* Sedikit lebih tebal agar teks terbaca di atas gambar */
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border-radius: 3rem;
+            background: rgba(255, 255, 255, 0.12); /* Transparansi tinggi */
+            backdrop-filter: blur(25px); /* Blur kuat untuk kesan premium */
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border-radius: 2.5rem;
         }
 
         .shiny-voucher-kcs {
-            background: linear-gradient(110deg, #075985 0%, #0ea5e9 50%, #075985 100%);
+            background: linear-gradient(110deg, #0ea5e9 0%, #38bdf8 50%, #0ea5e9 100%);
             background-size: 200% 100%;
             animation: shimmer 3s infinite linear;
-            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.4);
+            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.3);
         }
 
         @keyframes shimmer {
@@ -81,13 +84,12 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="bg-kcs-container">
-        <!-- Logo KCS tetap ada di tengah dengan background kantor di belakangnya -->
         <img src="https://imgs.search.brave.com/yrr_jlT-frCPUQ5xMZ2xxCHFuFN5NIH_D5Dmtcb2kJw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rZW1h/c2FuY2lwdGEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIx/LzAxL2Nyb3BwZWQt/Y3JvcHBlZC1XRUJT/SVRFLUtDUy1sb2dv/LTIwMjUucG5n" alt="Logo KCS">
     </div>
 
     <div class="fixed top-0 w-full marquee-glass z-50 py-3">
         <div class="marquee-text">
-            <span class="text-sky-600 font-bold text-[11px] tracking-[0.25em] uppercase">
+            <span class="text-white/80 font-bold text-[11px] tracking-[0.25em] uppercase">
                 PT. Kemasan Ciptatama Sempurna Wi-Fi Service — Please enter your name to claim your voucher — Use internet wisely for productivity — Support: IT Department (08113219556) —
             </span>
         </div>
@@ -121,7 +123,7 @@
                 if (res.ok) {
                     const statusLock = result.data.is_locked;
                     if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        this.errorMsg = 'MAAF, VOUCHER SUDAH TERPAKAI.';
+                        this.errorMsg = 'VOUCHER SUDAH TERPAKAI.';
                         this.voucher = null;
                     } else {
                         this.voucher = result.data;
@@ -152,69 +154,69 @@
         <div class="card-kcs p-10 relative overflow-hidden group">
             <template x-if="!voucher">
                 <div class="animate-in fade-in zoom-in duration-500">
-                    <div class="relative w-24 h-24 mx-auto mb-8">
-                        <div class="absolute inset-0 bg-sky-400 blur-3xl opacity-20 animate-pulse"></div>
-                        <div class="relative bg-white border-2 border-sky-100 rounded-3xl w-full h-full flex items-center justify-center shadow-lg">
-                            <svg class="w-12 h-12 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="relative w-20 h-20 mx-auto mb-8">
+                        <div class="absolute inset-0 bg-sky-400 blur-2xl opacity-30 animate-pulse"></div>
+                        <div class="relative bg-white/10 border border-white/20 rounded-2xl w-full h-full flex items-center justify-center">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
                             </svg>
                         </div>
                     </div>
 
                     <div class="text-center mb-10">
-                        <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">KEMASAN <span class="text-sky-600">CIPTA</span></h1>
-                        <p class="text-[10px] font-bold text-sky-500 uppercase tracking-[0.3em] mt-1">Wi-Fi Voucher Claim</p>
+                        <h1 class="text-2xl font-extrabold text-white tracking-tight">KEMASAN <span class="text-sky-400">CIPTA</span></h1>
+                        <p class="text-[10px] font-bold text-white/50 uppercase tracking-[0.3em] mt-1">Wi-Fi Access Portal</p>
                     </div>
                     
-                    <div class="space-y-5">
-                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Employee Name" 
-                               class="w-full bg-white/70 backdrop-blur-sm border-2 border-slate-200/50 rounded-2xl py-4 px-6 text-center font-bold text-slate-700 focus:bg-white focus:border-sky-500 transition-all outline-none">
+                    <div class="space-y-4">
+                        <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Input Your Name" 
+                               class="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl py-4 px-6 text-center font-bold text-white placeholder:text-white/30 focus:bg-white/20 focus:border-sky-400 transition-all outline-none">
                         
                         <button @click="getVoucher()" :disabled="loading"
-                                class="w-full py-5 bg-sky-600 text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase hover:bg-sky-700 shadow-xl active:scale-95 disabled:opacity-50">
-                            <span x-show="!loading">GET ACCESS VOUCHER</span>
+                                class="w-full py-5 bg-sky-500 text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase hover:bg-sky-400 shadow-xl active:scale-95 disabled:opacity-50 transition-all">
+                            <span x-show="!loading">CLAIM VOUCHER</span>
                             <span x-show="loading" class="flex items-center justify-center gap-3">
                                 <svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                 PROCESSING
                             </span>
                         </button>
                     </div>
-                    <p x-show="errorMsg" x-text="errorMsg" class="mt-6 text-center text-red-600 text-[10px] font-black tracking-widest"></p>
+                    <p x-show="errorMsg" x-text="errorMsg" class="mt-6 text-center text-red-400 text-[10px] font-black tracking-widest"></p>
                 </div>
             </template>
 
             <template x-if="voucher">
                 <div class="animate-in slide-in-from-bottom-8 duration-500">
-                    <div x-show="showNotif" class="bg-sky-50/80 backdrop-blur-sm flex items-center justify-center gap-2 px-4 py-2 rounded-full mb-6 mx-auto w-fit border border-sky-200">
-                        <span class="flex h-2 w-2 rounded-full bg-sky-500"></span>
-                        <span class="text-[10px] font-extrabold text-sky-700 uppercase">Voucher Successfully Claimed</span>
+                    <div x-show="showNotif" class="bg-sky-500/20 backdrop-blur-md flex items-center justify-center gap-2 px-4 py-2 rounded-full mb-6 mx-auto w-fit border border-sky-400/30">
+                        <span class="flex h-2 w-2 rounded-full bg-sky-400 animate-ping"></span>
+                        <span class="text-[10px] font-extrabold text-sky-300 uppercase">Access Granted</span>
                     </div>
 
-                    <h2 class="text-xl font-bold text-slate-800 text-center mb-8">Hello, <br><span x-text="voucher.user_name" class="text-sky-600 font-black"></span></h2>
+                    <h2 class="text-xl font-bold text-white text-center mb-8">Hello, <br><span x-text="voucher.user_name" class="text-sky-400 font-black uppercase"></span></h2>
                     
-                    <div class="shiny-voucher-kcs rounded-[2.5rem] py-10 px-4 mb-6 cursor-pointer text-center" 
+                    <div class="shiny-voucher-kcs rounded-[2rem] py-10 px-4 mb-6 cursor-pointer text-center" 
                          @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Token Copied!')">
-                        <p class="text-[9px] font-bold text-white/70 uppercase tracking-[0.3em] mb-2">Wi-Fi Token Code</p>
-                        <h1 class="text-4xl font-black text-white tracking-[0.1em] drop-shadow-xl" x-text="voucher.voucher_code"></h1>
+                        <p class="text-[9px] font-bold text-white/70 uppercase tracking-[0.3em] mb-2">Your Wi-Fi Token</p>
+                        <h1 class="text-4xl font-black text-white tracking-[0.1em] drop-shadow-2xl" x-text="voucher.voucher_code"></h1>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="p-4 bg-white/70 backdrop-blur-sm rounded-2xl border border-sky-100 text-center">
-                            <p class="text-sky-400 font-bold uppercase mb-1" style="font-size: 8px;">Network Speed</p>
-                            <p class="font-black text-sky-800 text-xs" x-text="voucher.speed || '15 Mbps'"></p>
+                        <div class="p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 text-center">
+                            <p class="text-white/40 font-bold uppercase mb-1" style="font-size: 8px;">Network</p>
+                            <p class="font-black text-sky-400 text-xs" x-text="voucher.speed || 'High Speed'"></p>
                         </div>
-                        <div class="p-4 bg-white/70 backdrop-blur-sm rounded-2xl border border-sky-100 text-center">
-                            <p class="text-sky-400 font-bold uppercase mb-1" style="font-size: 8px;">Device Status</p>
-                            <p class="font-black text-sky-800 text-xs text-green-600 uppercase">Verified</p>
+                        <div class="p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 text-center">
+                            <p class="text-white/40 font-bold uppercase mb-1" style="font-size: 8px;">Status</p>
+                            <p class="font-black text-green-400 text-xs uppercase">Encrypted</p>
                         </div>
                     </div>
                     
-                    <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Berhasil disalin!')" 
-                            class="w-full py-4 bg-sky-600 text-white rounded-2xl font-black text-[11px] tracking-widest shadow-lg">
+                    <button @click="navigator.clipboard.writeText(voucher.voucher_code); alert('Token Berhasil disalin!')" 
+                            class="w-full py-4 bg-white text-slate-900 rounded-2xl font-black text-[11px] tracking-widest shadow-lg hover:bg-sky-100 transition-colors">
                         COPY TOKEN
                     </button>
                     
-                    <button @click="voucher = null; inputName = ''; showNotif = false" class="w-full mt-6 text-[9px] font-bold text-slate-500 hover:text-red-600 uppercase tracking-widest text-center">
+                    <button @click="voucher = null; inputName = ''; showNotif = false" class="w-full mt-6 text-[9px] font-bold text-white/30 hover:text-white uppercase tracking-widest text-center transition-colors">
                         Clear & Exit
                     </button>
                 </div>
@@ -222,8 +224,8 @@
         </div>
         
         <div class="mt-12 text-center">
-            <div class="inline-block px-8 py-3 bg-white/70 backdrop-blur-md shadow-sm rounded-full border border-sky-100/50">
-                <p class="text-[10px] font-bold text-sky-600/80 uppercase tracking-[0.4em]">Developed By IT SATRIO</p>
+            <div class="inline-block px-8 py-3 bg-white/5 backdrop-blur-md shadow-sm rounded-full border border-white/10">
+                <p class="text-[10px] font-bold text-white/40 uppercase tracking-[0.4em]">Developed By IT SATRIO</p>
             </div>
         </div>
     </div>
