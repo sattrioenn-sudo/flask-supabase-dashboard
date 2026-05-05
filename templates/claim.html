@@ -16,7 +16,7 @@
         }
         [x-cloak] { display: none !important; }
 
-        /* Container Background */
+        /* Container Background dengan Office Image */
         .bg-kcs-container {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -24,13 +24,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #ffffff;
+            /* Menambahkan Background Office */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1920');
+            background-size: cover;
+            background-position: center;
         }
         
         .bg-kcs-container img {
-            max-width: 100%;
-            max-height: 100%;
+            max-width: 80%;
+            max-height: 40%;
             object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); /* Memberi glow pada logo agar stand out */
         }
 
         .marquee-glass {
@@ -51,13 +55,13 @@
             100% { transform: translateX(-100%); }
         }
 
-        /* REVISI: Kotak Transparan (Glassmorphism) */
+        /* Kotak Transparan (Glassmorphism) */
         .card-kcs {
-            background: rgba(255, 255, 255, 0.4); /* Opasitas dikurangi agar lebih transparan */
-            backdrop-filter: blur(20px); /* Efek blur kaca diperkuat */
+            background: rgba(255, 255, 255, 0.6); /* Sedikit lebih tebal agar teks terbaca di atas gambar */
+            backdrop-filter: blur(20px); 
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             border-radius: 3rem;
         }
 
@@ -77,6 +81,7 @@
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="bg-kcs-container">
+        <!-- Logo KCS tetap ada di tengah dengan background kantor di belakangnya -->
         <img src="https://imgs.search.brave.com/yrr_jlT-frCPUQ5xMZ2xxCHFuFN5NIH_D5Dmtcb2kJw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9rZW1h/c2FuY2lwdGEuY29t/L3dwLWNvbnRlbnQv/dXBsb2Fkcy8yMDIx/LzAxL2Nyb3BwZWQt/Y3JvcHBlZC1XRUJT/SVRFLUtDUy1sb2dv/LTIwMjUucG5n" alt="Logo KCS">
     </div>
 
@@ -162,9 +167,8 @@
                     </div>
                     
                     <div class="space-y-5">
-                        <!-- Input juga dibuat semi-transparan agar serasi -->
                         <input type="text" x-model="inputName" @keyup.enter="getVoucher()" placeholder="Employee Name" 
-                               class="w-full bg-white/50 backdrop-blur-sm border-2 border-slate-200/50 rounded-2xl py-4 px-6 text-center font-bold text-slate-700 focus:bg-white focus:border-sky-500 transition-all outline-none">
+                               class="w-full bg-white/70 backdrop-blur-sm border-2 border-slate-200/50 rounded-2xl py-4 px-6 text-center font-bold text-slate-700 focus:bg-white focus:border-sky-500 transition-all outline-none">
                         
                         <button @click="getVoucher()" :disabled="loading"
                                 class="w-full py-5 bg-sky-600 text-white rounded-2xl font-black text-xs tracking-[0.2em] uppercase hover:bg-sky-700 shadow-xl active:scale-95 disabled:opacity-50">
@@ -175,7 +179,7 @@
                             </span>
                         </button>
                     </div>
-                    <p x-show="errorMsg" x-text="errorMsg" class="mt-6 text-center text-red-500 text-[10px] font-black tracking-widest"></p>
+                    <p x-show="errorMsg" x-text="errorMsg" class="mt-6 text-center text-red-600 text-[10px] font-black tracking-widest"></p>
                 </div>
             </template>
 
@@ -195,11 +199,11 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-8">
-                        <div class="p-4 bg-white/50 backdrop-blur-sm rounded-2xl border border-sky-100 text-center">
+                        <div class="p-4 bg-white/70 backdrop-blur-sm rounded-2xl border border-sky-100 text-center">
                             <p class="text-sky-400 font-bold uppercase mb-1" style="font-size: 8px;">Network Speed</p>
                             <p class="font-black text-sky-800 text-xs" x-text="voucher.speed || '15 Mbps'"></p>
                         </div>
-                        <div class="p-4 bg-white/50 backdrop-blur-sm rounded-2xl border border-sky-100 text-center">
+                        <div class="p-4 bg-white/70 backdrop-blur-sm rounded-2xl border border-sky-100 text-center">
                             <p class="text-sky-400 font-bold uppercase mb-1" style="font-size: 8px;">Device Status</p>
                             <p class="font-black text-sky-800 text-xs text-green-600 uppercase">Verified</p>
                         </div>
@@ -210,7 +214,7 @@
                         COPY TOKEN
                     </button>
                     
-                    <button @click="voucher = null; inputName = ''; showNotif = false" class="w-full mt-6 text-[9px] font-bold text-slate-400 hover:text-red-500 uppercase tracking-widest text-center">
+                    <button @click="voucher = null; inputName = ''; showNotif = false" class="w-full mt-6 text-[9px] font-bold text-slate-500 hover:text-red-600 uppercase tracking-widest text-center">
                         Clear & Exit
                     </button>
                 </div>
@@ -218,8 +222,8 @@
         </div>
         
         <div class="mt-12 text-center">
-            <div class="inline-block px-8 py-3 bg-white/50 backdrop-blur-md shadow-sm rounded-full border border-sky-100/50">
-                <p class="text-[10px] font-bold text-sky-600/60 uppercase tracking-[0.4em]">Developed By IT SATRIO</p>
+            <div class="inline-block px-8 py-3 bg-white/70 backdrop-blur-md shadow-sm rounded-full border border-sky-100/50">
+                <p class="text-[10px] font-bold text-sky-600/80 uppercase tracking-[0.4em]">Developed By IT SATRIO</p>
             </div>
         </div>
     </div>
