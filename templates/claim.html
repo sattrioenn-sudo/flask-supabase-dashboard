@@ -189,10 +189,9 @@
                         <span class="text-[10px] font-extrabold text-sky-300 uppercase">Access Granted</span>
                     </div>
 
-                    <!-- UCAPAN KEPADA USER -->
-                    <h2 class="text-xl font-bold text-white text-center mb-8 italic">
+                    <h2 class="text-xl font-bold text-white text-center mb-8">
                         Halo, Selamat Bekerja! <br>
-                        <span x-text="voucher.user_name" class="text-sky-400 font-black uppercase not-italic"></span>
+                        <span x-text="voucher.user_name" class="text-sky-400 font-black uppercase"></span>
                     </h2>
                     
                     <div class="shiny-voucher-kcs rounded-[2rem] py-10 px-4 mb-6 cursor-pointer text-center" 
@@ -203,14 +202,14 @@
 
                     <div class="grid grid-cols-2 gap-4 mb-8">
                         <div class="p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 text-center">
-                            <p class="text-white/40 font-bold uppercase mb-1" style="font-size: 8px;">Kapasitas Speed</p>
-                            <!-- KETERANGAN KECEPATAN -->
-                            <p class="font-black text-sky-400 text-xs" x-text="voucher.speed ? voucher.speed + ' Mbps' : 'High Speed'"></p>
+                            <p class="text-white/40 font-bold uppercase mb-1" style="font-size: 8px;">Network Speed</p>
+                            <!-- Dinamis sesuai data DB, otomatis cek jika sudah ada kata 'Mbps' -->
+                            <p class="font-black text-sky-400 text-xs" x-text="voucher.speed ? (voucher.speed.toLowerCase().includes('mbps') ? voucher.speed : voucher.speed + ' Mbps') : 'High Speed'"></p>
                         </div>
                         <div class="p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 text-center">
-                            <p class="text-white/40 font-bold uppercase mb-1" style="font-size: 8px;">Lokasi Anda</p>
-                            <!-- LOKASI AKTUAL (BISA KAMU GANTI MANUAL DISINI) -->
-                            <p class="font-black text-green-400 text-xs uppercase tracking-tighter">Lantai 1 - Office</p>
+                            <p class="text-white/40 font-bold uppercase mb-1" style="font-size: 8px;">Scan Location</p>
+                            <!-- Dinamis sesuai field 'location' di database Supabase -->
+                            <p class="font-black text-green-400 text-xs uppercase" x-text="voucher.location || 'Area Kantor'"></p>
                         </div>
                     </div>
                     
