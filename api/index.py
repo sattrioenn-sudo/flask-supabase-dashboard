@@ -77,16 +77,16 @@ def vouchers():
     except: db_vouchers = []
     return render_template('vouchers.html', email=session.get('user_email'), vouchers=db_vouchers)
 
-# --- REVISI ROUTE SALES ---
+# --- REVISI ROUTE SALES (SINKRON DENGAN TABEL SALES_ACTIVITY) ---
 @app.route('/sales')
 def sales():
     if 'user_id' not in session: return redirect(url_for('login'))
     try:
-        # Mengambil data dari tabel 'sales'
-        response = supabase.table('sales').select("*").order('tanggal', desc=True).execute()
+        # Mengambil data dari tabel 'sales_activity' sesuai struktur di Supabase
+        response = supabase.table('sales_activity').select("*").order('tanggal', desc=True).execute()
         db_sales = response.data if response.data else []
         
-        # Hitung statistik sederhana untuk dashboard sales
+        # Hitung statistik customer per sales
         summary = {}
         for item in db_sales:
             name = item.get('nama_sales', 'Unknown')
@@ -115,11 +115,12 @@ def add_sales():
     }
     
     try:
-        supabase.table('sales').insert(data).execute()
+        # Insert data ke tabel 'sales_activity' (bukan 'sales')
+        supabase.table('sales_activity').insert(data).execute()
         return redirect(url_for('sales'))
     except Exception as e:
         return f"Gagal simpan data: {e}", 500
-# ---------------------------------
+# ---------------------------------------------------------------
 
 @app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
 def delete_voucher(code_voucher):
