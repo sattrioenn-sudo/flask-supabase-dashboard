@@ -82,11 +82,10 @@ def vouchers():
 def sales():
     if 'user_id' not in session: return redirect(url_for('login'))
     try:
-        # Mengambil data dari tabel 'sales_activity' sesuai struktur di Supabase
+        # Perhatikan: pastikan variabel di template adalah 'activity_data' atau samakan di sini
         response = supabase.table('sales_activity').select("*").order('tanggal', desc=True).execute()
         db_sales = response.data if response.data else []
         
-        # Hitung statistik customer per sales
         summary = {}
         for item in db_sales:
             name = item.get('nama_sales', 'Unknown')
@@ -97,9 +96,10 @@ def sales():
         db_sales = []
         stats = []
         
+    # Menggunakan activity_data agar sesuai dengan looping {% for row in activity_data %} di sales.html
     return render_template('sales.html', 
                            email=session.get('user_email'), 
-                           sales=db_sales, 
+                           activity_data=db_sales, 
                            summary_stats=stats)
 
 @app.route('/sales/add', methods=['POST'])
@@ -115,11 +115,20 @@ def add_sales():
     }
     
     try:
-        # Insert data ke tabel 'sales_activity' (bukan 'sales')
         supabase.table('sales_activity').insert(data).execute()
         return redirect(url_for('sales'))
     except Exception as e:
         return f"Gagal simpan data: {e}", 500
+
+@app.route('/sales/delete/<id>', methods=['DELETE'])
+def delete_sales(id):
+    """Route Baru untuk menghapus inputan sales berdasarkan ID Supabase"""
+    if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
+    try:
+        supabase.table('sales_activity').delete().eq('id', id).execute()
+        return jsonify({"status": "success"}), 200
+    except Exception as e: 
+        return jsonify({"status": "error", "message": str(e)}), 500
 # ---------------------------------------------------------------
 
 @app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
