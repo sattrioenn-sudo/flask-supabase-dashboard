@@ -77,6 +77,19 @@ def vouchers():
     except: db_vouchers = []
     return render_template('vouchers.html', email=session.get('user_email'), vouchers=db_vouchers)
 
+# --- TAMBAHAN ROUTE SALES BARU ---
+@app.route('/sales')
+def sales():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    try:
+        # Mengambil data sales dari Supabase
+        response = supabase.table('sales').select("*").order('created_at', desc=True).execute()
+        db_sales = response.data if response.data else []
+    except: 
+        db_sales = []
+    return render_template('sales.html', email=session.get('user_email'), sales=db_sales)
+# ---------------------------------
+
 @app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
 def delete_voucher(code_voucher):
     if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
@@ -132,4 +145,5 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-app = app
+if __name__ == '__main__':
+    app.run(debug=True)
