@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Data Sales</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="salesTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Hari & Tanggal</th>
+                                    <th>Salesman</th>
+                                    <th>Nama Customer</th>
+                                    <th>Alamat</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in sales %}
+                                <tr>
+                                    <td>{{ item.hari_tanggal }}</td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">
+                                            <i class="fas fa-user me-1"></i> {{ item.salesman }}
+                                        </span>
+                                    </td>
+                                    <td><strong>{{ item.nama_customer }}</strong></td>
+                                    <td><small class="text-muted">{{ item.alamat }}</small></td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-folder-open fa-3x mb-3"></i>
+                                            <p>Belum ada data sales yang tersedia.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Halaman Sales dimuat.");
+    });
+</script>
+{% endblock %}
