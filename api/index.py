@@ -77,17 +77,48 @@ def vouchers():
     except: db_vouchers = []
     return render_template('vouchers.html', email=session.get('user_email'), vouchers=db_vouchers)
 
-# --- TAMBAHAN ROUTE SALES BARU ---
+# --- REVISI ROUTE SALES ---
 @app.route('/sales')
 def sales():
     if 'user_id' not in session: return redirect(url_for('login'))
     try:
-        # Mengambil data sales dari Supabase
-        response = supabase.table('sales').select("*").order('created_at', desc=True).execute()
+        # Mengambil data dari tabel 'sales'
+        response = supabase.table('sales').select("*").order('tanggal', desc=True).execute()
         db_sales = response.data if response.data else []
-    except: 
+        
+        # Hitung statistik sederhana untuk dashboard sales
+        summary = {}
+        for item in db_sales:
+            name = item.get('nama_sales', 'Unknown')
+            summary[name] = summary.get(name, 0) + 1
+        stats = [{"nama_sales": k, "total_customer": v} for k, v in summary.items()]
+        
+    except Exception as e: 
         db_sales = []
-    return render_template('sales.html', email=session.get('user_email'), sales=db_sales)
+        stats = []
+        
+    return render_template('sales.html', 
+                           email=session.get('user_email'), 
+                           sales=db_sales, 
+                           summary_stats=stats)
+
+@app.route('/sales/add', methods=['POST'])
+def add_sales():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    data = {
+        "hari": request.form.get('hari'),
+        "tanggal": request.form.get('tanggal'),
+        "nama_sales": request.form.get('nama_sales'),
+        "nama_customer": request.form.get('nama_customer'),
+        "alamat_customer": request.form.get('alamat_customer')
+    }
+    
+    try:
+        supabase.table('sales').insert(data).execute()
+        return redirect(url_for('sales'))
+    except Exception as e:
+        return f"Gagal simpan data: {e}", 500
 # ---------------------------------
 
 @app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
