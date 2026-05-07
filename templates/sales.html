@@ -1,87 +1,113 @@
 {% extends 'base.html' %}
 
-{% block title %}Sales Management{% endblock %}
-{% block header_title %}Sales & Inventory{% endblock %}
+{% block title %}Sales Daily Report{% endblock %}
+{% block header_title %}Sales Activity Tracking{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
-    <!-- Section Form Input -->
+    <!-- Form Input Aktivitas -->
     <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
         <div class="flex items-center gap-2 mb-6">
             <div class="w-1.5 h-4 bg-[#075985] rounded-full"></div>
-            <h2 class="text-xs font-black text-slate-800 uppercase tracking-widest">Input Mutasi Barang</h2>
+            <h2 class="text-xs font-black text-slate-800 uppercase tracking-widest">Input Kunjungan / Customer Baru</h2>
         </div>
 
-        <form action="/sales/add" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <form action="/sales/add" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Hari & Tanggal -->
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-2">No. Kontrak / Surat Jalan</label>
-                <input type="text" name="no_kontrak" required 
-                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-xs focus:ring-2 focus:ring-sky-500/20 focus:border-[#075985] outline-none transition-all"
-                    placeholder="Contoh: KCS/2026/001">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Hari & Tanggal</label>
+                <div class="flex gap-2">
+                    <select name="hari" class="w-1/3 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#075985]">
+                        <option>Senin</option><option>Selasa</option><option>Rabu</option>
+                        <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
+                    </select>
+                    <input type="date" name="tanggal" required class="w-2/3 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#075985]">
+                </div>
             </div>
+
+            <!-- Nama Sales -->
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-2">User Peminta</label>
-                <input type="text" name="user_peminta" required 
-                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-xs focus:ring-2 focus:ring-sky-500/20 focus:border-[#075985] outline-none transition-all"
-                    placeholder="Nama personil">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nama Sales</label>
+                <input type="text" name="nama_sales" required placeholder="Nama Sales"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs outline-none focus:border-[#075985]">
             </div>
+
+            <!-- Nama Customer -->
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-2">Customer / Tujuan</label>
-                <input type="text" name="customer" required 
-                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-xs focus:ring-2 focus:ring-sky-500/20 focus:border-[#075985] outline-none transition-all"
-                    placeholder="Nama PT atau Vendor">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nama Customer</label>
+                <input type="text" name="nama_customer" required placeholder="Nama Toko / Personal"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs outline-none focus:border-[#075985]">
             </div>
-            <div class="md:col-span-2">
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-2">Nama Barang & Deskripsi</label>
-                <input type="text" name="nama_barang" required 
-                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-xs focus:ring-2 focus:ring-sky-500/20 focus:border-[#075985] outline-none transition-all"
-                    placeholder="Contoh: Ribbon Cartridge Epson LQ-2190">
-            </div>
+
+            <!-- Tombol Simpan -->
             <div class="flex items-end">
-                <button type="submit" 
-                    class="w-full bg-[#075985] hover:bg-sky-800 text-white font-black text-[10px] uppercase tracking-[0.2em] py-3 rounded-lg shadow-lg shadow-sky-900/20 transition-all active:scale-[0.98]">
-                    Simpan Data
+                <button type="submit" class="w-full bg-[#075985] text-white font-black text-[9px] uppercase tracking-widest py-2.5 rounded-lg hover:bg-sky-800 transition-all shadow-md active:scale-95">
+                    Submit Data
                 </button>
+            </div>
+
+            <!-- Alamat (Baris Baru) -->
+            <div class="md:col-span-4">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Alamat Lengkap Customer</label>
+                <textarea name="alamat_customer" rows="2" required placeholder="Jl. Raya No... Pasuruan"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs outline-none focus:border-[#075985]"></textarea>
             </div>
         </form>
     </div>
 
-    <!-- Section Tabel Data -->
-    <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
-            <h3 class="text-[11px] font-black text-slate-700 uppercase tracking-widest">Riwayat Mutasi Pasuruan Plant</h3>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Tabel Log Aktivitas (Sisi Kiri) -->
+        <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <span class="text-[10px] font-black text-slate-700 uppercase tracking-widest">Detail Aktivitas Harian</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="border-b border-slate-100">
+                            <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase">Waktu</th>
+                            <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase">Sales</th>
+                            <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase">Customer & Alamat</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for row in activity_data %}
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="px-5 py-3">
+                                <p class="text-[11px] font-bold text-slate-700">{{ row.hari }}</p>
+                                <p class="text-[9px] text-slate-400">{{ row.tanggal }}</p>
+                            </td>
+                            <td class="px-5 py-3 text-[11px] font-bold text-[#075985]">{{ row.nama_sales }}</td>
+                            <td class="px-5 py-3">
+                                <p class="text-[11px] font-bold text-slate-800">{{ row.nama_customer }}</p>
+                                <p class="text-[10px] text-slate-500 italic truncate max-w-xs">{{ row.alamat_customer }}</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-slate-100 bg-slate-50/50">
-                        <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter">Tanggal</th>
-                        <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter">No. Kontrak</th>
-                        <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter">Peminta/Customer</th>
-                        <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter">Nama Barang</th>
-                        <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter text-right">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50">
-                    {% for item in sales_data %}
-                    <tr class="hover:bg-slate-50/80 transition-colors">
-                        <td class="px-6 py-4 text-[11px] font-medium text-slate-500">{{ item.tanggal }}</td>
-                        <td class="px-6 py-4 text-xs font-bold text-slate-700">{{ item.nomor_kontrak }}</td>
-                        <td class="px-6 py-4">
-                            <p class="text-xs font-bold text-slate-700">{{ item.user_peminta }}</p>
-                            <p class="text-[9px] text-slate-400 uppercase font-semibold">{{ item.customer }}</p>
-                        </td>
-                        <td class="px-6 py-4 text-xs text-slate-600 italic">{{ item.nama_barang }}</td>
-                        <td class="px-6 py-4 text-right">
-                            <span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-600 uppercase tracking-tighter">
-                                <span class="w-1 h-1 bg-emerald-500 rounded-full"></span>
-                                {{ item.status }}
-                            </span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <!-- Tabel Ringkasan / Summary (Sisi Kanan) -->
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm h-fit">
+            <div class="px-5 py-3 border-b border-slate-100 bg-[#075985]">
+                <span class="text-[10px] font-black text-white uppercase tracking-widest">Performance Harian</span>
+            </div>
+            <div class="p-4 space-y-4">
+                <!-- Contoh Data Per Sales -->
+                {% for stat in summary_stats %}
+                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+                    <div>
+                        <p class="text-[11px] font-extrabold text-slate-800 uppercase">{{ stat.nama_sales }}</p>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Total Customers</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xl font-black text-[#075985]">{{ stat.total_customer }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
