@@ -4,7 +4,7 @@
 {% block header_title %}Sales Activity Tracking{% endblock %}
 
 {% block content %}
-<!-- Tambahkan library untuk PDF Export -->
+<!-- Library PDF Export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
@@ -14,9 +14,8 @@
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-2">
                 <div class="w-1.5 h-4 bg-[#075985] rounded-full"></div>
-                <h2 class="text-xs font-black text-slate-800 uppercase tracking-widest">Input Kunjungan / Customer Baru</h2>
+                <h2 id="form-title" class="text-xs font-black text-slate-800 uppercase tracking-widest">Input Kunjungan / Customer Baru</h2>
             </div>
-            <!-- Tombol Export PDF -->
             <button onclick="exportToPDF()" class="flex items-center gap-2 bg-rose-600 text-white px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -25,12 +24,15 @@
             </button>
         </div>
 
-        <form action="/sales/add" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form id="salesForm" action="/sales/add" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <!-- Hidden ID untuk Edit -->
+            <input type="hidden" name="id" id="edit_id">
+            
             <!-- Hari & Tanggal -->
             <div>
                 <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Hari & Tanggal</label>
                 <div class="flex gap-2">
-                    <select name="hari" class="w-1/3 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#075985]">
+                    <select name="hari" id="input_hari" class="w-1/3 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:border-[#075985]">
                         <option>Senin</option><option>Selasa</option><option>Rabu</option>
                         <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
                     </select>
@@ -41,28 +43,36 @@
             <!-- Nama Sales -->
             <div>
                 <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nama Sales</label>
-                <input type="text" name="nama_sales" required placeholder="Nama Sales"
+                <input type="text" name="nama_sales" id="input_sales" required placeholder="Nama Sales"
                     class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs outline-none focus:border-[#075985]">
             </div>
 
-            <!-- Nama Customer -->
+            <!-- Nama Customer (Master Data List) -->
             <div>
                 <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nama Customer</label>
-                <input type="text" name="nama_customer" required placeholder="Nama Toko / Personal"
+                <input type="text" name="nama_customer" id="input_customer" list="master_customer_list" required placeholder="Cari/Input Toko"
                     class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs outline-none focus:border-[#075985]">
+                <datalist id="master_customer_list">
+                    {% for cust in master_customers %}
+                    <option value="{{ cust.nama_customer }}">
+                    {% endfor %}
+                </datalist>
             </div>
 
             <!-- Tombol Simpan -->
-            <div class="flex items-end">
-                <button type="submit" class="w-full bg-[#075985] text-white font-black text-[9px] uppercase tracking-widest py-2.5 rounded-lg hover:bg-sky-800 transition-all shadow-md active:scale-95">
+            <div class="flex items-end gap-2">
+                <button type="submit" id="btn-submit" class="w-full bg-[#075985] text-white font-black text-[9px] uppercase tracking-widest py-2.5 rounded-lg hover:bg-sky-800 transition-all shadow-md active:scale-95">
                     Submit Data
+                </button>
+                <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden w-1/3 bg-slate-200 text-slate-600 font-black text-[9px] uppercase tracking-widest py-2.5 rounded-lg hover:bg-slate-300 transition-all">
+                    Batal
                 </button>
             </div>
 
-            <!-- Alamat (Baris Baru) -->
+            <!-- Alamat -->
             <div class="md:col-span-4">
                 <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Alamat Lengkap Customer</label>
-                <textarea name="alamat_customer" rows="2" required placeholder="Jl. Raya No... Pasuruan"
+                <textarea name="alamat_customer" id="input_alamat" rows="2" required placeholder="Jl. Raya No... Pasuruan"
                     class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-xs outline-none focus:border-[#075985]"></textarea>
             </div>
         </form>
@@ -80,7 +90,8 @@
                         <tr class="border-b border-slate-100">
                             <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase">Waktu</th>
                             <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase">Sales</th>
-                            <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase">Customer & Alamat</th>
+                            <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase">Customer</th>
+                            <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase">Alamat</th>
                             <th class="px-5 py-3 text-[9px] font-black text-slate-400 uppercase text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -92,16 +103,22 @@
                                 <p class="text-[9px] text-slate-400">{{ row.tanggal }}</p>
                             </td>
                             <td class="px-5 py-3 text-[11px] font-bold text-[#075985]">{{ row.nama_sales }}</td>
-                            <td class="px-5 py-3">
-                                <p class="text-[11px] font-bold text-slate-800">{{ row.nama_customer }}</p>
-                                <p class="text-[10px] text-slate-500 italic truncate max-w-xs">{{ row.alamat_customer }}</p>
-                            </td>
+                            <td class="px-5 py-3 text-[11px] font-bold text-slate-800">{{ row.nama_customer }}</td>
+                            <td class="px-5 py-3 text-[10px] text-slate-500 italic max-w-[150px] truncate">{{ row.alamat_customer }}</td>
                             <td class="px-5 py-3 text-center">
-                                <button onclick="deleteRecord('{{ row.id }}')" class="p-2 text-slate-300 hover:text-rose-600 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                                <div class="flex justify-center gap-2">
+                                    <button onclick="editRecord('{{ row.id }}', '{{ row.hari }}', '{{ row.tanggal }}', '{{ row.nama_sales }}', '{{ row.nama_customer }}', '{{ row.alamat_customer }}')" 
+                                            class="p-2 text-slate-300 hover:text-sky-600 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="deleteRecord('{{ row.id }}')" class="p-2 text-slate-300 hover:text-rose-600 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -110,23 +127,43 @@
             </div>
         </div>
 
-        <!-- Tabel Ringkasan / Summary (Sisi Kanan) -->
-        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm h-fit">
-            <div class="px-5 py-3 border-b border-slate-100 bg-[#075985]">
-                <span class="text-[10px] font-black text-white uppercase tracking-widest">Performance Harian</span>
-            </div>
-            <div class="p-4 space-y-4">
-                {% for stat in summary_stats %}
-                <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                    <div>
-                        <p class="text-[11px] font-extrabold text-slate-800 uppercase">{{ stat.nama_sales }}</p>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Total Customers</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-xl font-black text-[#075985]">{{ stat.total_customer }}</span>
-                    </div>
+        <!-- Tabel Rekap Filter (Sisi Kanan) -->
+        <div class="space-y-6">
+            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <div class="px-5 py-3 border-b border-slate-100 bg-[#075985]">
+                    <span class="text-[10px] font-black text-white uppercase tracking-widest">Rekap Periode Sales</span>
                 </div>
-                {% endfor %}
+                <form action="/sales/recap" method="GET" class="p-4 space-y-3">
+                    <div>
+                        <label class="text-[8px] font-bold text-slate-400 uppercase">Pilih Sales</label>
+                        <input type="text" name="sales_filter" placeholder="Nama Sales" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[#075985]">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[8px] font-bold text-slate-400 uppercase">Dari</label>
+                            <input type="date" name="start_date" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[#075985]">
+                        </div>
+                        <div>
+                            <label class="text-[8px] font-bold text-slate-400 uppercase">Sampai</label>
+                            <input type="date" name="end_date" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-[#075985]">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-slate-800 text-white text-[9px] font-bold py-2 rounded-lg hover:bg-black transition-all">Tampilkan Rekap</button>
+                </form>
+
+                <div class="p-4 pt-0 space-y-4">
+                    {% for stat in summary_stats %}
+                    <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <div>
+                            <p class="text-[11px] font-extrabold text-slate-800 uppercase">{{ stat.nama_sales }}</p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Total Customers Baru</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xl font-black text-[#075985]">{{ stat.total_customer }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
@@ -149,15 +186,42 @@
         }
     }
 
-    // 2. Fungsi Export PDF
+    // 2. Fungsi Edit Data (Mengisi Form Kembali)
+    function editRecord(id, hari, tanggal, sales, customer, alamat) {
+        document.getElementById('form-title').innerText = "Edit Data Kunjungan";
+        document.getElementById('edit_id').value = id;
+        document.getElementById('input_hari').value = hari;
+        document.getElementById('input_tanggal').value = tanggal;
+        document.getElementById('input_sales').value = sales;
+        document.getElementById('input_customer').value = customer;
+        document.getElementById('input_alamat').value = alamat;
+        
+        document.getElementById('btn-submit').innerText = "Update Data";
+        document.getElementById('btn-cancel').classList.remove('hidden');
+        document.getElementById('salesForm').action = "/sales/update"; // Sesuaikan endpoint update kamu
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 3. Fungsi Reset Form
+    function resetForm() {
+        document.getElementById('form-title').innerText = "Input Kunjungan / Customer Baru";
+        document.getElementById('salesForm').reset();
+        document.getElementById('edit_id').value = "";
+        document.getElementById('btn-submit').innerText = "Submit Data";
+        document.getElementById('btn-cancel').classList.add('hidden');
+        document.getElementById('salesForm').action = "/sales/add";
+        document.getElementById('input_tanggal').valueAsDate = new Date();
+    }
+
+    // 4. Fungsi Export PDF (Disesuaikan Kolomnya)
     function exportToPDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape agar lebih lebar
         
         doc.setFontSize(14);
         doc.text("SALES DAILY ACTIVITY REPORT", 14, 15);
         doc.setFontSize(10);
-        doc.setTextColor(100);
         doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
 
         doc.autoTable({
@@ -167,22 +231,17 @@
             headStyles: { fillColor: [7, 89, 133], fontSize: 8 },
             styles: { fontSize: 8 },
             columns: [
-                { header: 'Waktu', dataKey: 'waktu' },
-                { header: 'Sales', dataKey: 'sales' },
-                { header: 'Customer & Alamat', dataKey: 'customer' }
-            ],
-            didParseCell: function(data) {
-                // Jangan export kolom aksi (tombol hapus)
-                if (data.column.index === 3) {
-                    data.cell.text = '';
-                }
-            }
+                { header: 'Waktu' },
+                { header: 'Sales' },
+                { header: 'Customer' },
+                { header: 'Alamat' }
+            ]
         });
 
         doc.save(`Sales_Report_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 
-    // 3. Set Tanggal Hari Ini Otomatis
+    // Set Tanggal Hari Ini Otomatis
     document.getElementById('input_tanggal').valueAsDate = new Date();
 </script>
 {% endblock %}
