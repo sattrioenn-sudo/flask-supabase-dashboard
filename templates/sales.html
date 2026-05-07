@@ -8,57 +8,49 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
-<div class="max-w-7xl mx-auto space-y-6">
-    <!-- Header & Action Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-        <div class="flex items-center gap-3">
-            <div class="p-2.5 bg-sky-50 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#075985]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+<div class="space-y-6">
+    <!-- Form Input Aktivitas -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-1.5 h-5 bg-[#075985] rounded-full"></div>
+                <h2 id="form-title" class="text-[11px] font-black text-slate-800 uppercase tracking-[0.15em]">Input Kunjungan / Customer Baru</h2>
+            </div>
+            <button onclick="exportToPDF()" class="flex items-center gap-2 bg-rose-500 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-600 transition-all shadow-sm active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-            </div>
-            <div>
-                <h2 id="form-title" class="text-sm font-bold text-slate-800 tracking-tight">Input Kunjungan</h2>
-                <p class="text-[11px] text-slate-400">Catat aktivitas sales harian di sini.</p>
-            </div>
+                Export PDF
+            </button>
         </div>
-        <button onclick="exportToPDF()" class="inline-flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all shadow-sm active:scale-95">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Export PDF
-        </button>
-    </div>
 
-    <!-- Form Section -->
-    <div class="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm">
-        <form id="salesForm" action="/sales/add" method="POST" class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <form id="salesForm" action="/sales/add" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <input type="hidden" name="id" id="edit_id">
             
-            <!-- Tanggal & Hari -->
-            <div class="md:col-span-3 space-y-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Waktu Kunjungan</label>
+            <!-- Hari & Tanggal -->
+            <div class="space-y-2">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest px-1">Hari & Tanggal</label>
                 <div class="flex gap-2">
-                    <select name="hari" id="input_hari" class="w-1/3 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-sky-100 focus:border-[#075985] transition-all outline-none">
+                    <select name="hari" id="input_hari" class="w-1/3 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-[#075985] focus:ring-4 focus:ring-sky-50 transition-all">
                         <option>Senin</option><option>Selasa</option><option>Rabu</option>
                         <option>Kamis</option><option>Jumat</option><option>Sabtu</option>
                     </select>
-                    <input type="date" name="tanggal" id="input_tanggal" required class="w-2/3 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-sky-100 focus:border-[#075985] transition-all outline-none">
+                    <input type="date" name="tanggal" id="input_tanggal" required class="w-2/3 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs outline-none focus:border-[#075985] focus:ring-4 focus:ring-sky-50 transition-all">
                 </div>
             </div>
 
             <!-- Nama Sales -->
-            <div class="md:col-span-3 space-y-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nama Sales</label>
-                <input type="text" name="nama_sales" id="input_sales" required placeholder="Siapa yang bertugas?"
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-sky-100 focus:border-[#075985] transition-all outline-none">
+            <div class="space-y-2">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest px-1">Nama Sales</label>
+                <input type="text" name="nama_sales" id="input_sales" required placeholder="Nama Sales"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#075985] focus:ring-4 focus:ring-sky-50 transition-all">
             </div>
 
             <!-- Nama Customer -->
-            <div class="md:col-span-3 space-y-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Nama Customer</label>
-                <input type="text" name="nama_customer" id="input_customer" list="master_customer_list" required placeholder="Cari Toko..."
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:ring-2 focus:ring-sky-100 focus:border-[#075985] transition-all outline-none">
+            <div class="space-y-2">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest px-1">Nama Customer</label>
+                <input type="text" name="nama_customer" id="input_customer" list="master_customer_list" required placeholder="Cari/Input Toko"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:border-[#075985] focus:ring-4 focus:ring-sky-50 transition-all">
                 <datalist id="master_customer_list">
                     {% for cust in master_customers %}
                     <option value="{{ cust.nama_customer }}">
@@ -66,62 +58,68 @@
                 </datalist>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="md:col-span-3 flex items-end gap-2">
-                <button type="submit" id="btn-submit" class="flex-1 bg-[#075985] text-white font-bold text-[10px] uppercase tracking-wider py-3 rounded-xl hover:bg-sky-800 transition-all shadow-md active:scale-95">
+            <!-- Tombol Simpan -->
+            <div class="flex items-end gap-2">
+                <button type="submit" id="btn-submit" class="w-full bg-[#075985] text-white font-black text-[9px] uppercase tracking-widest py-3 rounded-xl hover:bg-sky-800 transition-all shadow-md active:scale-95">
                     Submit Data
                 </button>
-                <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden w-1/3 bg-slate-100 text-slate-500 font-bold text-[10px] uppercase tracking-wider py-3 rounded-xl hover:bg-slate-200 transition-all">
+                <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden w-1/3 bg-slate-100 text-slate-500 font-black text-[9px] uppercase tracking-widest py-3 rounded-xl hover:bg-slate-200 transition-all">
                     Batal
                 </button>
             </div>
 
             <!-- Alamat -->
-            <div class="md:col-span-12 space-y-2">
-                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Alamat Lengkap</label>
-                <textarea name="alamat_customer" id="input_alamat" rows="2" required placeholder="Masukkan alamat lengkap toko di sini..."
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-sky-100 focus:border-[#075985] transition-all outline-none resize-none"></textarea>
+            <div class="md:col-span-4 space-y-2">
+                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-widest px-1">Alamat Lengkap Customer</label>
+                <textarea name="alamat_customer" id="input_alamat" rows="2" required placeholder="Jl. Raya No... Pasuruan"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:border-[#075985] focus:ring-4 focus:ring-sky-50 transition-all resize-none"></textarea>
             </div>
         </form>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Tabel Detail (Kiri) -->
-        <div class="lg:col-span-8 bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-            <div class="px-6 py-4 border-b border-slate-50 bg-slate-50/30">
-                <h3 class="text-[11px] font-bold text-slate-600 uppercase tracking-widest">Detail Aktivitas Terbaru</h3>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Tabel Log Aktivitas (Sisi Kiri) -->
+        <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                <span class="text-[10px] font-black text-slate-700 uppercase tracking-[0.1em]">Detail Aktivitas Harian</span>
             </div>
             <div class="overflow-x-auto">
-                <table id="salesTable" class="w-full">
+                <table id="salesTable" class="w-full text-left">
                     <thead>
-                        <tr class="bg-white border-b border-slate-100">
-                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left">Waktu</th>
-                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-left">Info Sales & Toko</th>
-                            <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-center">Aksi</th>
+                        <tr class="border-b border-slate-100">
+                            <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter">Waktu</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter">Sales</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter">Customer</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter">Alamat</th>
+                            <th class="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-tighter text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50">
                         {% for row in activity_data %}
-                        <tr class="hover:bg-slate-50/80 transition-colors">
+                        <tr class="hover:bg-slate-50/50 transition-colors group">
                             <td class="px-6 py-4">
-                                <span class="block text-xs font-bold text-slate-700">{{ row.hari }}</span>
-                                <span class="text-[10px] text-slate-400">{{ row.tanggal }}</span>
+                                <p class="text-[11px] font-bold text-slate-700">{{ row.hari }}</p>
+                                <p class="text-[9px] text-slate-400 font-medium">{{ row.tanggal }}</p>
+                            </td>
+                            <td class="px-6 py-4 text-[11px] font-bold text-[#075985]">{{ row.nama_sales }}</td>
+                            <td class="px-6 py-4 text-[11px] font-bold text-slate-800">{{ row.nama_customer }}</td>
+                            <td class="px-6 py-4">
+                                <p class="text-[10px] text-slate-500 italic leading-relaxed max-w-[180px] line-clamp-2" title="{{ row.alamat_customer }}">
+                                    {{ row.alamat_customer }}
+                                </p>
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex flex-col">
-                                    <span class="text-xs font-bold text-[#075985] mb-0.5">{{ row.nama_sales }}</span>
-                                    <span class="text-xs font-semibold text-slate-800">{{ row.nama_customer }}</span>
-                                    <span class="text-[10px] text-slate-500 italic truncate max-w-[200px]">{{ row.alamat_customer }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="flex justify-center items-center gap-1">
+                                <div class="flex justify-center gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
                                     <button onclick="editRecord('{{ row.id }}', '{{ row.hari }}', '{{ row.tanggal }}', '{{ row.nama_sales }}', '{{ row.nama_customer }}', '{{ row.alamat_customer }}')" 
                                             class="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-all">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
                                     </button>
                                     <button onclick="deleteRecord('{{ row.id }}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
                                     </button>
                                 </div>
                             </td>
@@ -132,39 +130,39 @@
             </div>
         </div>
 
-        <!-- Tabel Rekap (Kanan) -->
-        <div class="lg:col-span-4 space-y-6">
-            <div class="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
-                <div class="px-6 py-4 bg-slate-800">
-                    <h3 class="text-[10px] font-bold text-white uppercase tracking-widest">Filter & Rekap</h3>
+        <!-- Tabel Rekap Filter (Sisi Kanan) -->
+        <div class="space-y-6">
+            <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                <div class="px-6 py-4 bg-[#075985]">
+                    <span class="text-[10px] font-black text-white uppercase tracking-widest">Rekap Periode Sales</span>
                 </div>
-                <form action="/sales/recap" method="GET" class="p-6 space-y-4">
+                <form action="/sales/recap" method="GET" class="p-5 space-y-4">
                     <div class="space-y-1.5">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Pilih Sales</label>
-                        <input type="text" name="sales_filter" placeholder="Cari nama..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:ring-2 focus:ring-sky-100 outline-none">
+                        <label class="text-[8px] font-black text-slate-400 uppercase ml-1">Pilih Sales</label>
+                        <input type="text" name="sales_filter" placeholder="Nama Sales" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs outline-none focus:border-[#075985] transition-all">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Dari</label>
-                            <input type="date" name="start_date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-sky-100 outline-none">
+                            <label class="text-[8px] font-black text-slate-400 uppercase ml-1">Dari</label>
+                            <input type="date" name="start_date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[10px] outline-none focus:border-[#075985]">
                         </div>
                         <div class="space-y-1.5">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sampai</label>
-                            <input type="date" name="end_date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[10px] focus:ring-2 focus:ring-sky-100 outline-none">
+                            <label class="text-[8px] font-black text-slate-400 uppercase ml-1">Sampai</label>
+                            <input type="date" name="end_date" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-[10px] outline-none focus:border-[#075985]">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-slate-800 text-white text-[10px] font-bold py-3 rounded-xl hover:bg-black transition-all shadow-md active:scale-95">Tampilkan Rekap</button>
+                    <button type="submit" class="w-full bg-slate-800 text-white text-[9px] font-black py-3 rounded-xl hover:bg-black transition-all shadow-md active:scale-95 uppercase tracking-widest">Tampilkan Rekap</button>
                 </form>
 
-                <div class="p-6 pt-0 space-y-3">
+                <div class="p-5 pt-0 space-y-3">
                     {% for stat in summary_stats %}
-                    <div class="group flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-sky-200 transition-all">
+                    <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-sky-100 transition-all">
                         <div>
-                            <p class="text-xs font-bold text-slate-800 uppercase">{{ stat.nama_sales }}</p>
-                            <p class="text-[10px] text-slate-400 font-medium">Customer Baru</p>
+                            <p class="text-[10px] font-black text-slate-800 uppercase tracking-tight">{{ stat.nama_sales }}</p>
+                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Total Customers Baru</p>
                         </div>
-                        <div class="bg-white px-4 py-1.5 rounded-lg border border-slate-200 group-hover:bg-sky-500 group-hover:text-white transition-all">
-                            <span class="text-lg font-black text-[#075985] group-hover:text-white">{{ stat.total_customer }}</span>
+                        <div class="text-right">
+                            <span class="text-2xl font-black text-[#075985] leading-none">{{ stat.total_customer }}</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -175,28 +173,13 @@
 </div>
 
 <script>
-    // ... (Script tetap sama secara fungsionalitas, hanya update visual class jika diperlukan) ...
-    // Pastikan fungsi resetForm() mengembalikan title ke default
-    function resetForm() {
-        document.getElementById('form-title').innerText = "Input Kunjungan";
-        document.getElementById('salesForm').reset();
-        document.getElementById('edit_id').value = "";
-        document.getElementById('btn-submit').innerText = "Submit Data";
-        document.getElementById('btn-cancel').classList.add('hidden');
-        document.getElementById('salesForm').action = "/sales/add";
-        document.getElementById('input_tanggal').valueAsDate = new Date();
-    }
-
+    // Logika JS tetap sama untuk menjaga fungsi
     async function deleteRecord(id) {
         if (confirm('Hapus data kunjungan ini?')) {
             try {
                 const response = await fetch(`/sales/delete/${id}`, { method: 'DELETE' });
-                if (response.ok) {
-                    location.reload();
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
+                if (response.ok) { location.reload(); }
+            } catch (error) { console.error('Error:', error); }
         }
     }
 
@@ -208,12 +191,20 @@
         document.getElementById('input_sales').value = sales;
         document.getElementById('input_customer').value = customer;
         document.getElementById('input_alamat').value = alamat;
-        
         document.getElementById('btn-submit').innerText = "Update Data";
         document.getElementById('btn-cancel').classList.remove('hidden');
-        document.getElementById('salesForm').action = "/sales/update"; 
-        
+        document.getElementById('salesForm').action = "/sales/update";
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        document.getElementById('form-title').innerText = "Input Kunjungan / Customer Baru";
+        document.getElementById('salesForm').reset();
+        document.getElementById('edit_id').value = "";
+        document.getElementById('btn-submit').innerText = "Submit Data";
+        document.getElementById('btn-cancel').classList.add('hidden');
+        document.getElementById('salesForm').action = "/sales/add";
+        document.getElementById('input_tanggal').valueAsDate = new Date();
     }
 
     function exportToPDF() {
@@ -223,13 +214,18 @@
         doc.text("SALES DAILY ACTIVITY REPORT", 14, 15);
         doc.autoTable({
             html: '#salesTable',
-            startY: 25,
+            startY: 30,
             theme: 'grid',
             headStyles: { fillColor: [7, 89, 133], fontSize: 8 },
             styles: { fontSize: 8 },
-            columns: [ { header: 'Waktu' }, { header: 'Info Sales & Toko' } ]
+            columns: [
+                { header: 'Waktu' },
+                { header: 'Sales' },
+                { header: 'Customer' },
+                { header: 'Alamat' }
+            ]
         });
-        doc.save(`Sales_Report.pdf`);
+        doc.save(`Sales_Report_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 
     document.getElementById('input_tanggal').valueAsDate = new Date();
