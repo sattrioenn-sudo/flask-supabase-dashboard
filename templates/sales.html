@@ -17,7 +17,7 @@
                 <div class="w-2 h-8 bg-indigo-600 rounded-full"></div>
                 <div>
                     <h2 id="form-title" class="text-xl font-bold text-slate-800">Input Kunjungan</h2>
-                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Formulir Pelaporan Harian</p>
+                    <p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Verifikasi Foto & GPS Aktif</p>
                 </div>
             </div>
             <button onclick="exportToPDF()" class="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-lg shadow-rose-100 active:scale-95">
@@ -28,8 +28,12 @@
             </button>
         </div>
 
-        <form id="salesForm" action="/sales/add" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <form id="salesForm" action="/sales/add" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <input type="hidden" name="id" id="edit_id">
+            
+            <!-- NEW: Hidden Input GPS -->
+            <input type="hidden" name="location_coords" id="input_coords">
+
             <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Tanggal</label>
                 <input type="date" name="tanggal" id="input_tanggal" required onchange="updateHariOtomatis(this.value)"
@@ -52,13 +56,37 @@
                     {% endfor %}
                 </datalist>
             </div>
+
+            <!-- NEW: Photo & GPS Section -->
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-rose-500 uppercase tracking-widest ml-1">Bukti Kunjungan</label>
+                <div class="flex gap-2">
+                    <label class="flex-1 cursor-pointer bg-rose-50 border-2 border-dashed border-rose-200 rounded-2xl flex flex-col items-center justify-center p-2 hover:bg-rose-100 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span id="photo-label" class="text-[10px] font-bold text-rose-600 mt-1 text-center leading-tight">Ambil Foto</span>
+                        <input type="file" name="foto_kunjungan" accept="image/*" capture="environment" class="hidden" onchange="previewImage(this)">
+                    </label>
+                    <button type="button" onclick="getLocation()" id="btn-gps" class="w-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-indigo-100 hover:text-indigo-600 transition-all shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                </div>
+                <p id="gps-status" class="text-[9px] text-slate-400 font-bold italic ml-1">GPS: Menunggu...</p>
+            </div>
+
+            <div class="md:col-span-3 space-y-2">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Alamat Customer</label>
+                <textarea name="alamat_customer" id="input_alamat" rows="2" required class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none resize-none"></textarea>
+            </div>
+            
             <div class="flex items-end gap-2">
                 <button type="submit" id="btn-submit" class="w-full bg-slate-900 text-white font-bold text-xs py-3.5 rounded-2xl hover:bg-indigo-600 transition-all shadow-lg uppercase tracking-widest">Submit</button>
                 <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden w-1/3 bg-slate-100 text-slate-500 font-bold text-xs py-3.5 rounded-2xl hover:bg-slate-200 transition-all uppercase">X</button>
-            </div>
-            <div class="md:col-span-4 space-y-2">
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Alamat Customer</label>
-                <textarea name="alamat_customer" id="input_alamat" rows="2" required class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none resize-none"></textarea>
             </div>
         </form>
     </div>
@@ -72,7 +100,7 @@
                     <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="pagination_info"></div>
                 </div>
                 
-                <!-- NEW SEARCH BAR -->
+                <!-- SEARCH BAR -->
                 <div class="relative group">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-4 h-4 text-slate-400 group-focus-within:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +153,7 @@
             <div class="p-6 border-t border-slate-50 bg-slate-50/30 flex justify-center gap-2" id="pagination_controls"></div>
         </div>
 
-        <!-- SIDEBAR RINGKASAN WITH SALES FILTER -->
+        <!-- SIDEBAR RINGKASAN -->
         <div class="lg:col-span-3 space-y-6">
             <div class="bg-indigo-900 rounded-3xl p-6 text-white shadow-xl shadow-indigo-200">
                 <h3 class="text-sm font-black uppercase tracking-widest mb-4 opacity-70">Ringkasan Sales</h3>
@@ -169,43 +197,74 @@
 </div>
 
 <script>
+    // --- GEOLOCATION LOGIC ---
+    function getLocation() {
+        const status = document.getElementById('gps-status');
+        const btnGps = document.getElementById('btn-gps');
+        const inputCoords = document.getElementById('input_coords');
+
+        if (!navigator.geolocation) {
+            status.innerText = "GPS tidak didukung";
+            return;
+        }
+
+        status.innerText = "Mencari Lokasi...";
+        btnGps.classList.add('animate-pulse', 'text-indigo-600');
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude.toFixed(6);
+                const long = position.coords.longitude.toFixed(6);
+                inputCoords.value = `${lat}, ${long}`;
+                status.innerText = `Terdeteksi: ${lat}, ${long}`;
+                status.classList.replace('text-slate-400', 'text-green-600');
+                btnGps.classList.remove('animate-pulse');
+                btnGps.classList.replace('bg-slate-100', 'bg-green-100');
+                btnGps.classList.add('text-green-600');
+            },
+            () => {
+                status.innerText = "GPS Gagal (Harap Izinkan)";
+                status.classList.add('text-rose-500');
+            },
+            { enableHighAccuracy: true }
+        );
+    }
+
+    function previewImage(input) {
+        const label = document.getElementById('photo-label');
+        if (input.files && input.files[0]) {
+            label.innerText = "Foto Terpilih!";
+            label.classList.replace('text-rose-600', 'text-green-600');
+            // Auto trigger GPS when photo taken
+            getLocation();
+        }
+    }
+
     // --- CONFIG & PAGINATION ---
     const rowsPerPage = 5;
     let currentPage = 1;
-    let currentFilteredRows = []; // Menyimpan baris hasil filter search
+    let currentFilteredRows = []; 
     const allRows = Array.from(document.querySelectorAll('.table-row-item'));
 
-    // --- SEARCH LOGIC ---
     function handleSearch() {
         const keyword = document.getElementById('globalSearch').value.toLowerCase();
-        
-        // Filter semua baris berdasarkan keyword Nama Customer atau Nama Sales
         currentFilteredRows = allRows.filter(row => {
             const customerName = row.querySelector('.search-target').innerText.toLowerCase();
             const salesName = row.getAttribute('data-sales').toLowerCase();
             return customerName.includes(keyword) || salesName.includes(keyword);
         });
-
-        currentPage = 1; // Reset ke halaman pertama saat mulai mencari
+        currentPage = 1;
         renderTable();
     }
 
     function renderTable() {
-        // Tentukan data mana yang akan dipagination (hasil search atau semua data)
         const keyword = document.getElementById('globalSearch').value.toLowerCase();
         const activeRows = (keyword === "") ? allRows : currentFilteredRows;
-
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
 
-        // Sembunyikan semua baris
         allRows.forEach(row => row.style.display = 'none');
-
-        // Tampilkan hanya baris yang masuk range pagination dari data yang aktif
-        activeRows.slice(start, end).forEach(row => {
-            row.style.display = '';
-        });
-
+        activeRows.slice(start, end).forEach(row => { row.style.display = ''; });
         updatePagination(activeRows.length);
     }
 
@@ -216,19 +275,13 @@
         
         info.innerText = `Showing ${totalData} entries | Page ${currentPage} of ${totalPages || 1}`;
         container.innerHTML = '';
-
         if (totalPages <= 1) return;
 
         for (let i = 1; i <= totalPages; i++) {
             const btn = document.createElement('button');
             btn.innerText = i;
             btn.className = `w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === i ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-400 hover:bg-slate-100'}`;
-            btn.onclick = () => { 
-                currentPage = i; 
-                renderTable(); 
-                // Auto scroll ke tabel saat ganti page di mobile
-                if(window.innerWidth < 768) document.getElementById('salesTable').scrollIntoView({behavior: 'smooth'});
-            };
+            btn.onclick = () => { currentPage = i; renderTable(); if(window.innerWidth < 768) document.getElementById('salesTable').scrollIntoView({behavior: 'smooth'}); };
             container.appendChild(btn);
         }
     }
@@ -242,13 +295,10 @@
 
         summaryCards.forEach(card => {
             const cardSalesName = card.getAttribute('data-sales-name');
-            
             if (selectedSales !== "" && selectedSales !== cardSalesName) {
                 card.classList.add('hidden');
                 return;
-            } else {
-                card.classList.remove('hidden');
-            }
+            } else { card.classList.remove('hidden'); }
 
             let count = 0;
             allRows.forEach(row => {
@@ -263,7 +313,6 @@
         });
     }
 
-    // --- FORM HELPERS ---
     function updateHariOtomatis(val) {
         if (!val) return;
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -282,16 +331,13 @@
         }
     }
 
-    // Init On Load
     window.onload = () => {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('input_tanggal').value = today;
         updateHariOtomatis(today);
-        
         const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
         document.getElementById('filter_start').value = firstDay;
         document.getElementById('filter_end').value = today;
-
         renderTable();
         filterSummary();
     };
@@ -316,6 +362,12 @@
         document.getElementById('btn-submit').innerText = "Submit";
         document.getElementById('btn-cancel').classList.add('hidden');
         document.getElementById('salesForm').action = "/sales/add";
+        // Reset GPS Status
+        document.getElementById('gps-status').innerText = "GPS: Menunggu...";
+        document.getElementById('gps-status').className = "text-[9px] text-slate-400 font-bold italic ml-1";
+        document.getElementById('btn-gps').className = "w-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-indigo-100 hover:text-indigo-600 transition-all shadow-sm";
+        document.getElementById('photo-label').innerText = "Ambil Foto";
+        document.getElementById('photo-label').className = "text-[10px] font-bold text-rose-600 mt-1 text-center leading-tight";
     }
 
     async function deleteRecord(id) {
@@ -336,7 +388,7 @@
             html: '#salesTable', 
             startY: 25, 
             theme: 'grid',
-            headStyles: { fillStyle: [79, 70, 229] }, // Indigo-600
+            headStyles: { fillStyle: [79, 70, 229] }, 
             columns: [
                 {header: 'Waktu', dataKey: 'waktu'},
                 {header: 'Sales', dataKey: 'sales'},
