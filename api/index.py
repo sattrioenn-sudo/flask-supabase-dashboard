@@ -62,35 +62,6 @@ def dashboard():
                            total_vouchers=total_v,
                            activity_data=db_sales)
 
-# --- CUSTOMER MANAGEMENT (TAMBAHAN BARU AGAR TOMBOL BERFUNGSI) ---
-
-@app.route('/master-customer')
-def master_customer():
-    if 'user_id' not in session: return redirect(url_for('login'))
-    try:
-        # Mengambil daftar customer unik dari tabel sales_activity
-        response = supabase.table('sales_activity').select("nama_customer, alamat_customer").execute()
-        
-        # Logika menghapus duplikasi nama customer
-        customers = []
-        seen = set()
-        for item in (response.data or []):
-            name = item['nama_customer']
-            if name not in seen:
-                customers.append(item)
-                seen.add(name)
-        
-    except Exception as e:
-        print(f"Error Master Customer: {e}")
-        customers = []
-        
-    return render_template('sales.html', 
-                           email=session.get('user_email'), 
-                           master_customers=customers,
-                           activity_data=[], # Kosongkan agar tidak bentrok dengan tabel aktivitas
-                           summary_stats=[],
-                           view_master=True) # Flag untuk membedakan tampilan jika diperlukan
-
 # --- SALES MANAGEMENT ---
 
 @app.route('/sales')
@@ -101,24 +72,35 @@ def sales():
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
-    try:
-        master_res = supabase.table('sales_activity').select("nama_customer, alamat_customer").execute()
-        unique_customers = []
-        seen = set()
-        for item in (master_res.data or []):
-            name = item['nama_customer']
-            if name not in seen:
-                unique_customers.append(item)
-                seen.add(name)
+    # Inisialisasi variabel agar tidak error di render_template jika try gagal
+    db_sales = []
+    stats = []
+    unique_customers = []
 
+    try:
+        # 1. Ambil list customer unik untuk dropdown/autocomplete
+        master_res = supabase.table('sales_activity').select("nama_customer").execute()
+        seen = set()
+        if master_res.data:
+            for item in master_res.data:
+                name = item.get('nama_customer')
+                if name and name not in seen:
+                    unique_customers.append({"nama_customer": name})
+                    seen.add(name)
+
+        # 2. Query data sales dengan filter
         query = supabase.table('sales_activity').select("*")
-        if sales_filter: query = query.ilike('nama_sales', f'%{sales_filter}%')
-        if start_date: query = query.gte('tanggal', start_date)
-        if end_date: query = query.lte('tanggal', end_date)
+        if sales_filter: 
+            query = query.ilike('nama_sales', f'%{sales_filter}%')
+        if start_date: 
+            query = query.gte('tanggal', start_date)
+        if end_date: 
+            query = query.lte('tanggal', end_date)
             
         response = query.order('tanggal', desc=True).execute()
         db_sales = response.data if response.data else []
         
+        # 3. Hitung statistik ringkas
         summary = {}
         for item in db_sales:
             name = item.get('nama_sales', 'Unknown')
@@ -126,8 +108,8 @@ def sales():
         stats = [{"nama_sales": k, "total_customer": v} for k, v in summary.items()]
         
     except Exception as e: 
-        db_sales, stats, unique_customers = [], [], []
-        print(f"Error Sales: {e}")
+        print(f"Error Sales Route: {e}")
+        # Variabel sudah diinisialisasi kosong di atas, jadi aman untuk render
         
     return render_template('sales.html', 
                            email=session.get('user_email'), 
