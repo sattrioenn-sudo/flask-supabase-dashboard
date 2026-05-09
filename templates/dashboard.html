@@ -4,17 +4,33 @@
 {% block header_title %}System Dashboard{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+<!-- Stat Cards Section -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <!-- Voucher Count (Original) -->
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Database Records</p>
-        <h3 class="text-4xl font-black text-emerald-600 mt-2">{{ total_vouchers }}</h3>
-        <p class="text-xs text-slate-400 mt-2">Active WiFi Vouchers</p>
+        <div class="flex items-end gap-2">
+            <h3 class="text-4xl font-black text-emerald-600 mt-2">{{ total_vouchers }}</h3>
+            <span class="text-[10px] text-emerald-500 font-bold mb-2">Vouchers</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Active WiFi Records</p>
     </div>
 
-    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between">
+    <!-- Sales Activity (New - Creative) -->
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+        <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Total Sales Activity</p>
+        <div class="flex items-end gap-2">
+            <h3 class="text-4xl font-black text-blue-600 mt-2">{{ activity_data|length if activity_data else '0' }}</h3>
+            <span class="text-[10px] text-blue-500 font-bold mb-2">Activities</span>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Recorded this month</p>
+    </div>
+
+    <!-- Server Status (Original - Refined) -->
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
         <div>
-            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Server Status</p>
-            <h3 class="text-2xl font-black text-emerald-500 mt-2 uppercase italic">Online</h3>
+            <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">System Status</p>
+            <h3 class="text-xl font-black text-emerald-500 mt-2 uppercase italic">Online</h3>
         </div>
         <div class="flex h-3 w-3 relative">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -22,18 +38,90 @@
         </div>
     </div>
 
-    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+    <!-- Storage Sync (Original) -->
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Storage Sync</p>
-        <h3 class="text-2xl font-black text-slate-800 mt-2 italic">Supabase</h3>
+        <h3 class="text-xl font-black text-slate-800 mt-2 italic">Supabase</h3>
         <p class="text-[10px] text-emerald-500 font-bold uppercase mt-1">Cloud Connected</p>
     </div>
 </div>
 
-<div class="mt-8 bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
-    <h3 class="text-xl font-bold text-slate-800 mb-4">Quick Actions</h3>
-    <div class="flex gap-4">
-        <a href="/vouchers" class="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 transition-all">Manage Vouchers</a>
-        <a href="/analytics" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200 transition-all">View Reports</a>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+    <!-- Sales Chart (New Section) -->
+    <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-slate-800">Sales Performance</h3>
+            <span class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase">Real-time Data</span>
+        </div>
+        <div class="h-[300px] w-full">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Side Info -->
+    <div class="space-y-6">
+        <div class="bg-slate-900 p-8 rounded-[2.5rem] shadow-xl text-white">
+            <h3 class="text-lg font-bold mb-4 italic">Quick Actions</h3>
+            <div class="flex flex-col gap-3">
+                <a href="/vouchers" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-xs text-center transition-all flex items-center justify-center gap-2">
+                    <span>Manage Vouchers</span>
+                </a>
+                <a href="/sales" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs text-center transition-all flex items-center justify-center gap-2">
+                    <span>Add Sales Report</span>
+                </a>
+                <a href="/analytics" class="w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold text-xs text-center transition-all">
+                    View Full Reports
+                </a>
+            </div>
+        </div>
+        
+        <!-- Info Card -->
+        <div class="bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100">
+            <p class="text-emerald-800 text-xs font-bold italic">Pro Tip:</p>
+            <p class="text-emerald-600 text-[11px] mt-1">Gunakan fitur <b>Recap</b> di menu Sales untuk melihat performa harian tim kamu.</p>
+        </div>
     </div>
 </div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    // Inisialisasi Chart dengan gradien warna modern
+    const blueGradient = ctx.createLinearGradient(0, 0, 0, 400);
+    blueGradient.addColorStop(0, 'rgba(37, 99, 235, 0.2)');
+    blueGradient.addColorStop(1, 'rgba(37, 99, 235, 0)');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Customer Visits',
+                data: [12, 19, 15, 25, 22, 30, 45], // Data dummy, nanti bisa diisi via API
+                borderColor: '#2563eb',
+                borderWidth: 4,
+                fill: true,
+                backgroundColor: blueGradient,
+                tension: 0.4,
+                pointRadius: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { display: false },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' } }
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}
