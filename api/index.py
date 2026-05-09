@@ -62,6 +62,35 @@ def dashboard():
                            total_vouchers=total_v,
                            activity_data=db_sales)
 
+# --- CUSTOMER MANAGEMENT (TAMBAHAN BARU AGAR TOMBOL BERFUNGSI) ---
+
+@app.route('/master-customer')
+def master_customer():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    try:
+        # Mengambil daftar customer unik dari tabel sales_activity
+        response = supabase.table('sales_activity').select("nama_customer, alamat_customer").execute()
+        
+        # Logika menghapus duplikasi nama customer
+        customers = []
+        seen = set()
+        for item in (response.data or []):
+            name = item['nama_customer']
+            if name not in seen:
+                customers.append(item)
+                seen.add(name)
+        
+    except Exception as e:
+        print(f"Error Master Customer: {e}")
+        customers = []
+        
+    return render_template('sales.html', 
+                           email=session.get('user_email'), 
+                           master_customers=customers,
+                           activity_data=[], # Kosongkan agar tidak bentrok dengan tabel aktivitas
+                           summary_stats=[],
+                           view_master=True) # Flag untuk membedakan tampilan jika diperlukan
+
 # --- SALES MANAGEMENT ---
 
 @app.route('/sales')
@@ -73,13 +102,13 @@ def sales():
     end_date = request.args.get('end_date')
 
     try:
-        master_res = supabase.table('sales_activity').select("nama_customer").execute()
+        master_res = supabase.table('sales_activity').select("nama_customer, alamat_customer").execute()
         unique_customers = []
         seen = set()
         for item in (master_res.data or []):
             name = item['nama_customer']
             if name not in seen:
-                unique_customers.append({"nama_customer": name})
+                unique_customers.append(item)
                 seen.add(name)
 
         query = supabase.table('sales_activity').select("*")
@@ -173,7 +202,6 @@ def update_voucher_lock():
     if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
     data = request.get_json(silent=True) or {}
     code = data.get('voucher_code')
-    # Paksa konversi ke boolean murni untuk menghindari error tipe data string dari JS
     raw_status = data.get('is_locked')
     new_status = True if str(raw_status).lower() == 'true' else False
     
@@ -201,7 +229,6 @@ def get_voucher_api():
         response = supabase.table('vouchers').select("*").eq('user_name', user_name).limit(1).execute()
         if response.data:
             v = response.data[0]
-            # Logika kunci yang lebih aman dengan pengecekan string dan bool
             lock_val = v.get('is_locked')
             if lock_val is True or str(lock_val).lower() == 'true':
                 return jsonify({"status": "error", "message": "Terblokir"}), 403
