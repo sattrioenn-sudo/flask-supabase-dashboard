@@ -43,10 +43,24 @@ def login():
 def dashboard():
     if 'user_id' not in session: return redirect(url_for('login'))
     try:
-        response = supabase.table('vouchers').select("*").execute()
-        db_vouchers = response.data if response.data else []
-    except: db_vouchers = []
-    return render_template('dashboard.html', email=session.get('user_email'), vouchers=db_vouchers)
+        # Mengambil data Voucher
+        res_v = supabase.table('vouchers').select("*", count='exact').execute()
+        db_vouchers = res_v.data if res_v.data else []
+        total_v = res_v.count if res_v.count is not None else len(db_vouchers)
+        
+        # Mengambil data Sales untuk Grafik Dashboard
+        res_s = supabase.table('sales_activity').select("*").order('tanggal', desc=True).limit(10).execute()
+        db_sales = res_s.data if res_s.data else []
+        
+    except Exception as e:
+        print(f"Dashboard Error: {e}")
+        db_vouchers, db_sales, total_v = [], [], 0
+        
+    return render_template('dashboard.html', 
+                           email=session.get('user_email'), 
+                           vouchers=db_vouchers, 
+                           total_vouchers=total_v,
+                           activity_data=db_sales)
 
 # --- SALES MANAGEMENT ---
 
@@ -156,15 +170,16 @@ def vouchers():
 
 @app.route('/vouchers/update_lock', methods=['POST'])
 def update_voucher_lock():
-    """Fungsi krusial yang sebelumnya tidak ada untuk memproses Unlock/Lock"""
     if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
     data = request.get_json(silent=True) or {}
     code = data.get('voucher_code')
-    new_status = data.get('is_locked', False)
+    # Paksa konversi ke boolean murni untuk menghindari error tipe data string dari JS
+    raw_status = data.get('is_locked')
+    new_status = True if str(raw_status).lower() == 'true' else False
     
     try:
         supabase.table('vouchers').update({"is_locked": new_status}).eq('voucher_code', code).execute()
-        return jsonify({"status": "success"}), 200
+        return jsonify({"status": "success", "new_status": new_status}), 200
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
@@ -183,11 +198,12 @@ def get_voucher_api():
     user_name = data.get('user_name', '').strip()
     if not user_name: return jsonify({"status": "error", "message": "Nama harus diisi"}), 400
     try:
-        # Menambahkan pengecekan eksplisit agar logika lock terbaca benar
         response = supabase.table('vouchers').select("*").eq('user_name', user_name).limit(1).execute()
         if response.data:
             v = response.data[0]
-            if v.get('is_locked') is True: # Validasi boolean murni
+            # Logika kunci yang lebih aman dengan pengecekan string dan bool
+            lock_val = v.get('is_locked')
+            if lock_val is True or str(lock_val).lower() == 'true':
                 return jsonify({"status": "error", "message": "Terblokir"}), 403
             return jsonify({"status": "success", "data": v}), 200
         return jsonify({"status": "error", "message": "Not Found"}), 404
@@ -198,7 +214,7 @@ def analytics():
     if 'user_id' not in session: return redirect(url_for('login'))
     try:
         response = supabase.table('vouchers').select("id", count='exact').execute()
-        total_vouchers = response.count if response.count else 0
+        total_vouchers = response.count if response.count is not None else 0
     except: total_vouchers = 0
     return render_template('analytics.html', email=session.get('user_email'), total_vouchers=total_vouchers)
 
