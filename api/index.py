@@ -174,7 +174,12 @@ def lock_voucher_api():
         return jsonify({"status": "success"}), 200
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
-# --- ANALYTICS & LOGOUT ---
+# --- SETTINGS, ANALYTICS & LOGOUT ---
+
+@app.route('/settings')
+def settings():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    return render_template('settings.html', email=session.get('user_email'), user_id=session.get('user_id'))
 
 @app.route('/analytics')
 def analytics():
