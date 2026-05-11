@@ -2,7 +2,7 @@ import os
 import sys
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 
-# FIX: Path Management agar lebih robust
+# Path Management
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.dirname(CURRENT_DIR)
 if PARENT_DIR not in sys.path:
@@ -43,35 +43,24 @@ def login():
 def dashboard():
     if 'user_id' not in session: return redirect(url_for('login'))
     try:
-        # Mengambil data Voucher
         res_v = supabase.table('vouchers').select("*", count='exact').execute()
         db_vouchers = res_v.data if res_v.data else []
         total_v = res_v.count if res_v.count is not None else len(db_vouchers)
-        
-        # Mengambil data Sales untuk Grafik Dashboard
         res_s = supabase.table('sales_activity').select("*").order('tanggal', desc=True).limit(10).execute()
         db_sales = res_s.data if res_s.data else []
-        
     except Exception as e:
         print(f"Dashboard Error: {e}")
         db_vouchers, db_sales, total_v = [], [], 0
-        
-    return render_template('dashboard.html', 
-                           email=session.get('user_email'), 
-                           vouchers=db_vouchers, 
-                           total_vouchers=total_v,
-                           activity_data=db_sales)
+    return render_template('dashboard.html', email=session.get('user_email'), vouchers=db_vouchers, total_vouchers=total_v, activity_data=db_sales)
 
 # --- SALES MANAGEMENT ---
 
 @app.route('/sales')
 def sales():
     if 'user_id' not in session: return redirect(url_for('login'))
-    
     sales_filter = request.args.get('sales_filter')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
-
     try:
         master_res = supabase.table('sales_activity').select("nama_customer").execute()
         unique_customers = []
@@ -81,41 +70,26 @@ def sales():
             if name not in seen:
                 unique_customers.append({"nama_customer": name})
                 seen.add(name)
-
         query = supabase.table('sales_activity').select("*")
         if sales_filter: query = query.ilike('nama_sales', f'%{sales_filter}%')
         if start_date: query = query.gte('tanggal', start_date)
         if end_date: query = query.lte('tanggal', end_date)
-            
         response = query.order('tanggal', desc=True).execute()
         db_sales = response.data if response.data else []
-        
         summary = {}
         for item in db_sales:
             name = item.get('nama_sales', 'Unknown')
             summary[name] = summary.get(name, 0) + 1
         stats = [{"nama_sales": k, "total_customer": v} for k, v in summary.items()]
-        
     except Exception as e: 
         db_sales, stats, unique_customers = [], [], []
         print(f"Error Sales: {e}")
-        
-    return render_template('sales.html', 
-                           email=session.get('user_email'), 
-                           activity_data=db_sales, 
-                           summary_stats=stats,
-                           master_customers=unique_customers)
+    return render_template('sales.html', email=session.get('user_email'), activity_data=db_sales, summary_stats=stats, master_customers=unique_customers)
 
 @app.route('/sales/add', methods=['POST'])
 def add_sales():
     if 'user_id' not in session: return redirect(url_for('login'))
-    data = {
-        "hari": request.form.get('hari'),
-        "tanggal": request.form.get('tanggal'),
-        "nama_sales": request.form.get('nama_sales'),
-        "nama_customer": request.form.get('nama_customer'),
-        "alamat_customer": request.form.get('alamat_customer')
-    }
+    data = {"hari": request.form.get('hari'), "tanggal": request.form.get('tanggal'), "nama_sales": request.form.get('nama_sales'), "nama_customer": request.form.get('nama_customer'), "alamat_customer": request.form.get('alamat_customer')}
     try:
         supabase.table('sales_activity').insert(data).execute()
         return redirect(url_for('sales'))
@@ -125,13 +99,7 @@ def add_sales():
 def update_sales():
     if 'user_id' not in session: return redirect(url_for('login'))
     row_id = request.form.get('id')
-    data = {
-        "hari": request.form.get('hari'),
-        "tanggal": request.form.get('tanggal'),
-        "nama_sales": request.form.get('nama_sales'),
-        "nama_customer": request.form.get('nama_customer'),
-        "alamat_customer": request.form.get('alamat_customer')
-    }
+    data = {"hari": request.form.get('hari'), "tanggal": request.form.get('tanggal'), "nama_sales": request.form.get('nama_sales'), "nama_customer": request.form.get('nama_customer'), "alamat_customer": request.form.get('alamat_customer')}
     try:
         supabase.table('sales_activity').update(data).eq('id', row_id).execute()
         return redirect(url_for('sales'))
@@ -153,15 +121,9 @@ def vouchers():
     if request.method == 'POST':
         data = request.get_json(silent=True) or {}
         try:
-            supabase.table('vouchers').insert({
-                "user_name": data.get('user_name', 'Guest'),
-                "voucher_code": data.get('voucher_code'),
-                "location": data.get('location', 'Office'),
-                "speed": "15Mbps", "status": "Active", "is_locked": False 
-            }).execute()
+            supabase.table('vouchers').insert({"user_name": data.get('user_name', 'Guest'), "voucher_code": data.get('voucher_code'), "location": data.get('location', 'Office'), "speed": "15Mbps", "status": "Active", "is_locked": False}).execute()
             return jsonify({"status": "success"}), 200
         except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
-    
     try:
         response = supabase.table('vouchers').select("*").order('created_at', desc=True).execute()
         db_vouchers = response.data if response.data else []
@@ -173,24 +135,18 @@ def update_voucher_lock():
     if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
     data = request.get_json(silent=True) or {}
     code = data.get('voucher_code')
-    # Paksa konversi ke boolean murni untuk menghindari error tipe data string dari JS
     raw_status = data.get('is_locked')
     new_status = True if str(raw_status).lower() == 'true' else False
-    
     try:
         supabase.table('vouchers').update({"is_locked": new_status}).eq('voucher_code', code).execute()
         return jsonify({"status": "success", "new_status": new_status}), 200
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
-def delete_voucher(code_voucher):
-    if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
-    try:
-        supabase.table('vouchers').delete().eq('voucher_code', code_voucher).execute()
-        return jsonify({"status": "success"}), 200
-    except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+# --- API FOR CLAIM PAGE ---
 
-# --- API & ANALYTICS ---
+@app.route('/claim')
+def claim_page():
+    return render_template('claim.html')
 
 @app.route('/api/get-voucher', methods=['POST'])
 def get_voucher_api():
@@ -201,13 +157,24 @@ def get_voucher_api():
         response = supabase.table('vouchers').select("*").eq('user_name', user_name).limit(1).execute()
         if response.data:
             v = response.data[0]
-            # Logika kunci yang lebih aman dengan pengecekan string dan bool
             lock_val = v.get('is_locked')
             if lock_val is True or str(lock_val).lower() == 'true':
                 return jsonify({"status": "error", "message": "Terblokir"}), 403
             return jsonify({"status": "success", "data": v}), 200
         return jsonify({"status": "error", "message": "Not Found"}), 404
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/lock-voucher', methods=['POST'])
+def lock_voucher_api():
+    data = request.get_json(silent=True) or {}
+    row_id = data.get('id')
+    if not row_id: return jsonify({"status": "error", "message": "ID Missing"}), 400
+    try:
+        supabase.table('vouchers').update({"is_locked": True}).eq('id', row_id).execute()
+        return jsonify({"status": "success"}), 200
+    except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+
+# --- ANALYTICS & LOGOUT ---
 
 @app.route('/analytics')
 def analytics():
