@@ -120,7 +120,8 @@
                 if (res.ok) {
                     const statusLock = result.data.is_locked;
                     if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        this.errorMsg = 'VOUCHER SUDAH TERPAKAI.';
+                        // Teks error diubah di bawah ini sesuai permintaan Anda
+                        this.errorMsg = 'VOUCHER SUDAH DICLAIM HUBUNGI TIM IT';
                         this.voucher = null;
                     } else {
                         this.voucher = result.data;
@@ -203,12 +204,10 @@
                     <div class="grid grid-cols-2 gap-4 mb-8">
                         <div class="p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 text-center">
                             <p class="text-white/40 font-bold uppercase mb-1" style="font-size: 8px;">Network Speed</p>
-                            <!-- Dinamis sesuai data DB, otomatis cek jika sudah ada kata 'Mbps' -->
                             <p class="font-black text-sky-400 text-xs" x-text="voucher.speed ? (voucher.speed.toLowerCase().includes('mbps') ? voucher.speed : voucher.speed + ' Mbps') : 'High Speed'"></p>
                         </div>
                         <div class="p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 text-center">
                             <p class="text-white/40 font-bold uppercase mb-1" style="font-size: 8px;">Scan Location</p>
-                            <!-- Dinamis sesuai field 'location' di database Supabase -->
                             <p class="font-black text-green-400 text-xs uppercase" x-text="voucher.location || 'Area Kantor'"></p>
                         </div>
                     </div>
