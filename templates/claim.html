@@ -120,7 +120,6 @@
                 if (res.ok) {
                     const statusLock = result.data.is_locked;
                     if (statusLock === true || statusLock === 1 || statusLock === 'true') {
-                        // Teks error diubah di bawah ini sesuai permintaan Anda
                         this.errorMsg = 'VOUCHER SUDAH DICLAIM HUBUNGI TIM IT';
                         this.voucher = null;
                     } else {
@@ -130,7 +129,13 @@
                         this.lockVoucher(result.data.id);
                     }
                 } else {
-                    this.errorMsg = result.message.toUpperCase();
+                    // Cek jika pesan error backend mengandung kata kunci penolakan voucher
+                    let serverMsg = result.message ? result.message.toUpperCase() : '';
+                    if (serverMsg.includes('BLOKIR') || serverMsg.includes('TERPAKAI') || serverMsg.includes('CLAIM') || serverMsg.includes('LIMIT')) {
+                        this.errorMsg = 'VOUCHER SUDAH DICLAIM HUBUNGI TIM IT';
+                    } else {
+                        this.errorMsg = serverMsg || 'GAGAL MENGAMBIL VOUCHER.';
+                    }
                 }
             } catch (e) {
                 this.errorMsg = 'SERVER OFFLINE.';
