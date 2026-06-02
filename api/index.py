@@ -142,6 +142,36 @@ def update_voucher_lock():
         return jsonify({"status": "success", "new_status": new_status}), 200
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
+# TAMBAHAN BARU: Route untuk Update Voucher via Form Edit di Front-End
+@app.route('/vouchers/update/<code_voucher>', methods=['POST'])
+def update_voucher_data(code_voucher):
+    if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
+    data = request.get_json(silent=True) or {}
+    user_name = data.get('user_name')
+    location = data.get('location')
+    try:
+        supabase.table('vouchers').update({"user_name": user_name, "location": location}).eq('voucher_code', code_voucher).execute()
+        return jsonify({"status": "success"}), 200
+    except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+
+# TAMBAHAN BARU: Route untuk Unlock Voucher
+@app.route('/vouchers/unlock/<code_voucher>', methods=['POST'])
+def unlock_voucher_data(code_voucher):
+    if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
+    try:
+        supabase.table('vouchers').update({"is_locked": False}).eq('voucher_code', code_voucher).execute()
+        return jsonify({"status": "success"}), 200
+    except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+
+# TAMBAHAN BARU: Route untuk Delete Voucher
+@app.route('/vouchers/delete/<code_voucher>', methods=['`DELETE`', 'DELETE'])
+def delete_voucher_data(code_voucher):
+    if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
+    try:
+        supabase.table('vouchers').delete().eq('voucher_code', code_voucher).execute()
+        return jsonify({"status": "success"}), 200
+    except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+
 # --- API FOR CLAIM PAGE ---
 
 @app.route('/claim')
