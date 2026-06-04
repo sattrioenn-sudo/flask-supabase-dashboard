@@ -2,7 +2,7 @@
 
 {% block title %}Accounting - Log Analisis Tagihan{% endblock %}
 
-{% block header_title %}Accounting & Billing{% endblock %}
+{% block header_title %}Accounting & Billing Log{% endblock %}
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -22,26 +22,27 @@
             <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Scan File Tagihan</h3>
-                    <p class="text-[10px] text-slate-400 font-medium">Unggah file Excel (.xlsx/.xls) atau .csv</p>
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Smart Scan File</h3>
+                    <p class="text-[10px] text-slate-400 font-medium">Mendukung format file Excel dan CSV Anda</p>
                 </div>
             </div>
             <div class="p-6">
-                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-sky-400 transition-colors bg-slate-50/50">
+                <div class="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center hover:border-[#075985] transition-colors bg-slate-50/50 group">
                     <input type="file" id="excel_file" accept=".xlsx, .xls, .csv" class="hidden" onchange="scanExcelFile(event)">
                     <label for="excel_file" class="cursor-pointer flex flex-col items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400 group-hover:text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400 group-hover:text-[#075985] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        <span class="text-xs font-bold text-slate-600">Pilih atau Seret File</span>
-                        <span class="text-[10px] text-slate-400">Kolom wajib: bulan_tahun, nomor_telepon, pemilik, nominal</span>
+                        <span class="text-xs font-bold text-slate-600">Pilih / Seret File Log Tagihan</span>
+                        <span class="text-[9px] text-slate-400 max-w-xs mx-auto">Sistem membaca kolom otomatis (MSISDN, User, Nominal) sesuai file lampiran Anda</span>
                     </label>
                 </div>
-                <div id="scan_status" class="mt-3 text-[11px] font-semibold text-center hidden"></div>
+                
+                <div id="scan_status" class="mt-4 p-3 rounded-xl text-[11px] font-semibold text-center hidden"></div>
             </div>
         </div>
 
@@ -49,31 +50,31 @@
             <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
                 <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Input Manual</h3>
-                    <p class="text-[10px] text-slate-400 font-medium">Tambahkan satu data tagihan ke log</p>
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Input Log Manual</h3>
+                    <p class="text-[10px] text-slate-400 font-medium">Tambah satu per satu data tagihan</p>
                 </div>
             </div>
             <div class="p-6">
                 <form action="{{ url_for('accounting') }}" method="POST" class="space-y-4">
                     <div>
                         <label for="bulan_tahun" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Periode Bulan & Tahun</label>
-                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="bulan_tahun" name="bulan_tahun" placeholder="Contoh: Juni 2026" required>
+                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="bulan_tahun" name="bulan_tahun" placeholder="Contoh: Oktober 2025" required>
                     </div>
                     <div>
-                        <label for="nomor_telepon" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nomor Telepon</label>
-                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nomor_telepon" name="nomor_telepon" placeholder="Contoh: 081234567890" required>
+                        <label for="nomor_telepon" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nomor Telepon (MSISDN)</label>
+                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nomor_telepon" name="nomor_telepon" placeholder="Contoh: 628113450842" required>
                     </div>
                     <div>
-                        <label for="pemilik" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Pemilik</label>
-                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="pemilik" name="pemilik" placeholder="Contoh: Budi Santoso" required>
+                        <label for="pemilik" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Pemilik (User)</label>
+                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="pemilik" name="pemilik" placeholder="Contoh: Bp. Hendro" required>
                     </div>
                     <div>
-                        <label tab="nominal_pembayaran" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nominal Pembayaran (Rp)</label>
-                        <input type="number" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nominal_pembayaran" name="nominal_pembayaran" placeholder="Contoh: 250000" required>
+                        <label for="nominal_pembayaran" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nominal Pembayaran (Rp)</label>
+                        <input type="number" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nominal_pembayaran" name="nominal_pembayaran" placeholder="Contoh: 113500" required>
                     </div>
                     <button type="submit" class="w-full bg-[#075985] text-white text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 rounded-lg hover:bg-sky-800 transition-colors shadow-sm">
                         Simpan ke Database Log
@@ -85,57 +86,74 @@
 
     <div class="xl:col-span-2">
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Log Historis & Analisis Perubahan</h3>
-                        <p class="text-[10px] text-slate-400 font-medium">Analisis perbandingan nominal otomatis lintas bulan berjalan</p>
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Log Analisis Perubahan & Historis</h3>
+                        <p class="text-[10px] text-slate-400 font-medium">Menampilkan perbedaan nominal pembayaran antar bulan otomatis</p>
                     </div>
                 </div>
-                <span class="bg-sky-50 text-[#075985] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    Total: {{ total_logs }} Logs
+                <span class="bg-sky-50 text-[#075985] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-center">
+                    Total: {{ total_logs }} Data
                 </span>
+            </div>
+
+            <div class="p-4 bg-white border-b border-slate-50 flex items-center gap-2">
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </span>
+                    <input type="text" id="table_search" onkeyup="liveSearchTable()" placeholder="Cari data lama berdasarkan nama, nomor telepon (MSISDN), atau bulan..." 
+                           class="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 font-medium placeholder-slate-400">
+                </div>
             </div>
             
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse" id="log_table">
                     <thead>
                         <tr class="border-b border-slate-100 bg-slate-50/70 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                             <th class="py-3 px-6 text-center">Bulan</th>
-                            <th class="py-3 px-6">No. Telepon</th>
-                            <th class="py-3 px-6">Pemilik</th>
+                            <th class="py-3 px-6">No. Telepon / MSISDN</th>
+                            <th class="py-3 px-6">Pemilik (User)</th>
                             <th class="py-3 px-6 text-right">Nominal</th>
-                            <th class="py-3 px-6 text-center">Status Tren</th>
+                            <th class="py-3 px-6 text-center">Analisis Selisih</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-50 text-xs font-medium text-slate-700">
                         {% if logs %}
                             {% for row in logs %}
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="py-3.5 px-6 text-center font-semibold text-slate-500">{{ row.bulan_tahun }}</td>
-                                <td class="py-3.5 px-6 font-mono text-slate-600">{{ row.nomor_telepon }}</td>
-                                <td class="py-3.5 px-6 text-slate-900 font-semibold">{{ row.pemilik }}</td>
+                            <tr class="hover:bg-slate-50/50 transition-colors log-row">
+                                <td class="py-3.5 px-6 text-center font-semibold text-slate-500 search-target">{{ row.bulan_tahun }}</td>
+                                <td class="py-3.5 px-6 font-mono text-slate-600 search-target">{{ row.nomor_telepon }}</td>
+                                <td class="py-3.5 px-6 text-slate-900 font-semibold search-target">{{ row.pemilik if row.pemilik and row.pemilik != '-' else 'No Name' }}</td>
                                 <td class="py-3.5 px-6 text-end font-mono font-bold text-slate-900">Rp {{ "{:,.0f}".format(row.nominal_pembayaran|float) }}</td>
                                 <td class="py-3.5 px-6 text-center text-[11px]" 
                                     data-phone="{{ row.nomor_telepon }}" 
                                     data-month="{{ row.bulan_tahun }}" 
                                     data-amount="{{ row.nominal_pembayaran }}">
-                                    <span class="text-slate-400 text-[10px] uppercase font-bold animate-pulse">Memproses...</span>
+                                    <span class="text-slate-300 text-[10px] uppercase font-bold animate-pulse">Memproses...</span>
                                 </td>
                             </tr>
                             {% endfor %}
                         {% else %}
-                            <tr>
+                            <tr id="no_data_row">
                                 <td colspan="5" class="py-12 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
                                     Belum ada data log tagihan di database.
                                 </td>
                             </tr>
                         {% endif %}
+                        <tr id="no_match_row" class="hidden">
+                            <td colspan="5" class="py-12 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                Data yang Anda cari tidak ditemukan.
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -146,15 +164,65 @@
 
 {% block scripts %}
 <script>
-    // --- FITUR SCAN & AUTO INSERT FILE EXCEL (CLIENT SIDE PARSING) ---
+    // --- 1. FITUR LIVE SEARCH DATA LAMA ---
+    function liveSearchTable() {
+        const input = document.getElementById("table_search").value.toLowerCase();
+        const rows = document.getElementsByClassName("log-row");
+        const noMatchRow = document.getElementById("no_match_row");
+        let foundAny = false;
+
+        for (let i = 0; i < rows.length; i++) {
+            const targets = rows[i].getElementsByClassName("search-target");
+            let rowMatches = false;
+            
+            for (let j = 0; j < targets.length; j++) {
+                if (targets[j].textContent.toLowerCase().includes(input)) {
+                    rowMatches = true;
+                    break;
+                }
+            }
+            
+            if (rowMatches) {
+                rows[i].classList.remove("hidden");
+                foundAny = true;
+            } else {
+                rows[i].classList.add("hidden");
+            }
+        }
+
+        if (rows.length > 0) {
+            if (!foundAny) {
+                noMatchRow.classList.remove("hidden");
+            } else {
+                noMatchRow.classList.add("hidden");
+            }
+        }
+    }
+
+    // --- 2. FITUR SMART SCAN FILE EXCEL / CSV ---
     async function scanExcelFile(event) {
         const file = event.target.files[0];
         if (!file) return;
 
         const statusDiv = document.getElementById('scan_status');
-        statusDiv.classList.remove('hidden', 'text-emerald-600', 'text-rose-600');
-        statusDiv.classList.add('text-slate-500');
-        statusDiv.innerHTML = "Memindai file...";
+        statusDiv.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'bg-emerald-50', 'text-emerald-700');
+        statusDiv.classList.add('bg-slate-50', 'text-slate-600', 'block');
+        statusDiv.innerHTML = "Memindai file & mendeteksi struktur kolom...";
+
+        // Coba ekstrak nama bulan dari nama file secara otomatis (misal: "10. OKTOBER 2025.xlsx" -> "Oktober 2025")
+        let defaultBulan = "Oktober 2025";
+        const fileNameUpper = file.name.toUpperCase();
+        const months = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+        
+        for (const m of months) {
+            if (fileNameUpper.includes(m)) {
+                // Temukan tahun jika ada angka 4 digit
+                const yearMatch = file.name.match(/\d{4}/);
+                const tahun = yearMatch ? yearMatch[0] : "2025";
+                defaultBulan = m.charAt(0) + m.slice(1).toLowerCase() + " " + tahun;
+                break;
+            }
+        }
 
         const reader = new FileReader();
         reader.onload = async function(e) {
@@ -164,31 +232,51 @@
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 
-                // Konversi baris excel menjadi JSON objek
+                // Konversi sheet Excel menjadi baris objek JSON
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
                 
                 if (jsonData.length === 0) {
-                    throw new Error("File kosong atau tidak memiliki baris data.");
+                    throw new Error("File kosong atau tidak memiliki baris data yang valid.");
                 }
 
-                statusDiv.innerHTML = `Ditemukan ${jsonData.length} baris. Memproses input database...`;
+                statusDiv.innerHTML = `Terdeteksi ${jsonData.length} baris. Memasukkan data ke database...`;
 
                 let successCount = 0;
-                // Kirim data baris ke backend satu per satu menggunakan fetch API internal
+
+                // Loop & Kirim data baris ke backend via Fetch API (meniru submit form manual tanpa ngerusak program)
                 for (const row of jsonData) {
-                    const bln = row.bulan_tahun || row.Bulan || '';
-                    const tel = row.nomor_telepon || row.No_Telp || row.telepon || '';
-                    const name = row.pemilik || row.Nama || '';
-                    const nominal = row.nominal_pembayaran || row.nominal || row.Nominal || 0;
+                    // Penyesuaian fleksibel nama kolom berdasarkan template excel Anda (MSISDN, CORP, User, Nominal)
+                    let phone = row.MSISDN || row.msisdn || row.nomor_telepon || row.No_Telp || '';
+                    let pemilik = row.User || row.USER || row.user || row.pemilik || row.Nama || '-';
+                    
+                    // Deteksi kolom nominal tagihan dinamis (bisa berupa kolom nama cabang seperti AIP, KCS, KCU, KCF, dll)
+                    let nominal = 0;
+                    const keys = Object.keys(row);
+                    // Cari kolom yang berisi nilai angka murni di luar NO dan MSISDN
+                    for (const key of keys) {
+                        const keyUpper = key.toUpperCase();
+                        if (keyUpper !== 'NO' && keyUpper !== 'MSISDN' && keyUpper !== 'USER' && keyUpper !== 'CORP' && keyUpper !== 'PEMILIK') {
+                            const val = parseFloat(String(row[key]).replace(/[^0-9.-]+/g, ""));
+                            if (!isNaN(val) && val > 0) {
+                                nominal = val;
+                                break;
+                            }
+                        }
+                    }
 
-                    if (!bln || !tel || !name) continue; // Skip jika kolom mandatory kosong
+                    // Skip baris subtotal, baris kosong, atau user yang DINONAKTIFKAN
+                    if (!phone || String(phone).toUpperCase().includes("SUBTOTAL") || String(nominal).toUpperCase().includes("DINONAKTIFKAN") || nominal === 0) {
+                        continue;
+                    }
 
+                    // Buat payload form data
                     const formData = new FormData();
-                    formData.append('bulan_tahun', bln);
-                    formData.append('nomor_telepon', tel);
-                    formData.append('pemilik', name);
+                    formData.append('bulan_tahun', defaultBulan);
+                    formData.append('nomor_telepon', String(phone).trim());
+                    formData.append('pemilik', String(pemilik).trim());
                     formData.append('nominal_pembayaran', nominal);
 
+                    // Kirim post request secara background ke route accounting anda
                     const response = await fetch("{{ url_for('accounting') }}", {
                         method: 'POST',
                         body: formData
@@ -197,25 +285,28 @@
                     if (response.ok) successCount++;
                 }
 
-                statusDiv.classList.replace('text-slate-500', 'text-emerald-600');
-                statusDiv.innerHTML = `✓ Berhasil memproses & menyimpan ${successCount} data log!`;
+                statusDiv.classList.replace('bg-slate-50', 'bg-emerald-50');
+                statusDiv.classList.replace('text-slate-600', 'text-emerald-700');
+                statusDiv.innerHTML = `✓ Berhasil memproses & mengimpor ${successCount} data tagihan Periode [ ${defaultBulan} ] ke database!`;
                 
-                // Refresh halaman untuk memuat ulang data terbaru dari database log
+                // Refresh halaman untuk memperbarui list tabel data
                 setTimeout(() => { window.location.reload(); }, 1500);
 
             } catch (err) {
-                statusDiv.classList.replace('text-slate-500', 'text-rose-600');
-                statusDiv.innerHTML = `✕ Gagal memindai: ${err.message}`;
+                statusDiv.classList.replace('bg-slate-50', 'bg-rose-50');
+                statusDiv.classList.replace('text-slate-600', 'text-rose-700');
+                statusDiv.innerHTML = `✕ Gagal memproses file: ${err.message}`;
             }
         };
         reader.readAsArrayBuffer(file);
     }
 
-    // --- LOGIKA ANALISIS TREN DATA REAL-TIME ---
+    // --- 3. LOGIKA DETEKSI LOG PERUBAHAN NOMINAL TIAP BULAN ---
     document.addEventListener("DOMContentLoaded", function() {
         const cells = document.querySelectorAll('td[data-phone]');
         const allData = [];
 
+        // Ambil seluruh data dari DOM tabel
         cells.forEach(cell => {
             allData.push({
                 element: cell,
@@ -229,9 +320,9 @@
             const currentIdx = allData.indexOf(item);
             let olderItem = null;
             
-            // Cari item nomor telepon yang sama yang memiliki entri index lebih lama/di bawahnya
-            for(let i = currentIdx + 1; i < allData.length; i++) {
-                if(allData[i].phone === item.phone && allData[i].month !== item.month) {
+            // Cari data dengan nomor telepon yang sama namun di baris bawahnya (asumsi log terurut dari terbaru ke terlama)
+            for (let i = currentIdx + 1; i < allData.length; i++) {
+                if (allData[i].phone === item.phone && allData[i].month !== item.month) {
                     olderItem = allData[i];
                     break;
                 }
@@ -241,19 +332,22 @@
                 const diff = item.amount - olderItem.amount;
                 
                 if (diff > 0) {
-                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-up">▲ Naik</span>`;
+                    // Nominal pembayaran naik dibanding bulan lalu
+                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-up">▲ Naik (Rp ${diff.toLocaleString('id-ID')})</span>`;
                 } else if (diff < 0) {
-                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-down">▼ Turun</span>`;
+                    // Nominal pembayaran turun dibanding bulan lalu
+                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-down">▼ Turun (Rp ${Math.abs(diff).toLocaleString('id-ID')})</span>`;
                 } else {
-                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-stable">Stabil</span>`;
+                    // Nominal stabil sama persis
+                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-stable">Stabil</span>`;
                 }
             } else {
-                // Periksa jika memang tidak ada record sama sekali di bulan lain
-                const hasOtherMonth = allData.some(d => d.phone === item.phone && d.month !== item.month);
-                if (!hasOtherMonth) {
-                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-new">User Baru</span>`;
+                // Periksa apakah nomor ini punya record di bulan lain
+                const hasOtherRecord = allData.some(d => d.phone === item.phone && d.month !== item.month);
+                if (!hasOtherRecord) {
+                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-new">User Baru</span>`;
                 } else {
-                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-stable">Data Awal</span>`;
+                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-stable">Data Awal</span>`;
                 }
             }
         });
