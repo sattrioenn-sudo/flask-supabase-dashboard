@@ -1,170 +1,262 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accounting - Log Analisis Tagihan</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { background-color: #f8f9fa; }
-        .navbar-brand { font-weight: bold; }
-        .card-header-custom { background-color: #2c3e50; color: white; }
-        .trend-up { background-color: #ffc7ce; color: #9c0006; font-weight: bold; }
-        .trend-down { background-color: #c6efce; color: #006100; font-weight: bold; }
-        .trend-new { background-color: #ddebf7; color: #1f4e78; font-weight: bold; }
-        .trend-stable { background-color: #f2f4f4; color: #5a5a5a; }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Sistem Log Tagihan</a>
-            <div class="navbar-nav ms-auto">
-                <span class="nav-link text-light me-3"><i class="fa-solid fa-user me-1"></i> {{ email }}</span>
-                <a class="btn btn-outline-light btn-sm" href="{{ url_for('dashboard') }}">Kembali ke Dashboard</a>
+{% block title %}Accounting - Log Analisis Tagihan{% endblock %}
+
+{% block header_title %}Accounting & Billing{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+    .trend-up { background-color: #fee2e2 !important; color: #991b1b !important; font-weight: 700; }
+    .trend-down { background-color: #dcfce7 !important; color: #166534 !important; font-weight: 700; }
+    .trend-new { background-color: #e0f2fe !important; color: #0369a1 !important; font-weight: 700; }
+    .trend-stable { background-color: #f1f5f9 !important; color: #475569 !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    
+    <div class="space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Scan File Tagihan</h3>
+                    <p class="text-[10px] text-slate-400 font-medium">Unggah file Excel (.xlsx/.xls) atau .csv</p>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center hover:border-sky-400 transition-colors bg-slate-50/50">
+                    <input type="file" id="excel_file" accept=".xlsx, .xls, .csv" class="hidden" onchange="scanExcelFile(event)">
+                    <label for="excel_file" class="cursor-pointer flex flex-col items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400 group-hover:text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-xs font-bold text-slate-600">Pilih atau Seret File</span>
+                        <span class="text-[10px] text-slate-400">Kolom wajib: bulan_tahun, nomor_telepon, pemilik, nominal</span>
+                    </label>
+                </div>
+                <div id="scan_status" class="mt-3 text-[11px] font-semibold text-center hidden"></div>
             </div>
         </div>
-    </nav>
 
-    <div class="container mb-5">
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header card-header-custom">
-                        <h5 class="card-title mb-0"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Input Data Tagihan</h5>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ url_for('accounting') }}" method="POST">
-                            <div class="mb-3">
-                                <label for="bulan_tahun" class="form-label">Periode Bulan & Tahun</label>
-                                <input type="text" class="form-control" id="bulan_tahun" name="bulan_tahun" placeholder="Contoh: Juni 2026" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="nomor_telepon" class="form-label">Nomor Telepon</label>
-                                <input type="text" class="form-control" id="nomor_telepon" name="nomor_telepon" placeholder="Contoh: 081234567890" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="pemilik" class="form-label">Nama Pemilik</label>
-                                <input type="text" class="form-control" id="pemilik" name="pemilik" placeholder="Contoh: Budi Santoso" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="nominal_pembayaran" class="form-label">Nominal Pembayaran (Rp)</label>
-                                <input type="number" class="form-control" id="nominal_pembayaran" name="nominal_pembayaran" placeholder="Contoh: 250000" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-floppy-disk me-2"></i>Simpan ke Database Log</button>
-                        </form>
-                    </div>
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Input Manual</h3>
+                    <p class="text-[10px] text-slate-400 font-medium">Tambahkan satu data tagihan ke log</p>
                 </div>
             </div>
-
-            <div class="col-md-8 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0"><i class="fa-solid fa-chart-line me-2"></i>Log Historis & Analisis Perubahan</h5>
-                        <span class="badge bg-light text-dark">Total Record: {{ total_logs }}</span>
+            <div class="p-6">
+                <form action="{{ url_for('accounting') }}" method="POST" class="space-y-4">
+                    <div>
+                        <label for="bulan_tahun" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Periode Bulan & Tahun</label>
+                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="bulan_tahun" name="bulan_tahun" placeholder="Contoh: Juni 2026" required>
                     </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle">
-                                <thead class="table-light text-center">
-                                    <tr>
-                                        <th>Bulan</th>
-                                        <th>No. Telepon</th>
-                                        <th>Pemilik</th>
-                                        <th>Nominal</th>
-                                        <th>Status Tren</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% if logs %}
-                                        {% for row in logs %}
-                                        <tr>
-                                            <td class="text-center">{{ row.bulan_tahun }}</td>
-                                            <td class="text-center">{{ row.nomor_telepon }}</td>
-                                            <td>{{ row.pemilik }}</td>
-                                            <td class="text-end font-monospace">Rp {{ "{:,.0f}".format(row.nominal_pembayaran|float) }}</td>
-                                            <td class="text-center" 
-                                                data-phone="{{ row.nomor_telepon }}" 
-                                                data-month="{{ row.bulan_tahun }}" 
-                                                data-amount="{{ row.nominal_pembayaran }}">
-                                                <small class="text-muted">Memproses...</small>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted py-4">Belum ada data log tagihan di database.</td>
-                                        </tr>
-                                    {% endif %}
-                                </tbody>
-                            </table>
-                        </div>
+                    <div>
+                        <label for="nomor_telepon" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nomor Telepon</label>
+                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nomor_telepon" name="nomor_telepon" placeholder="Contoh: 081234567890" required>
                     </div>
-                </div>
+                    <div>
+                        <label for="pemilik" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Pemilik</label>
+                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="pemilik" name="pemilik" placeholder="Contoh: Budi Santoso" required>
+                    </div>
+                    <div>
+                        <label tab="nominal_pembayaran" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nominal Pembayaran (Rp)</label>
+                        <input type="number" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nominal_pembayaran" name="nominal_pembayaran" placeholder="Contoh: 250000" required>
+                    </div>
+                    <button type="submit" class="w-full bg-[#075985] text-white text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 rounded-lg hover:bg-sky-800 transition-colors shadow-sm">
+                        Simpan ke Database Log
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const cells = document.querySelectorAll('td[data-phone]');
-            const allData = [];
+    <div class="xl:col-span-2">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Log Historis & Analisis Perubahan</h3>
+                        <p class="text-[10px] text-slate-400 font-medium">Analisis perbandingan nominal otomatis lintas bulan berjalan</p>
+                    </div>
+                </div>
+                <span class="bg-sky-50 text-[#075985] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                    Total: {{ total_logs }} Logs
+                </span>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-slate-50/70 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <th class="py-3 px-6 text-center">Bulan</th>
+                            <th class="py-3 px-6">No. Telepon</th>
+                            <th class="py-3 px-6">Pemilik</th>
+                            <th class="py-3 px-6 text-right">Nominal</th>
+                            <th class="py-3 px-6 text-center">Status Tren</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 text-xs font-medium text-slate-700">
+                        {% if logs %}
+                            {% for row in logs %}
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="py-3.5 px-6 text-center font-semibold text-slate-500">{{ row.bulan_tahun }}</td>
+                                <td class="py-3.5 px-6 font-mono text-slate-600">{{ row.nomor_telepon }}</td>
+                                <td class="py-3.5 px-6 text-slate-900 font-semibold">{{ row.pemilik }}</td>
+                                <td class="py-3.5 px-6 text-end font-mono font-bold text-slate-900">Rp {{ "{:,.0f}".format(row.nominal_pembayaran|float) }}</td>
+                                <td class="py-3.5 px-6 text-center text-[11px]" 
+                                    data-phone="{{ row.nomor_telepon }}" 
+                                    data-month="{{ row.bulan_tahun }}" 
+                                    data-amount="{{ row.nominal_pembayaran }}">
+                                    <span class="text-slate-400 text-[10px] uppercase font-bold animate-pulse">Memproses...</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="py-12 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                    Belum ada data log tagihan di database.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-            // Kumpulkan semua data dari DOM tabel untuk dianalisis lintas baris
-            cells.forEach(cell => {
-                allData.push({
-                    element: cell,
-                    phone: cell.getAttribute('data-phone'),
-                    month: cell.getAttribute('data-month'),
-                    amount: parseFloat(cell.getAttribute('data-amount'))
-                });
-            });
+{% block scripts %}
+<script>
+    // --- FITUR SCAN & AUTO INSERT FILE EXCEL (CLIENT SIDE PARSING) ---
+    async function scanExcelFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
-            // Analisis komparasi bulan berjalan vs bulan sebelumnya untuk nomor telepon yang sama
-            allData.forEach(item => {
-                // Cari apakah ada entitas nomor yang sama di record data yang lain
-                const matches = allData.filter(d => d.phone === item.phone && d.month !== item.month);
+        const statusDiv = document.getElementById('scan_status');
+        statusDiv.classList.remove('hidden', 'text-emerald-600', 'text-rose-600');
+        statusDiv.classList.add('text-slate-500');
+        statusDiv.innerHTML = "Memindai file...";
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
                 
-                if (matches.length === 0) {
-                    item.element.innerHTML = 'User Baru';
-                    item.element.className = 'text-center trend-new';
-                } else {
-                    // Logika sederhana membandingkan nominal (mengasumsikan baris baru di atas baris lama)
-                    // Cari item pembanding
-                    const currentIdx = allData.indexOf(item);
-                    let olderItem = null;
-                    
-                    for(let i = currentIdx + 1; i < allData.length; i++) {
-                        if(allData[i].phone === item.phone) {
-                            olderItem = allData[i];
-                            break;
-                        }
-                    }
-
-                    if (olderItem) {
-                        const diff = item.amount - olderItem.amount;
-                        const pct = (diff / olderItem.amount) * 100;
-                        
-                        if (pct > 10) {
-                            item.element.innerHTML = `▲ Lonjakan (+${pct.toFixed(0)}%)`;
-                            item.element.className = 'text-center trend-up';
-                        } else if (pct < -10) {
-                            item.element.innerHTML = `▼ Penurunan (${pct.toFixed(0)}%)`;
-                            item.element.className = 'text-center trend-down';
-                        } else {
-                            item.element.innerHTML = 'Stabil';
-                            item.element.className = 'text-center trend-stable';
-                        }
-                    } else {
-                        // Jika tidak ada data yang lebih tua, diidentifikasi sebagai baseline data awal
-                        item.element.innerHTML = 'Data Awal';
-                        item.element.className = 'text-center trend-stable';
-                    }
+                // Konversi baris excel menjadi JSON objek
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                if (jsonData.length === 0) {
+                    throw new Error("File kosong atau tidak memiliki baris data.");
                 }
+
+                statusDiv.innerHTML = `Ditemukan ${jsonData.length} baris. Memproses input database...`;
+
+                let successCount = 0;
+                // Kirim data baris ke backend satu per satu menggunakan fetch API internal
+                for (const row of jsonData) {
+                    const bln = row.bulan_tahun || row.Bulan || '';
+                    const tel = row.nomor_telepon || row.No_Telp || row.telepon || '';
+                    const name = row.pemilik || row.Nama || '';
+                    const nominal = row.nominal_pembayaran || row.nominal || row.Nominal || 0;
+
+                    if (!bln || !tel || !name) continue; // Skip jika kolom mandatory kosong
+
+                    const formData = new FormData();
+                    formData.append('bulan_tahun', bln);
+                    formData.append('nomor_telepon', tel);
+                    formData.append('pemilik', name);
+                    formData.append('nominal_pembayaran', nominal);
+
+                    const response = await fetch("{{ url_for('accounting') }}", {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) successCount++;
+                }
+
+                statusDiv.classList.replace('text-slate-500', 'text-emerald-600');
+                statusDiv.innerHTML = `✓ Berhasil memproses & menyimpan ${successCount} data log!`;
+                
+                // Refresh halaman untuk memuat ulang data terbaru dari database log
+                setTimeout(() => { window.location.reload(); }, 1500);
+
+            } catch (err) {
+                statusDiv.classList.replace('text-slate-500', 'text-rose-600');
+                statusDiv.innerHTML = `✕ Gagal memindai: ${err.message}`;
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // --- LOGIKA ANALISIS TREN DATA REAL-TIME ---
+    document.addEventListener("DOMContentLoaded", function() {
+        const cells = document.querySelectorAll('td[data-phone]');
+        const allData = [];
+
+        cells.forEach(cell => {
+            allData.push({
+                element: cell,
+                phone: cell.getAttribute('data-phone'),
+                month: cell.getAttribute('data-month'),
+                amount: parseFloat(cell.getAttribute('data-amount'))
             });
         });
-    </script>
-</body>
-</html>
+
+        allData.forEach(item => {
+            const currentIdx = allData.indexOf(item);
+            let olderItem = null;
+            
+            // Cari item nomor telepon yang sama yang memiliki entri index lebih lama/di bawahnya
+            for(let i = currentIdx + 1; i < allData.length; i++) {
+                if(allData[i].phone === item.phone && allData[i].month !== item.month) {
+                    olderItem = allData[i];
+                    break;
+                }
+            }
+
+            if (olderItem) {
+                const diff = item.amount - olderItem.amount;
+                
+                if (diff > 0) {
+                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-up">▲ Naik</span>`;
+                } else if (diff < 0) {
+                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-down">▼ Turun</span>`;
+                } else {
+                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-stable">Stabil</span>`;
+                }
+            } else {
+                // Periksa jika memang tidak ada record sama sekali di bulan lain
+                const hasOtherMonth = allData.some(d => d.phone === item.phone && d.month !== item.month);
+                if (!hasOtherMonth) {
+                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-new">User Baru</span>`;
+                } else {
+                    item.element.innerHTML = `<span class="px-2.5 py-1 rounded-full trend-stable">Data Awal</span>`;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
