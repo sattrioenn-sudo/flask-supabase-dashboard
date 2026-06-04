@@ -63,7 +63,7 @@
                 </div>
             </div>
             <div class="p-6">
-                <form action="{{ url_for('accounting') }}" method="POST" class="space-y-4">
+                <form action="{{ url_for('accounting') }}" method="POST" class="space-y-4" onsubmit="return handleFormSubmit(this);">
                     <div>
                         <label for="bulan_tahun" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Periode Bulan & Tahun</label>
                         <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="bulan_tahun" name="bulan_tahun" placeholder="Contoh: Oktober 2025" required>
@@ -80,7 +80,7 @@
                         <label for="nominal_pembayaran" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nominal Pembayaran (Rp)</label>
                         <input type="number" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nominal_pembayaran" name="nominal_pembayaran" placeholder="Contoh: 113500" required>
                     </div>
-                    <button type="submit" class="w-full bg-[#075985] text-white text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 rounded-lg hover:bg-sky-800 transition-colors shadow-sm">
+                    <button type="submit" id="btn_submit_manual" class="w-full bg-[#075985] text-white text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 rounded-lg hover:bg-sky-800 transition-colors shadow-sm disabled:bg-slate-300 disabled:cursor-not-allowed">
                         Simpan ke Database Log
                     </button>
                 </form>
@@ -134,7 +134,13 @@
                         </svg>
                     </span>
                     <input type="text" id="table_search" onkeyup="liveSearchTable()" placeholder="Cari berdasarkan nama atau nomor telepon (MSISDN)..." 
-                           class="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 font-medium placeholder-slate-400">
+                           class="w-full pl-9 pr-8 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 font-medium placeholder-slate-400">
+                    
+                    <button onclick="clearSearchField()" id="btn_clear_search" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
                 <span id="display_total_logs" class="bg-sky-50 text-[#075985] text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase tracking-wider whitespace-nowrap">
                     Total: {{ total_logs }} Data
@@ -145,7 +151,7 @@
                 <table class="w-full text-left border-collapse" id="log_table">
                     <thead>
                         <tr class="border-b border-slate-100 bg-slate-50/70 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            <th class="py-3 px-6 text-center">Bulan</th>
+                            <th class="py-3 px-6 text-center">Bulan <span class="text-[8px] text-slate-300">▼</span></th>
                             <th class="py-3 px-6">No. Telepon / MSISDN</th>
                             <th class="py-3 px-6">Pemilik (User)</th>
                             <th class="py-3 px-6 text-right">Nominal</th>
@@ -188,8 +194,7 @@
                 <span id="pagination_info" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Menampilkan 0 - 0 dari 0 Data
                 </span>
-                <div id="pagination_controls" class="flex items-center gap-1">
-                    </div>
+                <div id="pagination_controls" class="flex items-center gap-1"></div>
             </div>
         </div>
     </div>
@@ -200,10 +205,18 @@
 <script>
     let activePeriodeFilter = "ALL";
     let currentPage = 1;
-    const rowsPerPage = 10; // Silakan sesuaikan batas baris per halaman di sini
+    const rowsPerPage = 10; 
     let filteredRowsArray = [];
 
-    // --- 1. GENERATE TAB FILTER PERIODE OTOMATIS ---
+    // --- 1. FITUR KEAMANAN: ANTI DOUBLE-SUBMIT INPUT MANUAL ---
+    function handleFormSubmit(formElement) {
+        const btn = document.getElementById("btn_submit_manual");
+        btn.innerText = "Memproses Penyimpanan...";
+        btn.disabled = true;
+        return true;
+    }
+
+    // --- 2. GENERATE TAB FILTER PERIODE OTOMATIS ---
     function generatePeriodeTabs() {
         const rows = document.getElementsByClassName("log-row");
         const uniquePeriode = new Set();
@@ -238,11 +251,28 @@
     }
 
     function liveSearchTable() {
+        // Kontrol tampil/sembunyi tombol silang pembersih input
+        const searchInput = document.getElementById("table_search").value;
+        const clearBtn = document.getElementById("btn_clear_search");
+        if (searchInput.length > 0) {
+            clearBtn.classList.remove("hidden");
+        } else {
+            clearBtn.classList.add("hidden");
+        }
+
         currentPage = 1;
         applyTableFilters();
     }
 
-    // --- 2. LOGIKA KOMBINASI FILTER, SEARCH BOX, & PAGINATION CONTROLLER ---
+    function clearSearchField() {
+        const searchField = document.getElementById("table_search");
+        searchField.value = "";
+        document.getElementById("btn_clear_search").classList.add("hidden");
+        currentPage = 1;
+        applyTableFilters();
+    }
+
+    // --- 3. LOGIKA KOMBINASI FILTER, SEARCH BOX, & PAGINATION CONTROLLER ---
     function applyTableFilters() {
         const searchInput = document.getElementById("table_search").value.toLowerCase();
         const allRows = document.getElementsByClassName("log-row");
@@ -250,7 +280,6 @@
         
         filteredRowsArray = [];
 
-        // Tahap 1: Saring data berdasarkan Filter Periode & Kotak Pencarian
         for (let i = 0; i < allRows.length; i++) {
             const rowPeriode = allRows[i].getAttribute("data-row-periode");
             const targets = allRows[i].getElementsByClassName("search-target");
@@ -268,7 +297,7 @@
             if (matchesPeriode && matchesSearch) {
                 filteredRowsArray.push(allRows[i]);
             }
-            allRows[i].classList.add("hidden"); // sembunyikan semua default
+            allRows[i].classList.add("hidden"); 
         }
 
         const totalFiltered = filteredRowsArray.length;
@@ -283,22 +312,17 @@
             noMatchRow.classList.add("hidden");
         }
 
-        // Tahap 2: Kalkulasi Halaman Pagination
         const totalPages = Math.ceil(totalFiltered / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages;
 
         const startIdx = (currentPage - 1) * rowsPerPage;
         const endIdx = Math.min(startIdx + rowsPerPage, totalFiltered);
 
-        // Hanya tampilkan elemen baris data yang masuk dalam rentang halaman aktif
         for (let k = startIdx; k < endIdx; k++) {
             filteredRowsArray[k].classList.remove("hidden");
         }
 
-        // Perbarui Teks Informasi Rentang Data
         document.getElementById("pagination_info").innerText = `Menampilkan ${startIdx + 1} - ${endIdx} dari ${totalFiltered} Data`;
-        
-        // Render Navigasi Angka Halaman
         renderPaginationButtons(totalPages);
     }
 
@@ -317,7 +341,6 @@
             }
             btn.onclick = function() {
                 currentPage = i;
-                // Gulung balik fokus tampilan ke atas tabel secara smooth saat ganti page
                 document.getElementById("log_table").scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 applyTableFilters();
             };
@@ -325,12 +348,23 @@
         }
     }
 
-    // --- 3. FITUR SMART SCAN MULTI-SHEET EXCEL/CSV ---
+    // --- 4. FITUR KEAMANAN VALIDASI FILE & SMART MULTI-SHEET SCAN ---
     async function scanExcelFile(event) {
         const file = event.target.files[0];
         if (!file) return;
 
         const statusDiv = document.getElementById('scan_status');
+        
+        // Pengecekan keamanan tipe ekstensi file
+        const fileExt = file.name.split('.').pop().toLowerCase();
+        if (!['xlsx', 'xls', 'csv'].includes(fileExt)) {
+            statusDiv.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-700');
+            statusDiv.classList.add('bg-rose-50', 'text-rose-700', 'block');
+            statusDiv.innerHTML = "✕ Format berkas salah! Hanya diperbolehkan file Excel (.xlsx, .xls) atau CSV.";
+            event.target.value = ""; // bersihkan input berkas
+            return;
+        }
+
         statusDiv.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'bg-emerald-50', 'text-emerald-700');
         statusDiv.classList.add('bg-slate-50', 'text-slate-600', 'block');
         statusDiv.innerHTML = "Memindai seluruh data sheet cabang di dalam file...";
@@ -440,7 +474,7 @@
         reader.readAsArrayBuffer(file);
     }
 
-    // --- 4. FUNGSI EXPORT DATA FILTERED KE PDF DENGAN TANDA TANGAN ---
+    // --- 5. FUNGSI EXPORT DATA FILTERED KE PDF DENGAN TANDA TANGAN ---
     function exportToPDF() {
         if (filteredRowsArray.length === 0) {
             alert("Tidak ada data yang tersedia untuk di-export ke PDF.");
@@ -450,7 +484,6 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
         
-        // Header Judul Laporan
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(14);
         doc.text("LAPORAN LOG ANALISIS TAGIHAN BULANAN", 14, 15);
@@ -460,7 +493,6 @@
         doc.text(`Periode Cetak Filter: ${activePeriodeFilter}`, 14, 21);
         doc.text(`Tanggal Cetak Dokumen: ${new Date().toLocaleDateString('id-ID')}`, 14, 25);
         
-        // Transformasikan isi baris filteredRowsArray menjadi Array Data untuk AutoTable PDF
         const bodyData = [];
         filteredRowsArray.forEach((row, index) => {
             const bulan = row.querySelector(".text-bulan").innerText;
@@ -479,7 +511,6 @@
             ]);
         });
 
-        // Render Komponen Tabel ke dalam lembar PDF
         doc.autoTable({
             head: [['No', 'Periode', 'No. Telepon / MSISDN', 'Pemilik (User)', 'Nominal Pembayaran', 'Analisis Selisih']],
             body: bodyData,
@@ -495,15 +526,11 @@
                 5: { halign: 'center' }
             },
             didDrawPage: function(data) {
-                // Simpan koordinat akhir Y tabel untuk menaruh blok tanda tangan di bagian paling bawah data terakhir
                 doc.lastTableY = data.cursor.y;
             }
         });
 
-        // Tambah Jarak Aman untuk Penempatan Blok Tanda Tangan Komite Kontrol
         let signY = doc.lastTableY + 15;
-        
-        // Proteksi Halaman: Jika sisa ruang bawah kertas mepet (< 50mm), oper ke halaman baru agar rapi
         if (signY > 240) {
             doc.addPage();
             signY = 25; 
@@ -512,24 +539,20 @@
         doc.setFont("Helvetica", "normal");
         doc.setFontSize(10);
         
-        // Posisi Horizontal kiri (kolom Dikerjakan oleh) dan kanan (kolom Diketahui oleh)
         const leftColX = 25;
         const rightColX = 135;
 
-        // Cetak Label Tanda Tangan
         doc.text("Dikerjakan oleh :", leftColX, signY);
         doc.text("Diketahui oleh :", rightColX, signY);
         
-        // Garis Titik-titik Kosong Pengisian Manual Tanda Tangan
         doc.text("..........................................", leftColX, signY + 25);
         doc.text("..........................................", rightColX, signY + 25);
         
-        // Nama File Output Dinamis
         const safeFileName = `LOG_TAGIHAN_${activePeriodeFilter.replace(/\s+/g, '_')}.pdf`;
         doc.save(safeFileName);
     }
 
-    // --- 5. LOGIKA DETEKSI LOG PERUBAHAN NOMINAL TIAP BULAN ---
+    // --- 6. LOGIKA DETEKSI LOG PERUBAHAN NOMINAL TIAP BULAN ---
     document.addEventListener("DOMContentLoaded", function() {
         const cells = document.querySelectorAll('td[data-phone]');
         const allData = [];
@@ -573,7 +596,6 @@
             }
         });
 
-        // Inisialisasi awal UI komponen filter tab dan tabel pagination
         generatePeriodeTabs();
         applyTableFilters();
     });
