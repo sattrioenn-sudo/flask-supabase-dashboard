@@ -220,6 +220,36 @@ def analytics():
     except: total_vouchers = 0
     return render_template('analytics.html', email=session.get('user_email'), total_vouchers=total_vouchers)
 
+# --- TAMBAHAN BARU: ACCOUNTING ROUTE (LOG TAGIHAN SUPABASE) ---
+@app.route('/accounting', methods=['GET', 'POST'])
+def accounting():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        # Penambahan log baru (Prinsip: Hanya insert data baru, tidak merusak data lama)
+        data = {
+            "bulan_tahun": request.form.get('bulan_tahun'),
+            "nomor_telepon": request.form.get('nomor_telepon'),
+            "pemilik": request.form.get('pemilik'),
+            "nominal_pembayaran": float(request.form.get('nominal_pembayaran', 0))
+        }
+        try:
+            supabase.table('log_tagihan').insert(data).execute()
+            return redirect(url_for('accounting'))
+        except Exception as e:
+            return f"Gagal menyimpan data log tagihan: {e}", 500
+
+    # Ambil data log historis dari Supabase tabel 'log_tagihan'
+    try:
+        response = supabase.table('log_tagihan').select("*", count='exact').order('created_at', desc=True).execute()
+        db_logs = response.data if response.data else []
+        total_logs = response.count if response.count is not None else len(db_logs)
+    except Exception as e:
+        print(f"Error Fetching Log Tagihan: {e}")
+        db_logs, total_logs = [], 0
+
+    return render_template('accounting.html', email=session.get('user_email'), logs=db_logs, total_logs=total_logs)
+
 @app.route('/logout')
 def logout():
     session.clear()
