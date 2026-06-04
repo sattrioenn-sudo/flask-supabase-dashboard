@@ -10,11 +10,25 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <style>
-    .trend-up { background-color: #fee2e2 !important; color: #991b1b !important; font-weight: 700; }
-    .trend-down { background-color: #dcfce7 !important; color: #166534 !important; font-weight: 700; }
-    .trend-new { background-color: #e0f2fe !important; color: #0369a1 !important; font-weight: 700; }
-    .trend-stable { background-color: #f1f5f9 !important; color: #475569 !important; }
-    .tab-periode-active { background-color: #075985 !important; color: #ffffff !important; border-color: #075985 !important; }
+    /* Desain Badge Tren Perubahan */
+    .trend-badge { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-flex; items-center: center; gap: 4px; }
+    .trend-up { background-color: #fef2f2; color: #991b1b; border: 1px solid #fee2e2; }
+    .trend-down { background-color: #f0fdf4; color: #166534; border: 1px solid #dcfce7; }
+    .trend-new { background-color: #f0f9ff; color: #0369a1; border: 1px solid #e0f2fe; }
+    .trend-stable { background-color: #f8fafc; color: #475569; border: 1px solid #f1f5f9; }
+    
+    /* Warna Badge Cabang Dinamis */
+    .branch-badge { padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; uppercase; text-align: center; display: inline-block; }
+    .br-aip { background-color: #e0f2fe; color: #0369a1; }
+    .br-kcs { background-color: #dcfce7; color: #166534; }
+    .br-kcu { background-color: #f3e8ff; color: #6b21a8; }
+    .br-kck { background-color: #fef3c7; color: #92400e; }
+    .br-kcp { background-color: #ffedd5; color: #9a3412; }
+    .br-kcn { background-color: #fae8ff; color: #86198f; }
+    .br-kcf { background-color: #e2e8f0; color: #334155; }
+    .br-default { background-color: #f1f5f9; color: #64748b; }
+
+    .tab-periode-active { background-color: #075985 !important; color: #ffffff !important; border-color: #075985 !important; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
     .page-link-active { background-color: #075985 !important; color: #ffffff !important; border-color: #075985 !important; }
 </style>
 {% endblock %}
@@ -23,64 +37,81 @@
 <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
     
     <div class="space-y-6">
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
-                <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div class="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-9 h-9 bg-sky-100 rounded-xl flex items-center justify-center text-[#075985] shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
                 <div>
-                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Smart Scan File</h3>
-                    <p class="text-[10px] text-slate-400 font-medium">Mendukung format file Excel dan CSV Anda</p>
+                    <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Smart Auto-Scan File</h3>
+                    <p class="text-[10px] text-slate-400 font-medium">Otomatis pisah cabang dari Sheet Excel</p>
                 </div>
             </div>
             <div class="p-6">
-                <div class="border-2 border-dashed border-slate-200 rounded-xl p-5 text-center hover:border-[#075985] transition-colors bg-slate-50/50 group">
+                <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-[#075985] transition-all bg-slate-50/40 group cursor-pointer relative">
                     <input type="file" id="excel_file" accept=".xlsx, .xls, .csv" class="hidden" onchange="scanExcelFile(event)">
-                    <label for="excel_file" class="cursor-pointer flex flex-col items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-slate-400 group-hover:text-[#075985] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                        <span class="text-xs font-bold text-slate-600">Pilih / Seret File Log Tagihan</span>
-                        <span class="text-[9px] text-slate-400 max-w-xs mx-auto">Sistem membaca kolom otomatis lintas cabang AIP, KCU, KCK, KCS, KCP, KCN, KCF</span>
+                    <label for="excel_file" class="cursor-pointer flex flex-col items-center gap-3">
+                        <div class="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-[#075985] group-hover:scale-110 transition-all duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                        </div>
+                        <span class="text-xs font-bold text-slate-700">Pilih berkas atau seret ke sini</span>
+                        <span class="text-[10px] text-slate-400 max-w-xs mx-auto leading-relaxed">Sistem memetakan otomatis kolom lintas cabang: <b class="text-slate-600">AIP, KCU, KCK, KCS, KCP, KCN, KCF</b></span>
                     </label>
                 </div>
-                <div id="scan_status" class="mt-4 p-3 rounded-xl text-[11px] font-semibold text-center hidden"></div>
+                <div id="scan_status" class="mt-4 p-3.5 rounded-xl text-[11px] font-semibold text-center hidden transition-all duration-300"></div>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="p-6 bg-slate-50 border-b border-slate-100 flex items-center gap-3">
-                <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+            <div class="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-700 shadow-inner">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                 </div>
                 <div>
                     <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Input Log Manual</h3>
-                    <p class="text-[10px] text-slate-400 font-medium">Tambah satu per satu data tagihan</p>
+                    <p class="text-[10px] text-slate-400 font-medium">Tambah entri tunggal ke database</p>
                 </div>
             </div>
             <div class="p-6">
                 <form action="{{ url_for('accounting') }}" method="POST" class="space-y-4" onsubmit="return handleFormSubmit(this);">
-                    <div>
-                        <label for="bulan_tahun" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Periode Bulan & Tahun</label>
-                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="bulan_tahun" name="bulan_tahun" placeholder="Contoh: Oktober 2025" required>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="bulan_tahun" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Periode Bulan & Tahun</label>
+                            <input type="text" class="w-full px-3 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 font-medium text-slate-700 transition-all" id="bulan_tahun" name="bulan_tahun" placeholder="Oktober 2025" required>
+                        </div>
+                        <div>
+                            <label for="input_cabang" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Cabang Perusahaan</label>
+                            <select id="input_cabang" class="w-full px-3 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 font-bold text-slate-700 transition-all">
+                                <option value="KCS">KCS</option>
+                                <option value="AIP">AIP</option>
+                                <option value="KCU">KCU</option>
+                                <option value="KCK">KCK</option>
+                                <option value="KCP">KCP</option>
+                                <option value="KCN">KCN</option>
+                                <option value="KCF">KCF</option>
+                            </select>
+                        </div>
                     </div>
                     <div>
                         <label for="nomor_telepon" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nomor Telepon (MSISDN)</label>
-                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nomor_telepon" name="nomor_telepon" placeholder="Contoh: 628113450842" required>
+                        <input type="text" class="w-full px-3 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 font-medium font-mono text-slate-700 transition-all" id="nomor_telepon" name="nomor_telepon" placeholder="628113450842" required>
                     </div>
                     <div>
                         <label for="pemilik" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Pemilik (User)</label>
-                        <input type="text" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="pemilik" name="pemilik" placeholder="Contoh: Bp. Hendro" required>
+                        <input type="text" class="w-full px-3 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 font-medium text-slate-700 transition-all" id="pemilik" placeholder="Bp. Hendro" required>
+                        <input type="hidden" id="real_pemilik" name="pemilik">
                     </div>
                     <div>
                         <label for="nominal_pembayaran" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Nominal Pembayaran (Rp)</label>
-                        <input type="number" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-none focus:border-sky-500 font-medium" id="nominal_pembayaran" name="nominal_pembayaran" placeholder="Contoh: 113500" required>
+                        <input type="number" class="w-full px-3 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 font-bold font-mono text-slate-700 transition-all" id="nominal_pembayaran" name="nominal_pembayaran" placeholder="113500" required>
                     </div>
-                    <button type="submit" id="btn_submit_manual" class="w-full bg-[#075985] text-white text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 rounded-lg hover:bg-sky-800 transition-colors shadow-sm disabled:bg-slate-300 disabled:cursor-not-allowed">
+                    <button type="submit" id="btn_submit_manual" class="w-full bg-[#075985] text-white text-[11px] font-bold uppercase tracking-wider py-3 px-4 rounded-xl hover:bg-sky-800 transition-all shadow-md active:scale-[0.98] disabled:bg-slate-300 disabled:cursor-not-allowed mt-2">
                         Simpan ke Database Log
                     </button>
                 </form>
@@ -90,51 +121,51 @@
 
     <div class="xl:col-span-2 space-y-6">
         
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-md p-6">
+            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                Pilih Periode Log Bulanan:
+                Filter Cepat Berdasarkan Periode:
             </span>
-            <div id="periode_tabs_container" class="flex flex-wrap gap-2">
-                <button onclick="filterPeriode('ALL')" id="tab_all" class="px-3 py-1.5 text-xs font-bold uppercase rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition-all tab-periode-btn">
+            <div id="periode_tabs_container" class="flex flex-wrap gap-2.5">
+                <button onclick="filterPeriode('ALL')" id="tab_all" class="px-4 py-2 text-xs font-bold uppercase rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 transition-all duration-200 tab-periode-btn">
                     Semua Periode
                 </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-md overflow-hidden">
+            <div class="p-6 bg-gradient-to-r from-slate-50 to-slate-100 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-sky-50 rounded-lg flex items-center justify-center text-[#075985]">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-9 h-9 bg-sky-100 rounded-xl flex items-center justify-center text-[#075985] shadow-inner">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                         </svg>
                     </div>
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Log Analisis Perubahan & Historis</h3>
-                        <p class="text-[10px] text-slate-400 font-medium">Menampilkan data terpilih dan perbedaan nominal otomatis</p>
+                        <p class="text-[10px] text-slate-400 font-medium">Dilengkapi deteksi cabang dan komparasi otomatis</p>
                     </div>
                 </div>
                 
-                <button onclick="exportToPDF()" class="inline-flex items-center gap-2 bg-rose-600 text-white text-[11px] font-bold uppercase tracking-wider py-2 px-3 rounded-xl hover:bg-rose-700 transition-colors shadow-sm self-start sm:self-center">
+                <button onclick="exportToPDF()" class="inline-flex items-center gap-2 bg-rose-600 text-white text-[11px] font-bold uppercase tracking-wider py-2.5 px-4 rounded-xl hover:bg-rose-700 transition-all hover:shadow-md active:scale-[0.98] self-start sm:self-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Export PDF
+                    Export PDF Laporan
                 </button>
             </div>
 
-            <div class="p-4 bg-white border-b border-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="p-4 bg-white border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="relative flex-1">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
                         <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </span>
-                    <input type="text" id="table_search" onkeyup="liveSearchTable()" placeholder="Cari berdasarkan nama atau nomor telepon (MSISDN)..." 
-                           class="w-full pl-9 pr-8 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 font-medium placeholder-slate-400">
+                    <input type="text" id="table_search" onkeyup="liveSearchTable()" placeholder="Cari nama, cabang, periode, atau nomor telepon (MSISDN)..." 
+                           class="w-full pl-10 pr-9 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 font-medium placeholder-slate-400 transition-all">
                     
                     <button onclick="clearSearchField()" id="btn_clear_search" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -142,7 +173,7 @@
                         </svg>
                     </button>
                 </div>
-                <span id="display_total_logs" class="bg-sky-50 text-[#075985] text-[10px] font-bold px-2.5 py-1.5 rounded-lg uppercase tracking-wider whitespace-nowrap">
+                <span id="display_total_logs" class="bg-slate-100 text-slate-700 text-[10px] font-bold px-3 py-2 rounded-xl uppercase tracking-wider whitespace-nowrap text-center">
                     Total: {{ total_logs }} Data
                 </span>
             </div>
@@ -150,39 +181,50 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse" id="log_table">
                     <thead>
-                        <tr class="border-b border-slate-100 bg-slate-50/70 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                            <th class="py-3 px-6 text-center">Bulan <span class="text-[8px] text-slate-300">▼</span></th>
-                            <th class="py-3 px-6">No. Telepon / MSISDN</th>
-                            <th class="py-3 px-6">Pemilik (User)</th>
-                            <th class="py-3 px-6 text-right">Nominal</th>
-                            <th class="py-3 px-6 text-center">Analisis Selisih</th>
+                        <tr class="border-b border-slate-200 bg-slate-50/70 text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none">
+                            <th class="py-3.5 px-6 text-center">Bulan <span class="text-[8px] text-slate-300">▼</span></th>
+                            <th class="py-3.5 px-6 text-center">Cabang</th> <th class="py-3.5 px-6">No. Telepon / MSISDN</th>
+                            <th class="py-3.5 px-6">Pemilik (User)</th>
+                            <th class="py-3.5 px-6 text-right">Nominal</th>
+                            <th class="py-3.5 px-6 text-center">Analisis Selisih</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-50 text-xs font-medium text-slate-700" id="table_body">
+                    <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700" id="table_body">
                         {% if logs %}
                             {% for row in logs %}
-                            <tr class="hover:bg-slate-50/50 transition-colors log-row" data-row-periode="{{ row.bulan_tahun }}">
-                                <td class="py-3.5 px-6 text-center font-semibold text-slate-500 search-target text-bulan">{{ row.bulan_tahun }}</td>
-                                <td class="py-3.5 px-6 font-mono text-slate-600 search-target text-phone">{{ row.nomor_telepon }}</td>
-                                <td class="py-3.5 px-6 text-slate-900 font-semibold search-target text-user">{{ row.pemilik if row.pemilik and row.pemilik != '-' else 'No Name' }}</td>
-                                <td class="py-3.5 px-6 text-end font-mono font-bold text-slate-900 text-amount" data-raw-val="{{ row.nominal_pembayaran }}">Rp {{ "{:,.0f}".format(row.nominal_pembayaran|float) }}</td>
-                                <td class="py-3.5 px-6 text-center text-[11px] text-diff-container" 
+                            <tr class="hover:bg-slate-50/80 transition-colors duration-150 log-row" data-row-periode="{{ row.bulan_tahun }}">
+                                <td class="py-4 px-6 text-center font-bold text-slate-500 search-target text-bulan">{{ row.bulan_tahun }}</td>
+                                
+                                <td class="py-4 px-6 text-center whitespace-nowrap">
+                                    <span class="branch-badge search-target text-cabang" id="branch_badge_{{ loop.index }}">
+                                        Proses...
+                                    </span>
+                                </td>
+                                
+                                <td class="py-4 px-6 font-mono text-slate-600 search-target text-phone">{{ row.nomor_telepon }}</td>
+                                
+                                <td class="py-4 px-6 text-slate-900 font-bold search-target text-user" id="user_display_{{ loop.index }}" data-raw-user="{{ row.pemilik }}">
+                                    {{ row.pemilik }}
+                                </td>
+                                
+                                <td class="py-4 px-6 text-end font-mono font-extrabold text-slate-900 text-amount" data-raw-val="{{ row.nominal_pembayaran }}">Rp {{ "{:,.0f}".format(row.nominal_pembayaran|float) }}</td>
+                                <td class="py-4 px-6 text-center text-[11px] text-diff-container" 
                                     data-phone="{{ row.nomor_telepon }}" 
                                     data-month="{{ row.bulan_tahun }}" 
                                     data-amount="{{ row.nominal_pembayaran }}">
-                                    <span class="text-slate-300 text-[10px] uppercase font-bold">Memproses...</span>
+                                    <span class="trend-badge trend-stable">Memproses...</span>
                                 </td>
                             </tr>
                             {% endfor %}
                         {% else %}
                             <tr id="no_data_row">
-                                <td colspan="5" class="py-12 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                <td colspan="6" class="py-16 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
                                     Belum ada data log tagihan di database.
                                 </td>
                             </tr>
                         {% endif %}
                         <tr id="no_match_row" class="hidden">
-                            <td colspan="5" class="py-12 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            <td colspan="6" class="py-16 text-center text-xs font-bold text-slate-400 uppercase tracking-wider">
                                 Data yang Anda cari tidak ditemukan.
                             </td>
                         </tr>
@@ -190,10 +232,21 @@
                 </table>
             </div>
 
-            <div class="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <span id="pagination_info" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                    Menampilkan 0 - 0 dari 0 Data
-                </span>
+            <div class="p-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 select-none">
+                <div class="flex items-center gap-2.5">
+                    <span id="pagination_info" class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        Menampilkan 0 - 0 dari 0 Data
+                    </span>
+                    <div class="flex items-center gap-1.5 border border-slate-200 rounded-lg bg-white px-2 py-1 shadow-sm">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">Tampil:</span>
+                        <select id="rows_per_page_select" onchange="changeRowsPerPage(this.value)" class="text-[11px] font-bold text-slate-700 outline-none bg-transparent cursor-pointer">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="pagination_controls" class="flex items-center gap-1"></div>
             </div>
         </div>
@@ -205,18 +258,74 @@
 <script>
     let activePeriodeFilter = "ALL";
     let currentPage = 1;
-    const rowsPerPage = 10; 
+    let rowsPerPage = 10; // Default dinamis awal
     let filteredRowsArray = [];
 
-    // --- 1. FITUR KEAMANAN: ANTI DOUBLE-SUBMIT INPUT MANUAL ---
+    // --- 1. PRE-PROCESSING SEAFETY DATA RECOVERY: EKSTRAKSI CABANG & NAMA (SUPABASE COMPATIBLE) ---
+    function processCabangAndUserStrings() {
+        const rows = document.getElementsByClassName("log-row");
+        const validCabang = ["AIP", "KCS", "KCU", "KCK", "KCP", "KCN", "KCF"];
+
+        for (let i = 0; i < rows.length; i++) {
+            const userTD = rows[i].querySelector(`[id^="user_display_"]`);
+            const badgeSPAN = rows[i].querySelector(`[id^="branch_badge_"]`);
+            if (!userTD || !badgeSPAN) continue;
+
+            let rawString = userTD.getAttribute("data-raw-user").trim();
+            let detectedCabang = "KCS"; // Default fallback perusahaan induk Anda
+            let cleanUserName = rawString;
+
+            // Jika format tersimpan dalam bentuk "CABANG - NAMA" (Efek Auto-Scan)
+            if (rawString.includes(" - ")) {
+                let parts = rawString.split(" - ");
+                let possibleCabang = parts[0].toUpperCase().trim();
+                if (validCabang.includes(possibleCabang)) {
+                    detectedCabang = possibleCabang;
+                    cleanUserName = parts.slice(1).join(" - ");
+                }
+            } else {
+                // Cari kata kunci cabang di dalam string user teks secara acak
+                let rawUpper = rawString.toUpperCase();
+                for (let cab of validCabang) {
+                    if (rawUpper.includes(`[${cab}]`) || rawUpper.startsWith(cab + " ")) {
+                        detectedCabang = cab;
+                        cleanUserName = rawString.replace(new RegExp(cab, 'i'), '').replace(/[\[\]\-]/g, '').trim();
+                        break;
+                    }
+                }
+            }
+
+            if (!cleanUserName || cleanUserName === "-") cleanUserName = "No Name";
+            
+            // Set render text visual ke UI komponen baru
+            userTD.innerText = cleanUserName;
+            badgeSPAN.innerText = detectedCabang;
+            badgeSPAN.className = `branch-badge br-${detectedCabang.toLowerCase()}`;
+        }
+    }
+
+    // --- 2. ANTI-DOUBLE SUBMIT & MERGING PAYLOAD MANUAL FORM ---
     function handleFormSubmit(formElement) {
         const btn = document.getElementById("btn_submit_manual");
+        const cab = document.getElementById("input_cabang").value;
+        const user = document.getElementById("pemilik").value.trim();
+        
+        // Gabungkan cabang dan nama ke dalam hidden field 'pemilik' agar masuk rapi ke database eksisting
+        document.getElementById("real_pemilik").value = `${cab} - ${user}`;
+
         btn.innerText = "Memproses Penyimpanan...";
         btn.disabled = true;
         return true;
     }
 
-    // --- 2. GENERATE TAB FILTER PERIODE OTOMATIS ---
+    // --- 3. DYNAMIC PAGINATION SELECTOR HANDLER ---
+    function changeRowsPerPage(value) {
+        rowsPerPage = parseInt(value);
+        currentPage = 1;
+        applyTableFilters();
+    }
+
+    // --- 4. GENERATE TAB FILTER PERIODE BULANAN ---
     function generatePeriodeTabs() {
         const rows = document.getElementsByClassName("log-row");
         const uniquePeriode = new Set();
@@ -231,7 +340,7 @@
             const btn = document.createElement("button");
             btn.innerText = periode;
             btn.id = "tab_" + btoa(periode).replace(/=/g, "");
-            btn.className = "px-3 py-1.5 text-xs font-bold uppercase rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all tab-periode-btn";
+            btn.className = "px-4 py-2 text-xs font-bold uppercase rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all duration-150 tab-periode-btn shadow-sm";
             btn.onclick = function() { filterPeriode(periode, btn.id); };
             container.appendChild(btn);
         });
@@ -251,7 +360,6 @@
     }
 
     function liveSearchTable() {
-        // Kontrol tampil/sembunyi tombol silang pembersih input
         const searchInput = document.getElementById("table_search").value;
         const clearBtn = document.getElementById("btn_clear_search");
         if (searchInput.length > 0) {
@@ -259,7 +367,6 @@
         } else {
             clearBtn.classList.add("hidden");
         }
-
         currentPage = 1;
         applyTableFilters();
     }
@@ -272,7 +379,7 @@
         applyTableFilters();
     }
 
-    // --- 3. LOGIKA KOMBINASI FILTER, SEARCH BOX, & PAGINATION CONTROLLER ---
+    // --- 5. COMBINED FILTER SYSTEM (PERIODE + LIVE SEARCH + PAGINATION) ---
     function applyTableFilters() {
         const searchInput = document.getElementById("table_search").value.toLowerCase();
         const allRows = document.getElementsByClassName("log-row");
@@ -322,7 +429,7 @@
             filteredRowsArray[k].classList.remove("hidden");
         }
 
-        document.getElementById("pagination_info").innerText = `Menampilkan ${startIdx + 1} - ${endIdx} dari ${totalFiltered} Data`;
+        document.getElementById("pagination_info").innerText = `Menampilkan ${startIdx + 1} - ${endIdx} dari ${totalFiltered}`;
         renderPaginationButtons(totalPages);
     }
 
@@ -335,7 +442,7 @@
         for (let i = 1; i <= totalPages; i++) {
             const btn = document.createElement("button");
             btn.innerText = i;
-            btn.className = "w-7 h-7 flex items-center justify-center text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all";
+            btn.className = "w-7 h-7 flex items-center justify-center text-xs font-bold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all shadow-sm";
             if (i === currentPage) {
                 btn.className += " page-link-active";
             }
@@ -348,26 +455,23 @@
         }
     }
 
-    // --- 4. FITUR KEAMANAN VALIDASI FILE & SMART MULTI-SHEET SCAN ---
+    // --- 6. SMART FILE AUTOMATED MULTI-SHEET SCANNER ---
     async function scanExcelFile(event) {
         const file = event.target.files[0];
         if (!file) return;
 
         const statusDiv = document.getElementById('scan_status');
         
-        // Pengecekan keamanan tipe ekstensi file
         const fileExt = file.name.split('.').pop().toLowerCase();
         if (!['xlsx', 'xls', 'csv'].includes(fileExt)) {
-            statusDiv.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-700');
-            statusDiv.classList.add('bg-rose-50', 'text-rose-700', 'block');
+            statusDiv.className = "mt-4 p-3.5 rounded-xl text-[11px] font-semibold text-center bg-rose-50 text-rose-700 block border border-rose-200";
             statusDiv.innerHTML = "✕ Format berkas salah! Hanya diperbolehkan file Excel (.xlsx, .xls) atau CSV.";
-            event.target.value = ""; // bersihkan input berkas
+            event.target.value = ""; 
             return;
         }
 
-        statusDiv.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'bg-emerald-50', 'text-emerald-700');
-        statusDiv.classList.add('bg-slate-50', 'text-slate-600', 'block');
-        statusDiv.innerHTML = "Memindai seluruh data sheet cabang di dalam file...";
+        statusDiv.className = "mt-4 p-3.5 rounded-xl text-[11px] font-semibold text-center bg-slate-50 text-slate-600 block border border-slate-200 animate-pulse";
+        statusDiv.innerHTML = "Memindai seluruh data sheet cabang di dalam berkas...";
 
         let defaultBulan = "Oktober 2025";
         const fileNameUpper = file.name.toUpperCase();
@@ -400,7 +504,7 @@
                     const jsonData = XLSX.utils.sheet_to_json(worksheet);
                     if (jsonData.length === 0) continue;
 
-                    statusDiv.innerHTML = `Membaca data dari Sheet Cabang: <b>${sheetName}</b>...`;
+                    statusDiv.innerHTML = `Membaca data dari Sheet Cabang: <b class="text-[#075985]">${sheetName}</b>...`;
 
                     for (const row of jsonData) {
                         let phone = row.MSISDN || row.msisdn || row.nomor_telepon || row.No_Telp || '';
@@ -441,10 +545,18 @@
 
                         if (nominal > 0) {
                             totalRowsFound++;
+                            
+                            // Deteksi cabang pintar berdasarkan nama Sheet aktif
+                            let targetCabang = "KCS";
+                            for (let b of validCabang) {
+                                if (sheetNameUpper.includes(b)) { targetCabang = b; break; }
+                            }
+
                             const formData = new FormData();
                             formData.append('bulan_tahun', defaultBulan);
                             formData.append('nomor_telepon', String(phone).trim());
-                            formData.append('pemilik', pemilik ? String(pemilik).trim() : '-');
+                            // Gabungkan data Cabang di depan string nama secara terstruktur sebelum dilempar ke backend
+                            formData.append('pemilik', `${targetCabang} - ${(pemilik ? String(pemilik).trim() : '-')}`);
                             formData.append('nominal_pembayaran', nominal);
 
                             const response = await fetch("{{ url_for('accounting') }}", {
@@ -457,27 +569,25 @@
                 }
 
                 if (totalRowsFound === 0) {
-                    throw new Error("Tidak ditemukan data cabang yang valid pada file ini.");
+                    throw new Error("Tidak ditemukan kolom data cabang yang cocok pada file ini.");
                 }
 
-                statusDiv.classList.replace('bg-slate-50', 'bg-emerald-50');
-                statusDiv.classList.replace('text-slate-600', 'text-emerald-700');
-                statusDiv.innerHTML = `✓ Sukses memproses seluruh sheet cabang! Berhasil menyimpan ${successCount} data ke database log.`;
-                setTimeout(() => { window.location.reload(); }, 1500);
+                statusDiv.className = "mt-4 p-3.5 rounded-xl text-[11px] font-semibold text-center bg-emerald-50 text-emerald-700 block border border-emerald-200";
+                statusDiv.innerHTML = `✓ Berhasil memproses! Menyimpan ${successCount} data log cabang baru ke database.`;
+                setTimeout(() => { window.location.reload(); }, 1200);
 
             } catch (err) {
-                statusDiv.classList.replace('bg-slate-50', 'bg-rose-50');
-                statusDiv.classList.replace('text-slate-600', 'text-rose-700');
+                statusDiv.className = "mt-4 p-3.5 rounded-xl text-[11px] font-semibold text-center bg-rose-50 text-rose-700 block border border-rose-200";
                 statusDiv.innerHTML = `✕ Gagal memproses file: ${err.message}`;
             }
         };
         reader.readAsArrayBuffer(file);
     }
 
-    // --- 5. FUNGSI EXPORT DATA FILTERED KE PDF DENGAN TANDA TANGAN ---
+    // --- 7. EXPORT DATA FILTERED KE PDF TERSTRUKTUR ---
     function exportToPDF() {
         if (filteredRowsArray.length === 0) {
-            alert("Tidak ada data yang tersedia untuk di-export ke PDF.");
+            alert("Tidak ada data log yang tersaring untuk dicetak.");
             return;
         }
 
@@ -490,12 +600,13 @@
         
         doc.setFont("Helvetica", "normal");
         doc.setFontSize(9);
-        doc.text(`Periode Cetak Filter: ${activePeriodeFilter}`, 14, 21);
-        doc.text(`Tanggal Cetak Dokumen: ${new Date().toLocaleDateString('id-ID')}`, 14, 25);
+        doc.text(`Kriteria Filter Periode: ${activePeriodeFilter}`, 14, 21);
+        doc.text(`Waktu Cetak Dokumen: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`, 14, 25);
         
         const bodyData = [];
         filteredRowsArray.forEach((row, index) => {
             const bulan = row.querySelector(".text-bulan").innerText;
+            const cabang = row.querySelector(".text-cabang").innerText; // Ekstraksi kolom baru
             const phone = row.querySelector(".text-phone").innerText;
             const user = row.querySelector(".text-user").innerText;
             const amount = row.querySelector(".text-amount").innerText;
@@ -504,6 +615,7 @@
             bodyData.push([
                 index + 1,
                 bulan,
+                cabang,
                 phone,
                 user,
                 amount,
@@ -512,18 +624,19 @@
         });
 
         doc.autoTable({
-            head: [['No', 'Periode', 'No. Telepon / MSISDN', 'Pemilik (User)', 'Nominal Pembayaran', 'Analisis Selisih']],
+            head: [['No', 'Periode', 'Cabang', 'No. Telepon / MSISDN', 'Pemilik (User)', 'Nominal Pembayaran', 'Analisis Selisih']],
             body: bodyData,
             startY: 30,
             theme: 'grid',
-            headStyles: { fillColor: [7, 89, 133], fontSize: 9, halign: 'center' },
+            headStyles: { fillColor: [7, 89, 133], fontSize: 8, halign: 'center' },
             bodyStyles: { fontSize: 8 },
             columnStyles: {
-                0: { halign: 'center', cellWidth: 10 },
-                1: { halign: 'center', cellWidth: 25 },
-                2: { font: 'monospace', cellWidth: 35 },
-                4: { halign: 'right', cellWidth: 35 },
-                5: { halign: 'center' }
+                0: { halign: 'center', cellWidth: 8 },
+                1: { halign: 'center', cellWidth: 22 },
+                2: { halign: 'center', cellWidth: 15 },
+                3: { font: 'monospace', cellWidth: 32 },
+                5: { halign: 'right', cellWidth: 30 },
+                6: { halign: 'center' }
             },
             didDrawPage: function(data) {
                 doc.lastTableY = data.cursor.y;
@@ -543,17 +656,20 @@
         const rightColX = 135;
 
         doc.text("Dikerjakan oleh :", leftColX, signY);
-        doc.text("Diketahui oleh :", rightColX, signY);
+        doc.text("Dimaklumi / Diketahui oleh :", rightColX, signY);
         
         doc.text("..........................................", leftColX, signY + 25);
         doc.text("..........................................", rightColX, signY + 25);
         
-        const safeFileName = `LOG_TAGIHAN_${activePeriodeFilter.replace(/\s+/g, '_')}.pdf`;
+        const safeFileName = `LOG_TAGIHAN_PERUSAHAAN_${activePeriodeFilter.replace(/\s+/g, '_')}.pdf`;
         doc.save(safeFileName);
     }
 
-    // --- 6. LOGIKA DETEKSI LOG PERUBAHAN NOMINAL TIAP BULAN ---
+    // --- 8. LOGIKA DETEKSI LOG PERUBAHAN TREND BULANAN ---
     document.addEventListener("DOMContentLoaded", function() {
+        // Jalankan parser ekstraksi teks cabang & nama user terlebih dahulu sebelum merender tren
+        processCabangAndUserStrings();
+
         const cells = document.querySelectorAll('td[data-phone]');
         const allData = [];
 
@@ -580,22 +696,23 @@
             if (olderItem) {
                 const diff = item.amount - olderItem.amount;
                 if (diff > 0) {
-                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-up">▲ Naik (Rp ${diff.toLocaleString('id-ID')})</span>`;
+                    item.element.innerHTML = `<span class="trend-badge trend-up">▲ Naik (Rp ${diff.toLocaleString('id-ID')})</span>`;
                 } else if (diff < 0) {
-                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-down">▼ Turun (Rp ${Math.abs(diff).toLocaleString('id-ID')})</span>`;
+                    item.element.innerHTML = `<span class="trend-badge trend-down">▼ Turun (Rp ${Math.abs(diff).toLocaleString('id-ID')})</span>`;
                 } else {
-                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-stable">Stabil</span>`;
+                    item.element.innerHTML = `<span class="trend-badge trend-stable">Stabil</span>`;
                 }
             } else {
                 const hasOtherRecord = allData.some(d => d.phone === item.phone && d.month !== item.month);
                 if (!hasOtherRecord) {
-                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-new">User Baru</span>`;
+                    item.element.innerHTML = `<span class="trend-badge trend-new">User Baru</span>`;
                 } else {
-                    item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-stable">Data Awal</span>`;
+                    item.element.innerHTML = `<span class="trend-badge trend-stable">Data Awal</span>`;
                 }
             }
         });
 
+        // Tampilkan filter tab dan jalankan sistem pagination filter pertama kali
         generatePeriodeTabs();
         applyTableFilters();
     });
