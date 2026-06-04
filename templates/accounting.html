@@ -11,6 +11,7 @@
     .trend-down { background-color: #dcfce7 !important; color: #166534 !important; font-weight: 700; }
     .trend-new { background-color: #e0f2fe !important; color: #0369a1 !important; font-weight: 700; }
     .trend-stable { background-color: #f1f5f9 !important; color: #475569 !important; }
+    .tab-periode-active { background-color: #075985 !important; color: #ffffff !important; border-color: #075985 !important; }
 </style>
 {% endblock %}
 
@@ -38,7 +39,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                         <span class="text-xs font-bold text-slate-600">Pilih / Seret File Log Tagihan</span>
-                        <span class="text-[9px] text-slate-400 max-w-xs mx-auto">Sistem membaca kolom otomatis (MSISDN, User, Nominal) lintas cabang AIP, KCU, KCK, KCS, KCP, KCN, KCF</span>
+                        <span class="text-[9px] text-slate-400 max-w-xs mx-auto">Sistem membaca kolom otomatis lintas cabang AIP, KCU, KCK, KCS, KCP, KCN, KCF</span>
                     </label>
                 </div>
                 
@@ -84,7 +85,22 @@
         </div>
     </div>
 
-    <div class="xl:col-span-2">
+    <div class="xl:col-span-2 space-y-6">
+        
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Pilih Periode Log Bulanan:
+            </span>
+            <div id="periode_tabs_container" class="flex flex-wrap gap-2">
+                <button onclick="filterPeriode('ALL')" id="tab_all" class="px-3 py-1.5 text-xs font-bold uppercase rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition-all tab-periode-btn">
+                    Semua Periode
+                </button>
+                </div>
+        </div>
+
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             <div class="p-6 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div class="flex items-center gap-3">
@@ -95,10 +111,10 @@
                     </div>
                     <div>
                         <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Log Analisis Perubahan & Historis</h3>
-                        <p class="text-[10px] text-slate-400 font-medium">Menampilkan perbedaan nominal pembayaran antar bulan otomatis</p>
+                        <p class="text-[10px] text-slate-400 font-medium">Menampilkan data terpilih dan perbedaan nominal otomatis</p>
                     </div>
                 </div>
-                <span class="bg-sky-50 text-[#075985] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-center">
+                <span id="display_total_logs" class="bg-sky-50 text-[#075985] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider self-start sm:self-center">
                     Total: {{ total_logs }} Data
                 </span>
             </div>
@@ -110,7 +126,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </span>
-                    <input type="text" id="table_search" onkeyup="liveSearchTable()" placeholder="Cari data lama berdasarkan nama, nomor telepon (MSISDN), atau bulan..." 
+                    <input type="text" id="table_search" onkeyup="liveSearchTable()" placeholder="Cari dalam periode ini berdasarkan nama atau nomor telepon (MSISDN)..." 
                            class="w-full pl-9 pr-4 py-2 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-sky-500 font-medium placeholder-slate-400">
                 </div>
             </div>
@@ -129,7 +145,7 @@
                     <tbody class="divide-y divide-slate-50 text-xs font-medium text-slate-700">
                         {% if logs %}
                             {% for row in logs %}
-                            <tr class="hover:bg-slate-50/50 transition-colors log-row">
+                            <tr class="hover:bg-slate-50/50 transition-colors log-row" data-row-periode="{{ row.bulan_tahun }}">
                                 <td class="py-3.5 px-6 text-center font-semibold text-slate-500 search-target">{{ row.bulan_tahun }}</td>
                                 <td class="py-3.5 px-6 font-mono text-slate-600 search-target">{{ row.nomor_telepon }}</td>
                                 <td class="py-3.5 px-6 text-slate-900 font-semibold search-target">{{ row.pemilik if row.pemilik and row.pemilik != '-' else 'No Name' }}</td>
@@ -138,7 +154,7 @@
                                     data-phone="{{ row.nomor_telepon }}" 
                                     data-month="{{ row.bulan_tahun }}" 
                                     data-amount="{{ row.nominal_pembayaran }}">
-                                    <span class="text-slate-300 text-[10px] uppercase font-bold animate-pulse">Memproses...</span>
+                                    <span class="text-slate-300 text-[10px] uppercase font-bold">Memproses...</span>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -164,34 +180,85 @@
 
 {% block scripts %}
 <script>
-    // --- 1. FITUR LIVE SEARCH DATA LAMA ---
-    function liveSearchTable() {
-        const input = document.getElementById("table_search").value.toLowerCase();
+    let activePeriodeFilter = "ALL";
+
+    // --- 1. GENERATE TAB FILTER PERIODE OTOMATIS & KLIK FILTER ---
+    function generatePeriodeTabs() {
+        const rows = document.getElementsByClassName("log-row");
+        const uniquePeriode = new Set();
+        
+        // Ambil list bulan_tahun unik dari data tabel
+        for (let i = 0; i < rows.length; i++) {
+            const p = rows[i].getAttribute("data-row-periode");
+            if (p) uniquePeriode.add(p.trim());
+        }
+
+        const container = document.getElementById("periode_tabs_container");
+        
+        // Render tombol untuk masing-masing periode bulan
+        uniquePeriode.forEach(periode => {
+            const btn = document.createElement("button");
+            btn.innerText = periode;
+            btn.id = "tab_" + btoa(periode).replace(/=/g, ""); // safe ID name
+            btn.className = "px-3 py-1.5 text-xs font-bold uppercase rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all tab-periode-btn";
+            btn.onclick = function() { filterPeriode(periode, btn.id); };
+            container.appendChild(btn);
+        });
+
+        // Set default aktif awal ke 'Semua Periode'
+        document.getElementById("tab_all").classList.add("tab-periode-active");
+    }
+
+    function filterPeriode(periode, clickedId = "tab_all") {
+        activePeriodeFilter = periode;
+        
+        // Atur style tombol aktif
+        const buttons = document.getElementsByClassName("tab-periode-btn");
+        for (let b of buttons) {
+            b.classList.remove("tab-periode-active");
+        }
+        document.getElementById(clickedId).classList.add("tab-periode-active");
+
+        // Jalankan filter baris tabel
+        applyTableFilters();
+    }
+
+    // --- 2. LOGIKA KOMBINASI FILTER PERIODE & SEARCH BOX ---
+    function applyTableFilters() {
+        const searchInput = document.getElementById("table_search").value.toLowerCase();
         const rows = document.getElementsByClassName("log-row");
         const noMatchRow = document.getElementById("no_match_row");
-        let foundAny = false;
+        let visibleCount = 0;
 
         for (let i = 0; i < rows.length; i++) {
+            const rowPeriode = rows[i].getAttribute("data-row-periode");
             const targets = rows[i].getElementsByClassName("search-target");
-            let rowMatches = false;
             
+            // Cek kecocokan periode
+            let matchesPeriode = (activePeriodeFilter === "ALL" || rowPeriode === activePeriodeFilter);
+            
+            // Cek kecocokan kotak pencarian
+            let matchesSearch = false;
             for (let j = 0; j < targets.length; j++) {
-                if (targets[j].textContent.toLowerCase().includes(input)) {
-                    rowMatches = true;
+                if (targets[j].textContent.toLowerCase().includes(searchInput)) {
+                    matchesSearch = true;
                     break;
                 }
             }
-            
-            if (rowMatches) {
+
+            if (matchesPeriode && matchesSearch) {
                 rows[i].classList.remove("hidden");
-                foundAny = true;
+                visibleCount++;
             } else {
                 rows[i].classList.add("hidden");
             }
         }
 
+        // Tampilkan total log real-time hasil filter
+        document.getElementById("display_total_logs").innerText = `Total: ${visibleCount} Data`;
+
         if (rows.length > 0) {
-            if (!foundAny) {
+            if (visibleCount === 0) {
                 noMatchRow.classList.remove("hidden");
             } else {
                 noMatchRow.classList.add("hidden");
@@ -199,7 +266,11 @@
         }
     }
 
-    // --- 2. FITUR SMART SCAN SEMUA SHEET & LINTAS CABANG (AIP, KCU, KCK, KCS, KCP, KCN, KCF) ---
+    function liveSearchTable() {
+        applyTableFilters();
+    }
+
+    // --- 3. FITUR SMART SCAN SEMUA SHEET & LINTAS CABANG ---
     async function scanExcelFile(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -209,7 +280,6 @@
         statusDiv.classList.add('bg-slate-50', 'text-slate-600', 'block');
         statusDiv.innerHTML = "Memindai seluruh data sheet cabang di dalam file...";
 
-        // Deteksi Otomatis Periode Bulan & Tahun dari Nama File
         let defaultBulan = "Oktober 2025";
         const fileNameUpper = file.name.toUpperCase();
         const months = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
@@ -231,20 +301,14 @@
                 
                 let successCount = 0;
                 let totalRowsFound = 0;
-
-                // Daftar filter validasi kolom cabang target
                 const validCabang = ["AIP", "KCU", "KCK", "KCS", "KCP", "KCN", "KCF"];
 
-                // LOOPING SEMUA SHEET (TAB) YANG ADA DI FILE EXCEL
                 for (const sheetName of workbook.SheetNames) {
                     const sheetNameUpper = sheetName.toUpperCase().trim();
-                    
-                    // Lewati sheet rekapitulasi utama agar data tidak terinput ganda
                     if (sheetNameUpper === "TOTAL" || sheetNameUpper === "REKAP" || sheetNameUpper === "SUMMARY") continue;
 
                     const worksheet = workbook.Sheets[sheetName];
                     const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                    
                     if (jsonData.length === 0) continue;
 
                     statusDiv.innerHTML = `Membaca data dari Sheet Cabang: <b>${sheetName}</b>...`;
@@ -253,7 +317,6 @@
                         let phone = row.MSISDN || row.msisdn || row.nomor_telepon || row.No_Telp || '';
                         let pemilik = row.User || row.USER || row.user || row.pemilik || row.Nama || '';
                         
-                        // Validasi Awal: Jika kolom MSISDN kosong atau berisi subtotal, lewati
                         if (!phone || String(phone).toUpperCase().includes("SUBTOTAL") || String(phone).toUpperCase().includes("TOTAL")) {
                             continue;
                         }
@@ -261,25 +324,19 @@
                         let nominal = 0;
                         const keys = Object.keys(row);
                         
-                        // Ekstraksi nilai nominal dari kolom cabang tanpa menghentikan perulangan objek secara prematur
                         for (const key of keys) {
                             const keyUpper = key.toUpperCase().trim();
-                            
                             if (validCabang.includes(keyUpper) || keyUpper === sheetNameUpper) {
                                 const rawValue = String(row[key]).toUpperCase().trim();
-                                
                                 if (rawValue.includes("DINONAKTIFKAN") || rawValue.includes("NON AKTIF") || rawValue === "" || rawValue === "-") {
                                     nominal = 0;
                                 } else {
                                     const val = parseFloat(rawValue.replace(/[^0-9.-]+/g, ""));
-                                    if (!isNaN(val) && val > 0) {
-                                        nominal = val;
-                                    }
+                                    if (!isNaN(val) && val > 0) nominal = val;
                                 }
                             }
                         }
 
-                        // Jika nominal masih 0, cari alternatif kolom numerik murni lainnya
                         if (nominal === 0) {
                             for (const key of keys) {
                                 const keyUpper = key.toUpperCase().trim();
@@ -288,17 +345,13 @@
                                     if (rawValue.includes("DINONAKTIFKAN") || rawValue.includes("NON AKTIF")) continue;
                                     
                                     const val = parseFloat(rawValue.replace(/[^0-9.-]+/g, ""));
-                                    if (!isNaN(val) && val > 0) {
-                                        nominal = val;
-                                    }
+                                    if (!isNaN(val) && val > 0) nominal = val;
                                 }
                             }
                         }
 
-                        // Jika nominal final valid dan bukan 0, kirim ke database
                         if (nominal > 0) {
                             totalRowsFound++;
-
                             const formData = new FormData();
                             formData.append('bulan_tahun', defaultBulan);
                             formData.append('nomor_telepon', String(phone).trim());
@@ -309,7 +362,6 @@
                                 method: 'POST',
                                 body: formData
                             });
-
                             if (response.ok) successCount++;
                         }
                     }
@@ -321,9 +373,7 @@
 
                 statusDiv.classList.replace('bg-slate-50', 'bg-emerald-50');
                 statusDiv.classList.replace('text-slate-600', 'text-emerald-700');
-                statusDiv.innerHTML = `✓ Sukses memproses semua sheet cabang! Berhasil menyimpan ${successCount} data ke database log.`;
-                
-                // Refresh halaman untuk memuat ulang data terbaru
+                statusDiv.innerHTML = `✓ Sukses memproses seluruh sheet cabang! Berhasil menyimpan ${successCount} data ke database log.`;
                 setTimeout(() => { window.location.reload(); }, 1500);
 
             } catch (err) {
@@ -335,7 +385,7 @@
         reader.readAsArrayBuffer(file);
     }
 
-    // --- 3. LOGIKA DETEKSI LOG PERUBAHAN NOMINAL TIAP BULAN ---
+    // --- 4. LOGIKA ANALISIS TREN SELISIH NOMINAL ANTAR BULAN ---
     document.addEventListener("DOMContentLoaded", function() {
         const cells = document.querySelectorAll('td[data-phone]');
         const allData = [];
@@ -378,6 +428,9 @@
                 }
             }
         });
+
+        // Jalankan pembuatan tab filter setelah data DOM siap
+        generatePeriodeTabs();
     });
 </script>
 {% endblock %}
