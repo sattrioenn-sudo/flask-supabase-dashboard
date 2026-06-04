@@ -38,7 +38,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
                         <span class="text-xs font-bold text-slate-600">Pilih / Seret File Log Tagihan</span>
-                        <span class="text-[9px] text-slate-400 max-w-xs mx-auto">Sistem membaca kolom otomatis (MSISDN, User, Nominal) sesuai file lampiran Anda</span>
+                        <span class="text-[9px] text-slate-400 max-w-xs mx-auto">Sistem membaca kolom otomatis (MSISDN, User, Nominal) lintas cabang AIP, KCU, KCK, KCS, KCP, KCN, KCF</span>
                     </label>
                 </div>
                 
@@ -199,7 +199,7 @@
         }
     }
 
-    // --- 2. FITUR SMART SCAN FILE EXCEL / CSV ---
+    // --- 2. FITUR SMART SCAN SEMUA SHEET & LINTAS CABANG (AIP, KCU, KCK, KCS, KCP, KCN, KCF) ---
     async function scanExcelFile(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -207,16 +207,15 @@
         const statusDiv = document.getElementById('scan_status');
         statusDiv.classList.remove('hidden', 'bg-rose-50', 'text-rose-700', 'bg-emerald-50', 'text-emerald-700');
         statusDiv.classList.add('bg-slate-50', 'text-slate-600', 'block');
-        statusDiv.innerHTML = "Memindai file & mendeteksi struktur kolom...";
+        statusDiv.innerHTML = "Memindai seluruh data sheet cabang di dalam file...";
 
-        // Coba ekstrak nama bulan dari nama file secara otomatis (misal: "10. OKTOBER 2025.xlsx" -> "Oktober 2025")
+        // Deteksi Otomatis Periode Bulan & Tahun dari Nama File
         let defaultBulan = "Oktober 2025";
         const fileNameUpper = file.name.toUpperCase();
         const months = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
         
         for (const m of months) {
             if (fileNameUpper.includes(m)) {
-                // Temukan tahun jika ada angka 4 digit
                 const yearMatch = file.name.match(/\d{4}/);
                 const tahun = yearMatch ? yearMatch[0] : "2025";
                 defaultBulan = m.charAt(0) + m.slice(1).toLowerCase() + " " + tahun;
@@ -229,67 +228,102 @@
             try {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
                 
-                // Konversi sheet Excel menjadi baris objek JSON
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                
-                if (jsonData.length === 0) {
-                    throw new Error("File kosong atau tidak memiliki baris data yang valid.");
-                }
-
-                statusDiv.innerHTML = `Terdeteksi ${jsonData.length} baris. Memasukkan data ke database...`;
-
                 let successCount = 0;
+                let totalRowsFound = 0;
 
-                // Loop & Kirim data baris ke backend via Fetch API (meniru submit form manual tanpa ngerusak program)
-                for (const row of jsonData) {
-                    // Penyesuaian fleksibel nama kolom berdasarkan template excel Anda (MSISDN, CORP, User, Nominal)
-                    let phone = row.MSISDN || row.msisdn || row.nomor_telepon || row.No_Telp || '';
-                    let pemilik = row.User || row.USER || row.user || row.pemilik || row.Nama || '-';
+                // Daftar filter validasi kolom cabang target
+                const validCabang = ["AIP", "KCU", "KCK", "KCS", "KCP", "KCN", "KCF"];
+
+                // LOOPING SEMUA SHEET (TAB) YANG ADA DI FILE EXCEL
+                for (const sheetName of workbook.SheetNames) {
+                    const sheetNameUpper = sheetName.toUpperCase().trim();
                     
-                    // Deteksi kolom nominal tagihan dinamis (bisa berupa kolom nama cabang seperti AIP, KCS, KCU, KCF, dll)
-                    let nominal = 0;
-                    const keys = Object.keys(row);
-                    // Cari kolom yang berisi nilai angka murni di luar NO dan MSISDN
-                    for (const key of keys) {
-                        const keyUpper = key.toUpperCase();
-                        if (keyUpper !== 'NO' && keyUpper !== 'MSISDN' && keyUpper !== 'USER' && keyUpper !== 'CORP' && keyUpper !== 'PEMILIK') {
-                            const val = parseFloat(String(row[key]).replace(/[^0-9.-]+/g, ""));
-                            if (!isNaN(val) && val > 0) {
-                                nominal = val;
-                                break;
+                    // Lewati sheet rekapitulasi utama agar data tidak terinput ganda
+                    if (sheetNameUpper === "TOTAL" || sheetNameUpper === "REKAP" || sheetNameUpper === "SUMMARY") continue;
+
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    if (jsonData.length === 0) continue;
+
+                    statusDiv.innerHTML = `Membaca data dari Sheet Cabang: <b>${sheetName}</b>...`;
+
+                    for (const row of jsonData) {
+                        let phone = row.MSISDN || row.msisdn || row.nomor_telepon || row.No_Telp || '';
+                        let pemilik = row.User || row.USER || row.user || row.pemilik || row.Nama || '';
+                        
+                        // Validasi Awal: Jika kolom MSISDN kosong atau berisi subtotal, lewati
+                        if (!phone || String(phone).toUpperCase().includes("SUBTOTAL") || String(phone).toUpperCase().includes("TOTAL")) {
+                            continue;
+                        }
+
+                        let nominal = 0;
+                        const keys = Object.keys(row);
+                        
+                        // Ekstraksi nilai nominal dari kolom cabang tanpa menghentikan perulangan objek secara prematur
+                        for (const key of keys) {
+                            const keyUpper = key.toUpperCase().trim();
+                            
+                            if (validCabang.includes(keyUpper) || keyUpper === sheetNameUpper) {
+                                const rawValue = String(row[key]).toUpperCase().trim();
+                                
+                                if (rawValue.includes("DINONAKTIFKAN") || rawValue.includes("NON AKTIF") || rawValue === "" || rawValue === "-") {
+                                    nominal = 0;
+                                } else {
+                                    const val = parseFloat(rawValue.replace(/[^0-9.-]+/g, ""));
+                                    if (!isNaN(val) && val > 0) {
+                                        nominal = val;
+                                    }
+                                }
                             }
                         }
+
+                        // Jika nominal masih 0, cari alternatif kolom numerik murni lainnya
+                        if (nominal === 0) {
+                            for (const key of keys) {
+                                const keyUpper = key.toUpperCase().trim();
+                                if (!["NO", "MSISDN", "USER", "CORP", "PEMILIK", "CABANG"].includes(keyUpper)) {
+                                    const rawValue = String(row[key]).toUpperCase().trim();
+                                    if (rawValue.includes("DINONAKTIFKAN") || rawValue.includes("NON AKTIF")) continue;
+                                    
+                                    const val = parseFloat(rawValue.replace(/[^0-9.-]+/g, ""));
+                                    if (!isNaN(val) && val > 0) {
+                                        nominal = val;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Jika nominal final valid dan bukan 0, kirim ke database
+                        if (nominal > 0) {
+                            totalRowsFound++;
+
+                            const formData = new FormData();
+                            formData.append('bulan_tahun', defaultBulan);
+                            formData.append('nomor_telepon', String(phone).trim());
+                            formData.append('pemilik', pemilik ? String(pemilik).trim() : '-');
+                            formData.append('nominal_pembayaran', nominal);
+
+                            const response = await fetch("{{ url_for('accounting') }}", {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            if (response.ok) successCount++;
+                        }
                     }
+                }
 
-                    // Skip baris subtotal, baris kosong, atau user yang DINONAKTIFKAN
-                    if (!phone || String(phone).toUpperCase().includes("SUBTOTAL") || String(nominal).toUpperCase().includes("DINONAKTIFKAN") || nominal === 0) {
-                        continue;
-                    }
-
-                    // Buat payload form data
-                    const formData = new FormData();
-                    formData.append('bulan_tahun', defaultBulan);
-                    formData.append('nomor_telepon', String(phone).trim());
-                    formData.append('pemilik', String(pemilik).trim());
-                    formData.append('nominal_pembayaran', nominal);
-
-                    // Kirim post request secara background ke route accounting anda
-                    const response = await fetch("{{ url_for('accounting') }}", {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    if (response.ok) successCount++;
+                if (totalRowsFound === 0) {
+                    throw new Error("Tidak ditemukan data cabang yang valid pada file ini.");
                 }
 
                 statusDiv.classList.replace('bg-slate-50', 'bg-emerald-50');
                 statusDiv.classList.replace('text-slate-600', 'text-emerald-700');
-                statusDiv.innerHTML = `✓ Berhasil memproses & mengimpor ${successCount} data tagihan Periode [ ${defaultBulan} ] ke database!`;
+                statusDiv.innerHTML = `✓ Sukses memproses semua sheet cabang! Berhasil menyimpan ${successCount} data ke database log.`;
                 
-                // Refresh halaman untuk memperbarui list tabel data
+                // Refresh halaman untuk memuat ulang data terbaru
                 setTimeout(() => { window.location.reload(); }, 1500);
 
             } catch (err) {
@@ -306,7 +340,6 @@
         const cells = document.querySelectorAll('td[data-phone]');
         const allData = [];
 
-        // Ambil seluruh data dari DOM tabel
         cells.forEach(cell => {
             allData.push({
                 element: cell,
@@ -320,7 +353,6 @@
             const currentIdx = allData.indexOf(item);
             let olderItem = null;
             
-            // Cari data dengan nomor telepon yang sama namun di baris bawahnya (asumsi log terurut dari terbaru ke terlama)
             for (let i = currentIdx + 1; i < allData.length; i++) {
                 if (allData[i].phone === item.phone && allData[i].month !== item.month) {
                     olderItem = allData[i];
@@ -330,19 +362,14 @@
 
             if (olderItem) {
                 const diff = item.amount - olderItem.amount;
-                
                 if (diff > 0) {
-                    // Nominal pembayaran naik dibanding bulan lalu
                     item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-up">▲ Naik (Rp ${diff.toLocaleString('id-ID')})</span>`;
                 } else if (diff < 0) {
-                    // Nominal pembayaran turun dibanding bulan lalu
                     item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-down">▼ Turun (Rp ${Math.abs(diff).toLocaleString('id-ID')})</span>`;
                 } else {
-                    // Nominal stabil sama persis
                     item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-stable">Stabil</span>`;
                 }
             } else {
-                // Periksa apakah nomor ini punya record di bulan lain
                 const hasOtherRecord = allData.some(d => d.phone === item.phone && d.month !== item.month);
                 if (!hasOtherRecord) {
                     item.element.innerHTML = `<span class="px-2 py-0.5 rounded-md trend-new">User Baru</span>`;
