@@ -10,105 +10,125 @@
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            overflow: hidden;
+            background-color: #f8fafc;
         }
+        /* Gradasi Modern & Halus */
         .bg-gradient-custom {
-            background: linear-gradient(135deg, #2b4cc4 0%, #4a90e2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%);
         }
-        /* Membuat lekukan gelombang di sisi kiri panel biru */
-        .wave-shape {
+        /* Ornamen abstrak modern di latar belakang */
+        .bg-pattern {
             position: absolute;
-            left: -100px;
-            top: 0;
-            height: 100%;
-            width: 150px;
-            background: inherit;
-            border-radius: 50% 0 0 50%;
-            transform: scaleX(0.8);
-        }
-        .icon-bg-pattern {
-            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
-            opacity: 0.1;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(0,0,0,0) 70%);
+            top: -10%;
+            right: -10%;
+            z-index: 0;
         }
     </style>
 </head>
-<body class="flex min-h-screen bg-white">
+<body class="flex min-h-screen items-center justify-center bg-slate-50 relative overflow-x-hidden">
 
-    <div class="hidden lg:flex w-1/2 flex-col justify-between p-12 relative">
-        <div class="flex items-center gap-2">
-            <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
-                </svg>
+    <div class="bg-pattern hidden lg:block"></div>
+
+    <div class="w-full max-w-5xl min-h-[600px] flex rounded-2xl overflow-hidden shadow-2xl bg-white m-4 z-10 border border-slate-100">
+        
+        <div class="hidden lg:flex w-1/2 flex-col justify-between p-12 bg-slate-50 border-r border-slate-100 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
+            
+            <div class="flex items-center gap-3 relative z-10">
+                <div class="w-11 h-11 bg-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-slate-800 font-extrabold text-lg tracking-tight leading-tight">Single Sign-On</h2>
+                    <p class="text-xs text-blue-600 font-semibold tracking-wider uppercase">Secure Portal</p>
+                </div>
             </div>
-            <div>
-                <h2 class="text-blue-600 font-bold leading-tight">Single sign-on<br><span class="text-blue-500 font-medium">(SSO)</span></h2>
+
+            <div class="max-w-sm relative z-10">
+                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-wider">Welcome Back</span>
+                <h1 class="text-4xl font-black text-slate-800 mt-4 mb-3 tracking-tight leading-tight">Effortless Access, Enhanced Security.</h1>
+                <p class="text-slate-500 text-sm leading-relaxed">Enter your registered credentials on the right panel to securely access your central dashboard workspace.</p>
+            </div>
+
+            <div class="text-slate-400 text-xs font-medium relative z-10">
+                Copyright © 2026 Commlink Info Tech Ltd. All rights reserved.
             </div>
         </div>
 
-        <div class="max-w-md">
-            <h1 class="text-4xl font-bold text-blue-500 mb-4">WELCOME BACK !</h1>
-            <p class="text-xl text-blue-400">Enter your ID and Password to continue</p>
-        </div>
+        <div class="w-full lg:w-1/2 bg-gradient-custom relative flex items-center justify-center p-8 sm:p-12">
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div class="absolute -top-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-40 -right-40 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl"></div>
+            </div>
 
-        <div class="text-slate-400 text-sm">
-            Copyright © 2026 Commlink Info Tech Ltd. All rights reserved.
-        </div>
-    </div>
-
-    <div class="w-full lg:w-1/2 bg-gradient-custom relative flex items-center justify-center p-6 lg:p-0">
-        <div class="hidden lg:block wave-shape bg-gradient-custom"></div>
-        <div class="absolute inset-0 icon-bg-pattern pointer-events-none"></div>
-
-        <div class="w-full max-w-sm relative z-10 text-white text-center">
-            <h2 class="text-3xl font-bold mb-2 tracking-wide">SIGN IN</h2>
-            <p class="text-sm font-light mb-10 opacity-90 uppercase tracking-widest">To Access The Portal</p>
-
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                {% for category, message in messages %}
-                  <div class="mb-4 p-3 rounded-xl text-xs bg-red-500/20 border border-red-400/50 text-white backdrop-blur-sm">
-                    {{ message }}
-                  </div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
-
-            <form action="/login" method="POST" class="space-y-4">
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
-                    </span>
-                    <input type="email" name="email" required 
-                        class="w-full pl-12 pr-4 py-4 rounded-full border-none bg-white text-slate-900 focus:ring-4 focus:ring-blue-300 transition-all placeholder:text-slate-400"
-                        placeholder="Enter User Name Here">
+            <div class="w-full max-w-sm relative z-10 text-white">
+                
+                <div class="mb-8">
+                    <h2 class="text-2xl font-bold tracking-tight mb-1">Account Sign In</h2>
+                    <p class="text-sm font-light text-slate-300">Please authenticate to continue to the system.</p>
                 </div>
 
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-4 flex items-center text-slate-400">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                    </span>
-                    <input type="password" name="password" required 
-                        class="w-full pl-12 pr-4 py-4 rounded-full border-none bg-white text-slate-900 focus:ring-4 focus:ring-blue-300 transition-all placeholder:text-slate-400"
-                        placeholder="Enter Password">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="mb-5 p-3.5 rounded-xl text-xs bg-red-500/15 border border-red-500/30 text-red-200 backdrop-blur-md flex items-center gap-2">
+                        <svg class="w-4 h-4 text-red-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                        <span>{{ message }}</span>
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
+                <form action="/login" method="POST" class="space-y-4">
+                    
+                    <div class="space-y-1.5 text-left">
+                        <label class="text-xs font-semibold tracking-wide text-slate-300">Username / Email</label>
+                        <div class="relative group">
+                            <span class="absolute inset-y-0 left-4 flex items-center text-slate-400 group-focus-within:text-blue-400 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"></path></svg>
+                            </span>
+                            <input type="email" name="email" required 
+                                class="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-700/50 bg-slate-900/40 text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-500 text-sm backdrop-blur-sm"
+                                placeholder="name@company.com">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 text-left">
+                        <label class="text-xs font-semibold tracking-wide text-slate-300">Password</label>
+                        <div class="relative group">
+                            <span class="absolute inset-y-0 left-4 flex items-center text-slate-400 group-focus-within:text-blue-400 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </span>
+                            <input type="password" name="password" required 
+                                class="w-full pl-12 pr-4 py-3.5 rounded-xl border border-slate-700/50 bg-slate-900/40 text-white focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-500 text-sm backdrop-blur-sm"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <a href="#" class="text-xs text-slate-400 hover:text-white transition-colors">Forgot Password?</a>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" 
+                            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.99] text-sm tracking-wide">
+                            Sign In to Dashboard
+                        </button>
+                    </div>
+                </form>
+
+                <div class="lg:hidden mt-12 text-slate-500 text-[11px] text-center">
+                    Copyright © 2026 Commlink Info Tech Ltd.
                 </div>
-
-                <div class="pt-4">
-                    <button type="submit" 
-                        class="w-full bg-[#00c853] hover:bg-[#00a846] text-white font-bold py-4 rounded-full shadow-lg transition-all active:scale-95 text-lg">
-                        Login
-                    </button>
-                </div>
-            </form>
-
-            <div class="mt-6">
-                <a href="#" class="text-sm text-white/80 hover:text-white underline underline-offset-4 decoration-white/40">Forget Password?</a>
-            </div>
-
-            <div class="lg:hidden mt-20 text-white/50 text-[10px]">
-                Copyright © 2026 Commlink Info Tech Ltd.
             </div>
         </div>
+
     </div>
 
 </body>
