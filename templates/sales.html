@@ -89,28 +89,12 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <!-- DATA TABLE WITH SEARCH & PAGINATION -->
         <div class="lg:col-span-9 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col">
-            
-            <!-- HEADER BARU DENGAN FILTER TANGGAL -->
-            <div class="px-8 py-5 border-b border-slate-50 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="px-8 py-5 border-b border-slate-50 bg-slate-50/50 flex flex-col md:flex-row justify-between items-md-center gap-4">
                 <div>
                     <h3 class="font-bold text-slate-800 tracking-tight">Detail Aktivitas Harian</h3>
                     <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="pagination_info"></div>
                 </div>
-                
-                <!-- FILTER TANGGAL -->
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1">
-                        <span class="text-xs text-slate-500">Dari</span>
-                        <input type="date" id="table_start_date" class="border border-slate-200 rounded-xl px-3 py-1.5 text-sm">
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <span class="text-xs text-slate-500">Sampai</span>
-                        <input type="date" id="table_end_date" class="border border-slate-200 rounded-xl px-3 py-1.5 text-sm">
-                    </div>
-                    <button onclick="applyDateFilter()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-medium">Filter</button>
-                    <button onclick="resetDateFilter()" class="text-slate-500 hover:text-red-500 text-sm">Reset</button>
-                </div>
-
+               
                 <!-- SEARCH BAR -->
                 <div class="relative group">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -122,7 +106,6 @@
                         class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all w-full md:w-64 shadow-sm">
                 </div>
             </div>
-
             <div class="overflow-x-auto">
                 <table id="salesTable" class="w-full text-left border-collapse">
                     <thead>
@@ -131,12 +114,13 @@
                             <th class="px-6 py-4">Sales</th>
                             <th class="px-6 py-4">Customer</th>
                             <th class="px-6 py-4">Alamat</th>
+                            <th class="px-6 py-4">Status Customer</th>
                             <th class="px-6 py-4 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody" class="divide-y divide-slate-100">
                         {% for row in activity_data %}
-                        <tr class="hover:bg-indigo-50/30 transition-all table-row-item" data-tanggal="{{ row.tanggal }}" data-sales="{{ row.nama_sales }}">
+                        <tr class="hover:bg-indigo-50/30 transition-all table-row-item" data-tanggal="{{ row.tanggal }}" data-sales="{{ row.nama_sales }}" data-customer="{{ row.nama_customer }}">
                             <td class="px-6 py-4">
                                 <span class="block text-xs font-bold text-slate-700">{{ row.hari }}</span>
                                 <span class="text-[10px] text-slate-400 font-medium">{{ row.tanggal }}</span>
@@ -150,6 +134,7 @@
                             <td class="px-6 py-4">
                                 <p class="text-[11px] text-slate-500 leading-relaxed max-w-[200px] truncate" title="{{ row.alamat_customer }}">{{ row.alamat_customer }}</p>
                             </td>
+                            <td class="px-6 py-4 status-cell"></td>
                             <td class="px-6 py-4 text-center">
                                 <div class="flex justify-center gap-2">
                                     <button onclick="editRecord('{{ row.id }}', '{{ row.hari }}', '{{ row.tanggal }}', '{{ row.nama_sales }}', '{{ row.nama_customer }}', '{{ row.alamat_customer }}')" class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center hover:bg-amber-500 hover:text-white transition-all"><svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg></button>
@@ -254,38 +239,18 @@
 
     function applyDateFilter() {
         const keyword = document.getElementById('globalSearch').value.toLowerCase();
-        const startDate = document.getElementById('table_start_date').value;
-        const endDate = document.getElementById('table_end_date').value;
-
         currentFilteredRows = allRows.filter(row => {
-            const rowDate = row.getAttribute('data-tanggal');
             const customerName = row.querySelector('.search-target').innerText.toLowerCase();
             const salesName = row.getAttribute('data-sales').toLowerCase();
-
-            const matchSearch = !keyword || customerName.includes(keyword) || salesName.includes(keyword);
-            let matchDate = true;
-            if (startDate && rowDate < startDate) matchDate = false;
-            if (endDate && rowDate > endDate) matchDate = false;
-
-            return matchSearch && matchDate;
+            return customerName.includes(keyword) || salesName.includes(keyword);
         });
-
         currentPage = 1;
         renderTable();
     }
 
-    function resetDateFilter() {
-        document.getElementById('table_start_date').value = '';
-        document.getElementById('table_end_date').value = '';
-        applyDateFilter();
-    }
-
-    function handleSearch() {
-        applyDateFilter();   // Pakai fungsi yang sama
-    }
-
     function renderTable() {
-        const activeRows = (currentFilteredRows.length === 0) ? allRows : currentFilteredRows;
+        const keyword = document.getElementById('globalSearch').value.toLowerCase();
+        const activeRows = (keyword === "") ? allRows : currentFilteredRows;
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
         allRows.forEach(row => row.style.display = 'none');
@@ -409,6 +374,29 @@
         doc.save('Sales_Report_' + new Date().getTime() + '.pdf');
     }
 
+    // === FUNGSI BARU: DETEKSI CUSTOMER BARU / LAMA ===
+    function detectCustomerStatus() {
+        const customerMap = {};
+        allRows.forEach(row => {
+            const customer = row.getAttribute('data-customer');
+            if (customer) {
+                customerMap[customer] = (customerMap[customer] || 0) + 1;
+            }
+        });
+
+        allRows.forEach(row => {
+            const customer = row.getAttribute('data-customer');
+            const statusCell = row.querySelector('.status-cell');
+            if (statusCell && customer) {
+                if (customerMap[customer] > 1) {
+                    statusCell.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Repeat</span>`;
+                } else {
+                    statusCell.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">New</span>`;
+                }
+            }
+        });
+    }
+
     window.onload = () => {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('input_tanggal').value = today;
@@ -416,14 +404,9 @@
         const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
         document.getElementById('filter_start').value = firstDay;
         document.getElementById('filter_end').value = today;
-
-        // Default filter tanggal
-        document.getElementById('table_start_date').value = firstDay;
-        document.getElementById('table_end_date').value = today;
-
         renderTable();
         filterSummary();
-        applyDateFilter();
+        detectCustomerStatus();
     };
 </script>
 {% endblock %}
