@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
 <div class="max-w-7xl mx-auto space-y-6">
-   
+  
     <!-- SECTION 1: INPUT FORM -->
     <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-100/50 transition-all">
         <div class="flex items-center justify-between mb-8">
@@ -28,7 +28,7 @@
         </div>
         <form id="salesForm" action="/sales/add" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <input type="hidden" name="id" id="edit_id">
-           
+          
             <!-- NEW: Hidden Input GPS -->
             <input type="hidden" name="location_coords" id="input_coords">
             <div class="space-y-2">
@@ -78,7 +78,7 @@
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Alamat Customer</label>
                 <textarea name="alamat_customer" id="input_alamat" rows="2" required class="w-full bg-slate-50 border-0 ring-1 ring-slate-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 transition-all outline-none resize-none"></textarea>
             </div>
-           
+          
             <div class="flex items-end gap-2">
                 <button type="submit" id="btn-submit" class="w-full bg-slate-900 text-white font-bold text-xs py-3.5 rounded-2xl hover:bg-indigo-600 transition-all shadow-lg uppercase tracking-widest">Submit</button>
                 <button type="button" id="btn-cancel" onclick="resetForm()" class="hidden w-1/3 bg-slate-100 text-slate-500 font-bold text-xs py-3.5 rounded-2xl hover:bg-slate-200 transition-all uppercase">X</button>
@@ -89,12 +89,36 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <!-- DATA TABLE WITH SEARCH & PAGINATION -->
         <div class="lg:col-span-9 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col">
-            <div class="px-8 py-5 border-b border-slate-50 bg-slate-50/50 flex flex-col md:flex-row justify-between items-md-center gap-4">
+           
+            <!-- HEADER BARU DENGAN FILTER -->
+            <div class="px-8 py-5 border-b border-slate-50 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h3 class="font-bold text-slate-800 tracking-tight">Detail Aktivitas Harian</h3>
                     <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="pagination_info"></div>
                 </div>
                
+                <!-- FILTER CUSTOMER + TANGGAL -->
+                <div class="flex items-center gap-3 flex-wrap">
+                    <!-- Filter Nama Customer -->
+                    <div>
+                        <select id="customerFilter" onchange="applyFilters()" class="border border-slate-200 rounded-xl px-4 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500">
+                            <option value="">Semua Customer</option>
+                        </select>
+                    </div>
+
+                    <!-- Filter Tanggal -->
+                    <div class="flex items-center gap-1">
+                        <span class="text-xs text-slate-500">Dari</span>
+                        <input type="date" id="table_start_date" class="border border-slate-200 rounded-xl px-3 py-1.5 text-sm">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <span class="text-xs text-slate-500">Sampai</span>
+                        <input type="date" id="table_end_date" class="border border-slate-200 rounded-xl px-3 py-1.5 text-sm">
+                    </div>
+                    <button onclick="applyFilters()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-medium">Terapkan</button>
+                    <button onclick="resetAllFilters()" class="text-slate-500 hover:text-red-500 text-sm">Reset</button>
+                </div>
+
                 <!-- SEARCH BAR -->
                 <div class="relative group">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -102,10 +126,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </span>
-                    <input type="text" id="globalSearch" onkeyup="applyDateFilter()" placeholder="Cari Toko atau Sales..."
+                    <input type="text" id="globalSearch" onkeyup="applyFilters()" placeholder="Cari Toko atau Sales..."
                         class="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-2xl text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all w-full md:w-64 shadow-sm">
                 </div>
             </div>
+
             <div class="overflow-x-auto">
                 <table id="salesTable" class="w-full text-left border-collapse">
                     <thead>
@@ -114,7 +139,7 @@
                             <th class="px-6 py-4">Sales</th>
                             <th class="px-6 py-4">Customer</th>
                             <th class="px-6 py-4">Alamat</th>
-                            <th class="px-6 py-4">Status Customer</th>
+                            <th class="px-6 py-4">Status</th>
                             <th class="px-6 py-4 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -153,7 +178,7 @@
         <div class="lg:col-span-3 space-y-6">
             <div class="bg-indigo-900 rounded-3xl p-6 text-white shadow-xl shadow-indigo-200">
                 <h3 class="text-sm font-black uppercase tracking-widest mb-4 opacity-70">Ringkasan Sales</h3>
-               
+              
                 <div class="space-y-3 mb-6">
                     <div class="space-y-1">
                         <label class="text-[9px] font-bold text-indigo-300 uppercase">Pilih Sales</label>
@@ -237,20 +262,40 @@
     let currentFilteredRows = [];
     const allRows = Array.from(document.querySelectorAll('.table-row-item'));
 
-    function applyDateFilter() {
+    function applyFilters() {
         const keyword = document.getElementById('globalSearch').value.toLowerCase();
+        const selectedCustomer = document.getElementById('customerFilter').value;
+        const startDate = document.getElementById('table_start_date').value;
+        const endDate = document.getElementById('table_end_date').value;
+
         currentFilteredRows = allRows.filter(row => {
-            const customerName = row.querySelector('.search-target').innerText.toLowerCase();
+            const rowDate = row.getAttribute('data-tanggal');
+            const customerName = row.getAttribute('data-customer').toLowerCase();
             const salesName = row.getAttribute('data-sales').toLowerCase();
-            return customerName.includes(keyword) || salesName.includes(keyword);
+
+            const matchSearch = !keyword || customerName.includes(keyword) || salesName.includes(keyword);
+            const matchCustomer = !selectedCustomer || customerName === selectedCustomer.toLowerCase();
+            let matchDate = true;
+            if (startDate && rowDate < startDate) matchDate = false;
+            if (endDate && rowDate > endDate) matchDate = false;
+
+            return matchSearch && matchCustomer && matchDate;
         });
+
         currentPage = 1;
         renderTable();
     }
 
+    function resetAllFilters() {
+        document.getElementById('globalSearch').value = '';
+        document.getElementById('customerFilter').value = '';
+        document.getElementById('table_start_date').value = '';
+        document.getElementById('table_end_date').value = '';
+        applyFilters();
+    }
+
     function renderTable() {
-        const keyword = document.getElementById('globalSearch').value.toLowerCase();
-        const activeRows = (keyword === "") ? allRows : currentFilteredRows;
+        const activeRows = (currentFilteredRows.length === 0) ? allRows : currentFilteredRows;
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
         allRows.forEach(row => row.style.display = 'none');
@@ -262,7 +307,7 @@
         const totalPages = Math.ceil(totalData / rowsPerPage);
         const container = document.getElementById('pagination_controls');
         const info = document.getElementById('pagination_info');
-       
+      
         info.innerText = `Showing ${totalData} entries | Page ${currentPage} of ${totalPages || 1}`;
         container.innerHTML = '';
         if (totalPages <= 1) return;
@@ -374,21 +419,36 @@
         doc.save('Sales_Report_' + new Date().getTime() + '.pdf');
     }
 
-    // === FUNGSI BARU: DETEKSI CUSTOMER BARU / LAMA ===
-    function detectCustomerStatus() {
-        const customerMap = {};
+    // === FUNGSI BARU: POPULATE CUSTOMER FILTER & STATUS ===
+    function populateCustomerFilter() {
+        const select = document.getElementById('customerFilter');
+        const uniqueCustomers = new Set();
+
         allRows.forEach(row => {
-            const customer = row.getAttribute('data-customer');
-            if (customer) {
-                customerMap[customer] = (customerMap[customer] || 0) + 1;
-            }
+            const cust = row.getAttribute('data-customer');
+            if (cust) uniqueCustomers.add(cust);
+        });
+
+        uniqueCustomers.forEach(cust => {
+            const option = document.createElement('option');
+            option.value = cust;
+            option.textContent = cust;
+            select.appendChild(option);
+        });
+    }
+
+    function detectCustomerStatus() {
+        const customerCount = {};
+        allRows.forEach(row => {
+            const cust = row.getAttribute('data-customer');
+            if (cust) customerCount[cust] = (customerCount[cust] || 0) + 1;
         });
 
         allRows.forEach(row => {
-            const customer = row.getAttribute('data-customer');
+            const cust = row.getAttribute('data-customer');
             const statusCell = row.querySelector('.status-cell');
-            if (statusCell && customer) {
-                if (customerMap[customer] > 1) {
+            if (statusCell) {
+                if (customerCount[cust] > 1) {
                     statusCell.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Repeat</span>`;
                 } else {
                     statusCell.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">New</span>`;
@@ -404,9 +464,14 @@
         const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
         document.getElementById('filter_start').value = firstDay;
         document.getElementById('filter_end').value = today;
+        document.getElementById('table_start_date').value = firstDay;
+        document.getElementById('table_end_date').value = today;
+
         renderTable();
         filterSummary();
+        populateCustomerFilter();
         detectCustomerStatus();
+        applyFilters();
     };
 </script>
 {% endblock %}
