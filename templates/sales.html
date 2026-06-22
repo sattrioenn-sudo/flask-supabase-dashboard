@@ -9,7 +9,7 @@
 
 <div class="max-w-7xl mx-auto space-y-6">
    
-    <!-- SECTION 1: INPUT FORM (tidak diubah) -->
+    <!-- SECTION 1: INPUT FORM -->
     <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-xl shadow-slate-100/50 transition-all">
         <div class="flex items-center justify-between mb-8">
             <div class="flex items-center gap-4">
@@ -28,6 +28,8 @@
         </div>
         <form id="salesForm" action="/sales/add" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <input type="hidden" name="id" id="edit_id">
+           
+            <!-- NEW: Hidden Input GPS -->
             <input type="hidden" name="location_coords" id="input_coords">
             <div class="space-y-2">
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Tanggal</label>
@@ -51,6 +53,7 @@
                     {% endfor %}
                 </datalist>
             </div>
+            <!-- NEW: Photo & GPS Section -->
             <div class="space-y-2">
                 <label class="block text-xs font-bold text-rose-500 uppercase tracking-widest ml-1">Bukti Kunjungan</label>
                 <div class="flex gap-2">
@@ -84,17 +87,17 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- DATA TABLE -->
+        <!-- DATA TABLE WITH SEARCH & PAGINATION -->
         <div class="lg:col-span-9 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col">
             
-            <!-- HEADER + FILTER TANGGAL BARU -->
+            <!-- HEADER BARU DENGAN FILTER TANGGAL -->
             <div class="px-8 py-5 border-b border-slate-50 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h3 class="font-bold text-slate-800 tracking-tight">Detail Aktivitas Harian</h3>
                     <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest" id="pagination_info"></div>
                 </div>
                 
-                <!-- Filter Tanggal -->
+                <!-- FILTER TANGGAL -->
                 <div class="flex items-center gap-3">
                     <div class="flex items-center gap-1">
                         <span class="text-xs text-slate-500">Dari</span>
@@ -104,11 +107,11 @@
                         <span class="text-xs text-slate-500">Sampai</span>
                         <input type="date" id="table_end_date" class="border border-slate-200 rounded-xl px-3 py-1.5 text-sm">
                     </div>
-                    <button onclick="applyDateFilter()" class="bg-indigo-600 text-white px-4 py-1.5 rounded-xl text-sm font-medium hover:bg-indigo-700">Filter</button>
-                    <button onclick="resetDateFilter()" class="text-slate-500 hover:text-slate-700 text-sm">Reset</button>
+                    <button onclick="applyDateFilter()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-medium">Filter</button>
+                    <button onclick="resetDateFilter()" class="text-slate-500 hover:text-red-500 text-sm">Reset</button>
                 </div>
 
-                <!-- SEARCH BAR (tetap sama) -->
+                <!-- SEARCH BAR -->
                 <div class="relative group">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <svg class="w-4 h-4 text-slate-400 group-focus-within:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +123,6 @@
                 </div>
             </div>
 
-            <!-- TABEL (tetap sama) -->
             <div class="overflow-x-auto">
                 <table id="salesTable" class="w-full text-left border-collapse">
                     <thead>
@@ -162,11 +164,11 @@
             <div class="p-6 border-t border-slate-50 bg-slate-50/30 flex justify-center gap-2" id="pagination_controls"></div>
         </div>
 
-        <!-- SIDEBAR RINGKASAN (tetap sama) -->
+        <!-- SIDEBAR RINGKASAN -->
         <div class="lg:col-span-3 space-y-6">
             <div class="bg-indigo-900 rounded-3xl p-6 text-white shadow-xl shadow-indigo-200">
                 <h3 class="text-sm font-black uppercase tracking-widest mb-4 opacity-70">Ringkasan Sales</h3>
-                <!-- Sidebar content tetap sama -->
+               
                 <div class="space-y-3 mb-6">
                     <div class="space-y-1">
                         <label class="text-[9px] font-bold text-indigo-300 uppercase">Pilih Sales</label>
@@ -205,23 +207,51 @@
 </div>
 
 <script>
-    // Semua fungsi asli kamu tetap ada
-    function getLocation() { /* kode asli */ }
-    function previewImage(input) { /* kode asli */ }
-    function updateHariOtomatis(val) { /* kode asli */ }
-    function autoFillAlamat(name) { /* kode asli */ }
-    function editRecord(id, hari, tanggal, sales, customer, alamat) { /* kode asli */ }
-    function resetForm() { /* kode asli */ }
-    async function deleteRecord(id) { /* kode asli */ }
-    function exportToPDF() { /* kode asli */ }
+    // --- GEOLOCATION LOGIC ---
+    function getLocation() {
+        const status = document.getElementById('gps-status');
+        const btnGps = document.getElementById('btn-gps');
+        const inputCoords = document.getElementById('input_coords');
+        if (!navigator.geolocation) {
+            status.innerText = "GPS tidak didukung";
+            return;
+        }
+        status.innerText = "Mencari Lokasi...";
+        btnGps.classList.add('animate-pulse', 'text-indigo-600');
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude.toFixed(6);
+                const long = position.coords.longitude.toFixed(6);
+                inputCoords.value = `${lat}, ${long}`;
+                status.innerText = `Terdeteksi: ${lat}, ${long}`;
+                status.classList.replace('text-slate-400', 'text-green-600');
+                btnGps.classList.remove('animate-pulse');
+                btnGps.classList.replace('bg-slate-100', 'bg-green-100');
+                btnGps.classList.add('text-green-600');
+            },
+            () => {
+                status.innerText = "GPS Gagal (Harap Izinkan)";
+                status.classList.add('text-rose-500');
+            },
+            { enableHighAccuracy: true }
+        );
+    }
 
-    // === CONFIG & PAGINATION (tetap sama) ===
+    function previewImage(input) {
+        const label = document.getElementById('photo-label');
+        if (input.files && input.files[0]) {
+            label.innerText = "Foto Terpilih!";
+            label.classList.replace('text-rose-600', 'text-green-600');
+            getLocation();
+        }
+    }
+
+    // --- CONFIG & PAGINATION ---
     const rowsPerPage = 5;
     let currentPage = 1;
     let currentFilteredRows = [];
     const allRows = Array.from(document.querySelectorAll('.table-row-item'));
 
-    // Filter Gabungan (Search + Tanggal)
     function applyDateFilter() {
         const keyword = document.getElementById('globalSearch').value.toLowerCase();
         const startDate = document.getElementById('table_start_date').value;
@@ -250,11 +280,14 @@
         applyDateFilter();
     }
 
+    function handleSearch() {
+        applyDateFilter();   // Pakai fungsi yang sama
+    }
+
     function renderTable() {
-        const activeRows = currentFilteredRows.length > 0 ? currentFilteredRows : allRows;
+        const activeRows = (currentFilteredRows.length === 0) ? allRows : currentFilteredRows;
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
-
         allRows.forEach(row => row.style.display = 'none');
         activeRows.slice(start, end).forEach(row => { row.style.display = ''; });
         updatePagination(activeRows.length);
@@ -277,8 +310,104 @@
         }
     }
 
-    // FILTER SUMMARY (tetap sama)
-    function filterSummary() { /* kode asli kamu */ }
+    // --- FILTER SUMMARY LOGIC ---
+    function filterSummary() {
+        const selectedSales = document.getElementById('filter_sales_name').value;
+        const startDate = document.getElementById('filter_start').value;
+        const endDate = document.getElementById('filter_end').value;
+        const summaryCards = document.querySelectorAll('.summary-card');
+        summaryCards.forEach(card => {
+            const cardSalesName = card.getAttribute('data-sales-name');
+            if (selectedSales !== "" && selectedSales !== cardSalesName) {
+                card.classList.add('hidden');
+                return;
+            } else { card.classList.remove('hidden'); }
+            let count = 0;
+            allRows.forEach(row => {
+                const rowDate = row.getAttribute('data-tanggal');
+                const rowSales = row.getAttribute('data-sales');
+                let inDateRange = true;
+                if (startDate && rowDate < startDate) inDateRange = false;
+                if (endDate && rowDate > endDate) inDateRange = false;
+                if (inDateRange && rowSales === cardSalesName) count++;
+            });
+            card.querySelector('.stat-count').innerText = count;
+        });
+    }
+
+    function updateHariOtomatis(val) {
+        if (!val) return;
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const dayName = days[new Date(val).getDay()];
+        document.getElementById('input_hari').value = dayName;
+        document.getElementById('label_hari').innerText = `Terpilih: ${dayName}`;
+    }
+
+    function autoFillAlamat(name) {
+        const opts = document.getElementById('master_customer_list').options;
+        for (let opt of opts) {
+            if (opt.value === name) {
+                document.getElementById('input_alamat').value = opt.getAttribute('data-alamat');
+                break;
+            }
+        }
+    }
+
+    function editRecord(id, hari, tanggal, sales, customer, alamat) {
+        document.getElementById('form-title').innerText = "Edit Laporan";
+        document.getElementById('edit_id').value = id;
+        document.getElementById('input_tanggal').value = tanggal;
+        updateHariOtomatis(tanggal);
+        document.getElementById('input_sales').value = sales;
+        document.getElementById('input_customer').value = customer;
+        document.getElementById('input_alamat').value = alamat;
+        document.getElementById('btn-submit').innerText = "Update";
+        document.getElementById('btn-cancel').classList.remove('hidden');
+        document.getElementById('salesForm').action = "/sales/update";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        document.getElementById('form-title').innerText = "Input Kunjungan";
+        document.getElementById('salesForm').reset();
+        document.getElementById('btn-submit').innerText = "Submit";
+        document.getElementById('btn-cancel').classList.add('hidden');
+        document.getElementById('salesForm').action = "/sales/add";
+        document.getElementById('gps-status').innerText = "GPS: Menunggu...";
+        document.getElementById('gps-status').className = "text-[9px] text-slate-400 font-bold italic ml-1";
+        document.getElementById('btn-gps').className = "w-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-indigo-100 hover:text-indigo-600 transition-all shadow-sm";
+        document.getElementById('photo-label').innerText = "Ambil Foto";
+        document.getElementById('photo-label').className = "text-[10px] font-bold text-rose-600 mt-1 text-center leading-tight";
+    }
+
+    async function deleteRecord(id) {
+        if (confirm('Hapus data?')) {
+            const resp = await fetch(`/sales/delete/${id}`, { method: 'DELETE' });
+            if (resp.ok) location.reload();
+        }
+    }
+
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+        doc.setFontSize(16);
+        doc.text("SALES ACTIVITY REPORT", 14, 15);
+        doc.setFontSize(10);
+        doc.text("Generated on: " + new Date().toLocaleString(), 14, 20);
+        doc.autoTable({
+            html: '#salesTable',
+            startY: 25,
+            theme: 'grid',
+            headStyles: { fillStyle: [79, 70, 229] },
+            columns: [
+                {header: 'Waktu', dataKey: 'waktu'},
+                {header: 'Sales', dataKey: 'sales'},
+                {header: 'Customer', dataKey: 'customer'},
+                {header: 'Alamat', dataKey: 'alamat'}
+            ]
+        });
+        doc.save('Sales_Report_' + new Date().getTime() + '.pdf');
+    }
 
     window.onload = () => {
         const today = new Date().toISOString().split('T')[0];
@@ -288,13 +417,13 @@
         document.getElementById('filter_start').value = firstDay;
         document.getElementById('filter_end').value = today;
 
-        // Set default filter tanggal
+        // Default filter tanggal
         document.getElementById('table_start_date').value = firstDay;
         document.getElementById('table_end_date').value = today;
 
         renderTable();
         filterSummary();
-        applyDateFilter();   // Jalankan filter awal
+        applyDateFilter();
     };
 </script>
 {% endblock %}
