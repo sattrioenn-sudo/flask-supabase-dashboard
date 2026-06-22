@@ -99,11 +99,11 @@
                
                 <!-- FILTER CUSTOMER + TANGGAL -->
                 <div class="flex items-center gap-3 flex-wrap">
-                    <!-- Filter Nama Customer -->
-                    <div>
-                        <select id="customerFilter" onchange="applyFilters()" class="border border-slate-200 rounded-xl px-4 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500">
-                            <option value="">Semua Customer</option>
-                        </select>
+                    <!-- Filter Nama Customer (Text Input) -->
+                    <div class="flex items-center gap-1">
+                        <span class="text-xs text-slate-500">Customer</span>
+                        <input type="text" id="customerFilter" onkeyup="applyFilters()" placeholder="Nama Customer..." 
+                               class="border border-slate-200 rounded-xl px-3 py-1.5 text-sm w-48 focus:ring-2 focus:ring-indigo-500">
                     </div>
 
                     <!-- Filter Tanggal -->
@@ -264,7 +264,7 @@
 
     function applyFilters() {
         const keyword = document.getElementById('globalSearch').value.toLowerCase();
-        const selectedCustomer = document.getElementById('customerFilter').value;
+        const customerFilter = document.getElementById('customerFilter').value.toLowerCase();
         const startDate = document.getElementById('table_start_date').value;
         const endDate = document.getElementById('table_end_date').value;
 
@@ -274,7 +274,7 @@
             const salesName = row.getAttribute('data-sales').toLowerCase();
 
             const matchSearch = !keyword || customerName.includes(keyword) || salesName.includes(keyword);
-            const matchCustomer = !selectedCustomer || customerName === selectedCustomer.toLowerCase();
+            const matchCustomer = !customerFilter || customerName.includes(customerFilter);
             let matchDate = true;
             if (startDate && rowDate < startDate) matchDate = false;
             if (endDate && rowDate > endDate) matchDate = false;
@@ -419,44 +419,6 @@
         doc.save('Sales_Report_' + new Date().getTime() + '.pdf');
     }
 
-    // === FUNGSI BARU: POPULATE CUSTOMER FILTER & STATUS ===
-    function populateCustomerFilter() {
-        const select = document.getElementById('customerFilter');
-        const uniqueCustomers = new Set();
-
-        allRows.forEach(row => {
-            const cust = row.getAttribute('data-customer');
-            if (cust) uniqueCustomers.add(cust);
-        });
-
-        uniqueCustomers.forEach(cust => {
-            const option = document.createElement('option');
-            option.value = cust;
-            option.textContent = cust;
-            select.appendChild(option);
-        });
-    }
-
-    function detectCustomerStatus() {
-        const customerCount = {};
-        allRows.forEach(row => {
-            const cust = row.getAttribute('data-customer');
-            if (cust) customerCount[cust] = (customerCount[cust] || 0) + 1;
-        });
-
-        allRows.forEach(row => {
-            const cust = row.getAttribute('data-customer');
-            const statusCell = row.querySelector('.status-cell');
-            if (statusCell) {
-                if (customerCount[cust] > 1) {
-                    statusCell.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">Repeat</span>`;
-                } else {
-                    statusCell.innerHTML = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">New</span>`;
-                }
-            }
-        });
-    }
-
     window.onload = () => {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('input_tanggal').value = today;
@@ -469,8 +431,6 @@
 
         renderTable();
         filterSummary();
-        populateCustomerFilter();
-        detectCustomerStatus();
         applyFilters();
     };
 </script>
