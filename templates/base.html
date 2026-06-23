@@ -10,69 +10,58 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
         [x-cloak] { display: none !important; }
         
-        /* Ultra-Modern Dark Slate Sidebar */
+        /* Sidebar minimalis ultra-clean seperti image_c83d1f.png */
         .sidebar-minimalist { 
-            background-color: #0B1329; /* Deep Slate Blue Premium */
-            border-right: 1px solid rgba(255, 255, 255, 0.03);
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
         } 
         
-        /* Nav Active: Floating Modern Pill Style with glow indicator */
+        /* Gaya Navigasi Aktif bergaya Box Ringan Kebiruan */
         .nav-active { 
-            background: rgba(255, 255, 255, 0.07) !important;
-            color: #38BDF8 !important; /* Sky Blue Highlight */
-            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-            position: relative;
-        }
-        .nav-active::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 25%;
-            height: 50%;
-            width: 3px;
-            background-color: #38BDF8;
-            border-radius: 0 4px 4px 0;
+            background-color: #f0f7ff !important;
+            color: #0284c7 !important;
+            font-weight: 700;
         }
 
-        /* Nav Hover */
+        /* Hover menu pasif */
         .nav-hover:hover {
-            background-color: rgba(255, 255, 255, 0.04);
-            color: white !important;
+            background-color: #f8fafc;
+            color: #0f172a !important;
         }
 
-        /* Sophisticated Blurry Floating Header */
+        /* Header kaca transparan halus */
         .glass-header {
-            background: rgba(248, 250, 252, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+            border-bottom: 1px solid #f1f5f9;
         }
 
-        /* Smooth Entry Animation */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
+            from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-page { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-page { animation: fadeIn 0.3s ease-out; }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex overflow-hidden">
+<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex overflow-hidden">
 
+    <!-- Sidebar Samping Ramping & Berkelas -->
     <aside class="w-64 sidebar-minimalist hidden lg:flex flex-col h-screen sticky top-0 z-30">
-        <div class="p-6 mb-2">
-            <div class="flex items-center gap-3 bg-white/5 p-2 rounded-xl border border-white/5">
-                <div class="w-8 h-8 bg-gradient-to-tr from-sky-400 to-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-sky-500/20">
-                    <span class="text-white font-black text-sm tracking-tighter">N</span>
-                </div>
-                <div class="leading-none">
-                    <span class="text-xs font-extrabold tracking-widest text-white block">IT-KEMASAN</span>
-                    <span class="text-[7px] font-bold text-sky-400 uppercase tracking-[0.3em] mt-0.5 block opacity-80">Infrastructure</span>
-                </div>
+        <!-- Logo Section -->
+        <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+            <div class="w-8 h-8 bg-gradient-to-tr from-blue-600 to-sky-500 rounded-lg flex items-center justify-center shadow-sm shadow-blue-500/20">
+                <span class="text-white font-black text-sm tracking-tighter">N</span>
+            </div>
+            <div class="leading-none">
+                <span class="text-sm font-extrabold tracking-tight text-slate-800 block">IT-KEMASAN</span>
+                <span class="text-[8px] font-bold text-sky-600 uppercase tracking-widest mt-0.5 block">Infrastructure</span>
             </div>
         </div>
         
-        <nav class="flex-1 px-4 space-y-1">
+        <!-- Navigation Menu -->
+        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
             {% set nav_items = [
                 ('/dashboard', 'Dashboard', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'),
                 ('/analytics', 'Analytics', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'),
@@ -83,64 +72,71 @@
             ] %}
 
             {% for href, label, path in nav_items %}
-            <a href="{{ href }}" class="flex items-center gap-3 py-2 px-3.5 rounded-lg transition-all duration-150 text-xs font-medium group
-                {{ 'nav-active' if request.path == href else 'text-slate-400 nav-hover' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform duration-150 group-hover:scale-105" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="{{ path }}" />
+            <a href="{{ href }}" class="flex items-center gap-3 py-2.5 px-4 rounded-xl transition-all duration-150 text-xs font-semibold group
+                {{ 'nav-active' if request.path == href else 'text-slate-500 nav-hover' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="{{ path }}" />
                 </svg>
                 {{ label }}
             </a>
             {% endfor %}
         </nav>
 
-        <div class="p-4 border-t border-white/5 bg-black/10">
-            <div class="bg-white/5 border border-white/5 rounded-lg p-3 mb-2">
-                <p class="text-[8px] font-bold text-sky-400 uppercase tracking-widest mb-1 opacity-70">Signed in as</p>
-                <p class="text-[10px] text-slate-300 font-medium truncate">{{ email }}</p>
+        <!-- Sidebar Info & Logout -->
+        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+            <div class="bg-white border border-slate-200/60 rounded-xl p-3 mb-3 shadow-sm">
+                <p class="text-[8px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">Signed in as</p>
+                <p class="text-[11px] text-slate-700 font-semibold truncate">{{ email }}</p>
             </div>
-            <a href="/logout" class="flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all font-semibold text-[10px] uppercase tracking-wider">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <a href="/logout" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-all font-bold text-[10px] uppercase tracking-wider">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 Sign Out
             </a>
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto flex flex-col h-screen bg-[#F8FAFC]">
+    <!-- Konten Utama (Main Area) -->
+    <main class="flex-1 overflow-y-auto flex flex-col h-screen bg-[#f8fafc]">
+        <!-- Top Navbar Header -->
         <header class="h-16 glass-header sticky top-0 z-20 px-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <h1 class="text-xs font-bold text-slate-900 uppercase tracking-widest">{% block header_title %}{% endblock %}</h1>
-                <span class="text-slate-200 text-xs">/</span>
-                <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Console</span>
+                <h1 class="text-sm font-extrabold text-slate-800 tracking-tight">{% block header_title %}{% endblock %}</h1>
+                <span class="text-slate-300 text-sm">/</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Console</span>
             </div>
             
             <div class="flex items-center gap-6">
-                <div class="flex items-center gap-2 bg-slate-100/80 px-2.5 py-1 rounded-full border border-slate-200/50">
+                <!-- Status Pabrik -->
+                <div class="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-full border border-slate-200/40">
                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                     <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Pasuruan Plant</span>
                 </div>
 
                 <div class="h-4 w-px bg-slate-200"></div>
 
+                <!-- Informasi Profil Pengguna -->
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
-                        <p class="text-[11px] font-semibold text-slate-900 leading-none mb-0.5">{{ email.split('@')[0] if email else 'Admin' }}</p>
-                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider">Administrator</p>
+                        <p class="text-[12px] font-bold text-slate-800 leading-none mb-0.5">{{ email.split('@')[0] if email else 'Admin' }}</p>
+                        <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Admin</p>
                     </div>
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center text-white font-bold text-xs shadow-sm shadow-blue-500/10 ring-2 ring-white">
+                    <div class="w-8 h-8 rounded-full bg-lime-500 flex items-center justify-center text-white font-black text-xs shadow-sm ring-2 ring-white">
                         {{ email[0] | upper if email else 'A' }}
                     </div>
                 </div>
             </div>
         </header>
 
+        <!-- Blok Konten Halaman -->
         <div class="p-8 max-w-[1400px] w-full mx-auto flex-1 animate-page">
             {% block content %}{% endblock %}
         </div>
         
-        <footer class="px-8 py-4 border-t border-slate-200/40 bg-white/50 backdrop-blur-sm">
+        <!-- Bagian Footer -->
+        <footer class="px-8 py-4 border-t border-slate-100 bg-white/60">
             <div class="flex justify-between items-center">
-                <p class="text-[9px] font-medium text-slate-400 uppercase tracking-widest">© 2026 PT. KCS</p>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none opacity-80">Kemasan Group</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">© 2026 PT. KCS</p>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Kemasan Group</p>
             </div>
         </footer>
     </main>
