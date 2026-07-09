@@ -36,8 +36,8 @@
 
             <form action="/spareparts" method="POST" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">No. Request Bon</label>
-                    <input type="text" name="request_bon" placeholder="Contoh: BON-KCS-2026-002" required
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">No. Request Bon (Opsional)</label>
+                    <input type="text" name="request_bon" placeholder="Contoh: BON-KCS-2026-002"
                         class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
                 </div>
 
@@ -124,12 +124,16 @@
                                     <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/30">✖ Rejected</span>
                                 {% else %}
                                     <div class="inline-flex gap-1">
-                                        <button class="bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-md shadow-sm transition-all" title="Approve">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                        </button>
-                                        <button class="bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-md shadow-sm transition-all" title="Reject">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
-                                        </button>
+                                        <form action="/spareparts/approve/{{ item.id }}" method="POST" class="inline">
+                                            <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-md shadow-sm transition-all" title="Approve">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                            </button>
+                                        </form>
+                                        <form action="/spareparts/reject/{{ item.id }}" method="POST" class="inline">
+                                            <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-md shadow-sm transition-all" title="Reject">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 {% endif %}
                             </td>
