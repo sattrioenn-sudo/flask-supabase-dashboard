@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket Management{% endblock %}
+{% block header_title %}Ticket Helpdesk{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+            <div class="w-6 h-6 rounded-md bg-sky-50 flex items-center justify-center text-sky-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            </div>
+            <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Buat Ticket Baru</h2>
+        </div>
+
+        <form action="/tickets" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nomor Ticket</label>
+                <input type="text" name="nomor_ticket" value="{{ ticket_no }}" readonly
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-600 outline-none">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Ticket / Keluhan</label>
+                <input type="text" name="nama_ticket" placeholder="Contoh: Printer LQ-2190 Error Pause" required
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Priority</label>
+                <select name="priority" required class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                    <option value="Low">Low</option>
+                    <option value="Normal" selected>Normal</option>
+                    <option value="High">High</option>
+                    <option value="Critical">Critical</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Reporter (Peminta)</label>
+                <input type="text" name="reporter" placeholder="Nama User / Departemen" required
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Eksekutor (IT Technician)</label>
+                <input type="text" name="eksekutor" placeholder="Nama Personel IT"
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Kebutuhan Sparepart</label>
+                <div class="flex items-center h-10 px-2">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="request_sparepart" value="true" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500 relative"></div>
+                        <span class="ml-3 text-xs font-semibold text-slate-600">Butuh Bon Sparepart</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="md:col-span-3">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Keterangan / Detail Masalah</label>
+                <textarea name="keterangan" rows="3" placeholder="Tuliskan kronologi singkat kerusakan..."
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all"></textarea>
+            </div>
+
+            <div class="md:col-span-3 flex justify-end">
+                <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all shadow-sm shadow-sky-500/10">
+                    Simpan Ticket
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Log Riwayat Ticket</h3>
+            <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-200/40">Total: {{ tickets|length }} Ticket</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="py-3 px-6">No Ticket</th>
+                        <th class="py-3 px-6">Nama Ticket</th>
+                        <th class="py-3 px-6">Reporter / Eksekutor</th>
+                        <th class="py-3 px-6 text-center">Priority</th>
+                        <th class="py-3 px-6 text-center">Sparepart</th>
+                        <th class="py-3 px-6 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs">
+                    {% for ticket in tickets %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="py-4 px-6 font-mono font-bold text-slate-700">{{ ticket.nomor_ticket }}</td>
+                        <td class="py-4 px-6">
+                            <span class="font-semibold text-slate-800 block">{{ ticket.nama_ticket }}</span>
+                            <span class="text-[10px] text-slate-400 block truncate max-w-xs">{{ ticket.keterangan or '-' }}</span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="text-slate-600"><span class="font-medium text-[10px] text-slate-400 uppercase">From:</span> {{ ticket.reporter }}</div>
+                            <div class="text-slate-600"><span class="font-medium text-[10px] text-slate-400 uppercase">Tech:</span> {{ ticket.eksekutor or 'Unassigned' }}</div>
+                        </td>
+                        <td class="py-4 px-6 text-center">
+                            {% if ticket.priority == 'Critical' %}
+                                <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-rose-200/30">🔥 Critical</span>
+                            {% elif ticket.priority == 'High' %}
+                                <span class="bg-amber-50 text-amber-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200/30">▲ High</span>
+                            {% elif ticket.priority == 'Normal' %}
+                                <span class="bg-sky-50 text-sky-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-sky-200/30">═ Normal</span>
+                            {% else %}
+                                <span class="bg-slate-100 text-slate-500 text-[10px] font-bold px-2.5 py-0.5 rounded-full">▼ Low</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-6 text-center">
+                            {% if ticket.request_sparepart_id %}
+                                <span class="bg-purple-50 text-purple-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-purple-200/30">📦 Requested</span>
+                            {% else %}
+                                <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-6 text-center">
+                            <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200/30">{{ ticket.status_ticket }}</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Belum ada data ticket yang tersimpan.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
