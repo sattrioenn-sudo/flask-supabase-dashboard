@@ -4,7 +4,7 @@
 {% block content %}
 <div class="max-w-5xl mx-auto pb-20">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-       
+      
         <!-- Kolom Kiri: Informasi Akun & Personalisasi -->
         <div class="lg:col-span-1 space-y-6">
             <!-- Profil Card -->
@@ -16,7 +16,7 @@
                     <h3 class="text-lg font-bold text-slate-800">Administrator</h3>
                     <p class="text-slate-400 text-xs">{{ email }}</p>
                 </div>
-               
+              
                 <div class="space-y-3">
                     <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                         <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">User ID</label>
@@ -30,7 +30,7 @@
                 <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <i class="fa-solid fa-palette text-blue-500"></i> Appearance
                 </h4>
-               
+              
                 <div class="space-y-4">
                     <div>
                         <label class="text-xs font-bold text-slate-500 mb-2 block">System Theme</label>
@@ -53,7 +53,7 @@
 
         <!-- Kolom Kanan: User Management & Logs -->
         <div class="lg:col-span-2 space-y-6">
-           
+          
             <!-- Tambah User -->
             <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
@@ -61,18 +61,18 @@
                         <i class="fa-solid fa-user-plus text-emerald-500"></i> Add New User
                     </h4>
                 </div>
-               
+              
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="addUserForm">
-                    <input type="email" id="newEmail" placeholder="New User Email" 
+                    <input type="email" id="newEmail" placeholder="New User Email"
                            class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
-                    <input type="password" id="newPassword" placeholder="Temporary Password" 
+                    <input type="password" id="newPassword" placeholder="Temporary Password"
                            class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
                     <select id="newRole" class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
                         <option value="operator">Operator</option>
                         <option value="manager">Manager</option>
                         <option value="admin">Admin</option>
                     </select>
-                    <button onclick="addNewUser()" 
+                    <button onclick="addNewUser()"
                             class="bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 py-4">
                         Create Account
                     </button>
@@ -85,7 +85,7 @@
                 <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-orange-500"></i> Security Logs
                 </h4>
-               
+              
                 <div class="overflow-hidden border border-slate-50 rounded-2xl">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-bold">
@@ -139,7 +139,7 @@
         }
     }
 
-    // === Add User Handler (Diperbaiki) ===
+    // === Add User Handler (Sudah Diperbaiki) ===
     async function addNewUser() {
         const email = document.getElementById('newEmail').value.trim();
         const password = document.getElementById('newPassword').value.trim();
@@ -151,7 +151,7 @@
             return;
         }
 
-        const btn = event.currentTarget;  // Perbaikan: pakai currentTarget
+        const btn = event.currentTarget;
         const originalText = btn.textContent;
         btn.textContent = 'Creating...';
         btn.disabled = true;
@@ -159,7 +159,7 @@
         try {
             const response = await fetch('/add_user', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
@@ -170,7 +170,10 @@
 
             if (response.ok) {
                 showMessage(messageEl, `✅ ${result.message || 'User berhasil dibuat!'}`, 'text-emerald-600');
-                document.getElementById('addUserForm').reset();
+                // Reset fields manually
+                document.getElementById('newEmail').value = '';
+                document.getElementById('newPassword').value = '';
+                document.getElementById('newRole').value = 'operator';
             } else {
                 showMessage(messageEl, `❌ ${result.error || 'Gagal menambahkan user'}`, 'text-red-600');
             }
@@ -202,7 +205,6 @@
     window.onload = function() {
         const savedTheme = localStorage.getItem('sys_theme') || 'light';
         const savedLang = localStorage.getItem('sys_lang') || 'id';
-
         document.getElementById('themeSelect').value = savedTheme;
         document.getElementById('langSelect').value = savedLang;
         applyTheme(savedTheme);
