@@ -257,8 +257,13 @@ def ticket_management():
     if 'user_id' not in session: return redirect(url_for('login'))
     
     if request.method == 'POST':
-        # Menangani penyimpanan Form Ticket Baru ke Supabase
-        nomor_ticket = request.form.get('nomor_ticket')
+        nomor_ticket = request.form.get('nomor_ticket').strip()
+        # Jika dikosongkan oleh user, sistem generate otomatis sebagai cadangan
+        if not nomor_ticket:
+            timestamp = datetime.now().strftime("%Y%m%d")
+            unique_suffix = str(uuid.uuid4().hex[:4]).upper()
+            nomor_ticket = f"TCK-{timestamp}-{unique_suffix}"
+            
         nama_ticket = request.form.get('nama_ticket')
         priority = request.form.get('priority', 'Normal')
         reporter = request.form.get('reporter')
@@ -282,11 +287,7 @@ def ticket_management():
             print(f"Error Insert Ticket: {e}")
             return f"Gagal menyimpan data ticket ke database: {e}", 500
 
-    # Logika GET: Menampilkan Halaman & Data Riwayat Tabel
-    timestamp = datetime.now().strftime("%Y%m%d")
-    unique_suffix = str(uuid.uuid4().hex[:4]).upper()
-    generated_ticket_no = f"TCK-{timestamp}-{unique_suffix}"
-    
+    # Logika GET: Ambil Data Riwayat Tabel
     try:
         res_t = supabase.table('tickets').select("*").order('created_at', desc=True).execute()
         db_tickets = res_t.data if res_t.data else []
@@ -294,7 +295,18 @@ def ticket_management():
         print(f"Error Fetching Tickets: {e}")
         db_tickets = []
         
-    return render_template('ticket.html', email=session.get('user_email'), ticket_no=generated_ticket_no, tickets=db_tickets)
+    return render_template('ticket.html', email=session.get('user_email'), tickets=db_tickets)
+
+@app.route('/tickets/update_status/<int:ticket_id>', methods=['POST'])
+def update_ticket_status(ticket_id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    new_status = request.form.get('status_ticket')
+    try:
+        supabase.table('tickets').update({"status_ticket": new_status}).eq('id', ticket_id).execute()
+        return redirect(url_for('ticket_management'))
+    except Exception as e:
+        print(f"Error Update Status Ticket: {e}")
+        return f"Gagal mengubah status ticket: {e}", 500
 
 
 @app.route('/spareparts', methods=['GET', 'POST'])
@@ -302,8 +314,11 @@ def sparepart_management():
     if 'user_id' not in session: return redirect(url_for('login'))
     
     if request.method == 'POST':
-        # Menangani penyimpanan Form Mutasi Sparepart Baru ke Supabase
-        request_bon = request.form.get('request_bon')
+        request_bon = request.form.get('request_bon').strip()
+        # Jika bon kosong, diset sebagai tanda '-' (tidak wajib pakai bon)
+        if not request_bon:
+            request_bon = "-"
+            
         nama_barang = request.form.get('nama_barang')
         jumlah = int(request.form.get('jumlah', 0))
         satuan = request.form.get('satuan', 'Pcs')
@@ -338,6 +353,26 @@ def sparepart_management():
         db_spareparts = []
         
     return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts)
+
+@app.route('/spareparts/approve/<int:item_id>', methods=['POST'])
+def approve_sparepart(item_id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    try:
+        supabase.table('spareparts').update({"status_approve": "Approved"}).eq('id', item_id).execute()
+        return redirect(url_for('sparepart_management'))
+    except Exception as e:
+        print(f"Error Approve Sparepart: {e}")
+        return f"Gagal menyetujui sparepart: {e}", 500
+
+@app.route('/spareparts/reject/<int:item_id>', methods=['POST'])
+def reject_sparepart(item_id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    try:
+        supabase.table('spareparts').update({"status_approve": "Rejected"}).eq('id', item_id).execute()
+        return redirect(url_for('sparepart_management'))
+    except Exception as e:
+        print(f"Error Reject Sparepart: {e}")
+        return f"Gagal menolak sparepart: {e}", 500
 
 # =========================================================================
 
