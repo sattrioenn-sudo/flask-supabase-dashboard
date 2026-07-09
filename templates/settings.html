@@ -1,12 +1,10 @@
 {% extends "base.html" %}
-
 {% block title %}Settings & Management{% endblock %}
 {% block header_title %}System Settings{% endblock %}
-
 {% block content %}
 <div class="max-w-5xl mx-auto pb-20">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+       
         <!-- Kolom Kiri: Informasi Akun & Personalisasi -->
         <div class="lg:col-span-1 space-y-6">
             <!-- Profil Card -->
@@ -18,7 +16,7 @@
                     <h3 class="text-lg font-bold text-slate-800">Administrator</h3>
                     <p class="text-slate-400 text-xs">{{ email }}</p>
                 </div>
-                
+               
                 <div class="space-y-3">
                     <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100">
                         <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest block">User ID</label>
@@ -32,7 +30,7 @@
                 <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <i class="fa-solid fa-palette text-blue-500"></i> Appearance
                 </h4>
-                
+               
                 <div class="space-y-4">
                     <div>
                         <label class="text-xs font-bold text-slate-500 mb-2 block">System Theme</label>
@@ -42,7 +40,6 @@
                             <option value="glass">Emerald Glass</option>
                         </select>
                     </div>
-
                     <div>
                         <label class="text-xs font-bold text-slate-500 mb-2 block">Language / Bahasa</label>
                         <select id="langSelect" onchange="changeLang()" class="w-full bg-slate-50 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500">
@@ -56,35 +53,39 @@
 
         <!-- Kolom Kanan: User Management & Logs -->
         <div class="lg:col-span-2 space-y-6">
-            
-            <!-- Tambah User Tab -->
+           
+            <!-- Tambah User -->
             <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                 <div class="flex items-center justify-between mb-6">
                     <h4 class="font-bold text-slate-800 flex items-center gap-2">
                         <i class="fa-solid fa-user-plus text-emerald-500"></i> Add New User
                     </h4>
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="email" placeholder="New User Email" class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
-                    <input type="password" placeholder="Temporary Password" class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
-                    <select class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
-                        <option>Operator</option>
-                        <option>Manager</option>
-                        <option>Admin</option>
+               
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="addUserForm">
+                    <input type="email" id="newEmail" placeholder="New User Email" 
+                           class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                    <input type="password" id="newPassword" placeholder="Temporary Password" 
+                           class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                    <select id="newRole" class="bg-slate-50 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-emerald-500">
+                        <option value="operator">Operator</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Admin</option>
                     </select>
-                    <button class="bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100">
+                    <button onclick="addNewUser()" 
+                            class="bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 py-4">
                         Create Account
                     </button>
                 </div>
+                <div id="addUserMessage" class="mt-4 text-sm hidden"></div>
             </div>
 
-            <!-- Login/Logout Logs (Mockup data karena tidak ubah route) -->
+            <!-- Security Logs -->
             <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
                 <h4 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-orange-500"></i> Security Logs
                 </h4>
-                
+               
                 <div class="overflow-hidden border border-slate-50 rounded-2xl">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-bold">
@@ -112,13 +113,12 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
 <script>
-    // Fungsi Ganti Tema (Client Side)
+    // === Theme Handler ===
     function changeTheme() {
         const theme = document.getElementById('themeSelect').value;
         localStorage.setItem('sys_theme', theme);
@@ -126,33 +126,86 @@
     }
 
     function applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        
         if(theme === 'dark') {
-            document.body.style.backgroundColor = '#1e293b';
-            // Logic tambahan untuk merubah warna card bisa ditambah disini via ClassList
+            document.body.style.backgroundColor = '#0f172a';
+            document.body.style.color = '#e2e8f0';
         } else if(theme === 'glass') {
             document.body.style.backgroundImage = 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
+            document.body.style.backgroundColor = '';
         } else {
             document.body.style.backgroundColor = '#f8fafc';
             document.body.style.backgroundImage = 'none';
         }
     }
 
-    // Fungsi Ganti Bahasa (Client Side UI)
-    function changeLang() {
-        const lang = document.getElementById('langSelect').value;
-        alert(lang === 'id' ? 'Bahasa diubah ke Indonesia' : 'Language changed to English');
-        localStorage.setItem('sys_lang', lang);
+    // === Add User Handler ===
+    async function addNewUser() {
+        const email = document.getElementById('newEmail').value.trim();
+        const password = document.getElementById('newPassword').value.trim();
+        const role = document.getElementById('newRole').value;
+        const messageEl = document.getElementById('addUserMessage');
+
+        if (!email || !password) {
+            showMessage(messageEl, 'Email dan password wajib diisi!', 'text-red-600');
+            return;
+        }
+
+        // Loading state
+        const btn = event.target;
+        const originalText = btn.textContent;
+        btn.textContent = 'Creating...';
+        btn.disabled = true;
+
+        try {
+            // Ganti URL ini sesuai route Flask kamu
+            const response = await fetch('/add_user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, role })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showMessage(messageEl, `✅ User ${email} berhasil dibuat!`, 'text-emerald-600');
+                // Reset form
+                document.getElementById('addUserForm').reset();
+            } else {
+                showMessage(messageEl, `❌ ${result.error || 'Gagal menambahkan user'}`, 'text-red-600');
+            }
+        } catch (err) {
+            showMessage(messageEl, '❌ Koneksi error. Coba lagi.', 'text-red-600');
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
     }
 
-    // Load preferensi saat halaman dibuka
+    function showMessage(el, text, color) {
+        el.textContent = text;
+        el.className = `mt-4 text-sm ${color} block`;
+        setTimeout(() => el.classList.add('hidden'), 5000);
+    }
+
+    // === Language Handler ===
+    function changeLang() {
+        const lang = document.getElementById('langSelect').value;
+        localStorage.setItem('sys_lang', lang);
+        alert(lang === 'id' ? 'Bahasa diubah ke Indonesia ✅' : 'Language changed to English ✅');
+        // Bisa ditambah logic real translation nanti
+    }
+
+    // Load saved preferences
     window.onload = function() {
-        const savedTheme = localStorage.getItem('sys_theme');
-        const savedLang = localStorage.getItem('sys_lang');
-        if(savedTheme) {
-            document.getElementById('themeSelect').value = savedTheme;
-            applyTheme(savedTheme);
-        }
-        if(savedLang) document.getElementById('langSelect').value = savedLang;
+        const savedTheme = localStorage.getItem('sys_theme') || 'light';
+        const savedLang = localStorage.getItem('sys_lang') || 'id';
+
+        document.getElementById('themeSelect').value = savedTheme;
+        document.getElementById('langSelect').value = savedLang;
+
+        applyTheme(savedTheme);
     }
 </script>
 {% endblock %}
