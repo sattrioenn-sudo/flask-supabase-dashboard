@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Sparepart{% endblock %}
+{% block header_title %}Inventory & Sparepart Management{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm gap-4">
+        <div>
+            <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Rekapitulasi Stock Opname</h2>
+            <p class="text-[10px] text-slate-400 font-medium mt-0.5">Ekspor laporan kondisi sparepart masuk dan keluar dalam format dokumen PDF.</p>
+        </div>
+        <div class="flex gap-2 w-full sm:w-auto">
+            <button onclick="exportOpnamePDF('Harian')" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm">
+                📋 PDF Opname Harian
+            </button>
+            <button onclick="exportOpnamePDF('Bulanan')" class="flex-1 sm:flex-none bg-sky-600 hover:bg-sky-700 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-sky-500/10">
+                📊 PDF Opname Bulanan
+            </button>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+        <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm xl:col-span-1">
+            <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                <div class="w-6 h-6 rounded-md bg-sky-50 flex items-center justify-center text-sky-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                </div>
+                <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Input Mutasi Sparepart</h2>
+            </div>
+
+            <form action="/spareparts" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">No. Request Bon</label>
+                    <input type="text" name="request_bon" placeholder="Contoh: BON-KCS-2026-002" required
+                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Barang</label>
+                    <input type="text" name="nama_barang" placeholder="Contoh: Ribbon Cartridge Epson LQ2190" required
+                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Jumlah</label>
+                        <input type="number" name="jumlah" min="1" placeholder="10" required
+                            class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Satuan</label>
+                        <select name="satuan" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                            <option value="Pcs" selected>Pcs</option>
+                            <option value="Set">Set</option>
+                            <option value="Box">Box</option>
+                            <option value="Unit">Unit</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tgl Masuk</label>
+                        <input type="date" name="tanggal_masuk"
+                            class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tgl Keluar</label>
+                        <input type="date" name="tanggal_keluar"
+                            class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Peruntukan User / Mesin</label>
+                    <input type="text" name="untuk_user" placeholder="Contoh: Pak Budi (Logistik)" required
+                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                </div>
+
+                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all shadow-sm">
+                    Simpan Data Barang
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden xl:col-span-2">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Log Mutasi Sparepart</h3>
+                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-200/40">Total: {{ spareparts|length }} Item</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table id="table-sparepart" class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            <th class="py-3 px-4">No. Bon</th>
+                            <th class="py-3 px-4">Nama Barang</th>
+                            <th class="py-3 px-4 text-center">Jumlah</th>
+                            <th class="py-3 px-4">Tgl Masuk / Keluar</th>
+                            <th class="py-3 px-4">User</th>
+                            <th class="py-3 px-4 text-center">Approval Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs">
+                        {% for item in spareparts %}
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="py-4 px-4 font-mono font-bold text-slate-600">{{ item.request_bon or '-' }}</td>
+                            <td class="py-4 px-4 font-semibold text-slate-800">{{ item.nama_barang }}</td>
+                            <td class="py-4 px-4 text-center font-bold text-slate-700">{{ item.jumlah }} <span class="text-[10px] text-slate-400 font-normal">{{ item.satuan }}</span></td>
+                            <td class="py-4 px-4 whitespace-nowrap">
+                                <div class="text-[11px] text-emerald-600 font-medium">📥 In: {{ item.tanggal_masuk or '-' }}</div>
+                                <div class="text-[11px] text-rose-600 font-medium">📤 Out: {{ item.tanggal_keluar or '-' }}</div>
+                            </td>
+                            <td class="py-4 px-4 text-slate-600 font-medium">{{ item.untuk_user or '-' }}</td>
+                            <td class="py-4 px-4 text-center">
+                                {% if item.status_approve == 'Approved' %}
+                                    <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200/30">✔ Approved</span>
+                                {% elif item.status_approve == 'Rejected' %}
+                                    <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/30">✖ Rejected</span>
+                                {% else %}
+                                    <div class="inline-flex gap-1">
+                                        <button class="bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-md shadow-sm transition-all" title="Approve">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                        </button>
+                                        <button class="bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-md shadow-sm transition-all" title="Reject">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Belum ada mutasi log sparepart.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Fungsi Generator PDF Rekap Opname Profesional menggunakan jsPDF
+    function exportOpnamePDF(tipeLaporan) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        // Header Instansi / Perusahaan
+        doc.setFont("Plus Jakarta Sans", "bold");
+        doc.setFontSize(14);
+        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 15);
+        
+        doc.setFontSize(10);
+        doc.setFont("Plus Jakarta Sans", "normal");
+        doc.setTextColor(100);
+        doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 21);
+        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 26);
+        
+        // Garis Pembatas Header
+        doc.setDrawColor(226, 232, 240);
+        doc.line(14, 30, 196, 30);
+        
+        // Parsing data dari tabel DOM HTML ke Array PDF
+        const rows = [];
+        const table = document.getElementById("table-sparepart");
+        const trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+        
+        // Validasi jika tabel kosong
+        if (trs.length === 1 && trs[0].innerText.includes("Belum ada")) {
+            alert("Tidak ada data mutasi sparepart untuk dicetak!");
+            return;
+        }
+
+        for (let i = 0; i < trs.length; i++) {
+            const tds = trs[i].getElementsByTagName("td");
+            if(tds.length >= 6) {
+                // Parsing teks tanggal masuk dan keluar
+                const tanggalText = tds[3].innerText.replace('📥 In: ', '').replace('📤 Out: ', '\n');
+                rows.push([
+                    tds[0].innerText, // No. Bon
+                    tds[1].innerText, // Nama Barang
+                    tds[2].innerText, // Jumlah + Satuan
+                    tanggalText,      // Tanggal Mutasi
+                    tds[4].innerText, // User
+                    tds[5].innerText.trim() // Status Approval
+                ]);
+            }
+        }
+        
+        // Set susunan struktur kolom tabel PDF
+        const columns = ["No. Request Bon", "Nama Barang", "Jumlah", "Tgl Masuk / Keluar", "Peruntukan User", "Approval Status"];
+        
+        // Eksekusi Render AutoTable ke Dokumen
+        doc.autoTable({
+            head: [columns],
+            body: rows,
+            startY: 35,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [15, 23, 42], // Warna Slate-900 biar senada dengan tema aplikasi
+                textColor: [255, 255, 255],
+                fontSize: 9,
+                fontStyle: 'bold',
+                halign: 'left'
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: [51, 65, 85]
+            },
+            styles: {
+                overflow: 'linebreak',
+                cellPadding: 3
+            },
+            columnStyles: {
+                2: { halign: 'center' }, // Kolom jumlah dibuat rata tengah
+                5: { halign: 'center' }  // Status dibuat rata tengah
+            }
+        });
+        
+        // Unduh File PDF secara instan ke browser client
+        doc.save(`Rekap_Opname_Sparepart_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
+    }
+</script>
+{% endblock %}
