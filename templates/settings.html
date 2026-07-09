@@ -127,7 +127,6 @@
 
     function applyTheme(theme) {
         document.documentElement.setAttribute('data-theme', theme);
-        
         if(theme === 'dark') {
             document.body.style.backgroundColor = '#0f172a';
             document.body.style.color = '#e2e8f0';
@@ -140,7 +139,7 @@
         }
     }
 
-    // === Add User Handler ===
+    // === Add User Handler (Diperbaiki) ===
     async function addNewUser() {
         const email = document.getElementById('newEmail').value.trim();
         const password = document.getElementById('newPassword').value.trim();
@@ -152,31 +151,32 @@
             return;
         }
 
-        // Loading state
-        const btn = event.target;
+        const btn = event.currentTarget;  // Perbaikan: pakai currentTarget
         const originalText = btn.textContent;
         btn.textContent = 'Creating...';
         btn.disabled = true;
 
         try {
-            // Ganti URL ini sesuai route Flask kamu
             const response = await fetch('/add_user', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({ email, password, role })
             });
 
             const result = await response.json();
 
             if (response.ok) {
-                showMessage(messageEl, `✅ User ${email} berhasil dibuat!`, 'text-emerald-600');
-                // Reset form
+                showMessage(messageEl, `✅ ${result.message || 'User berhasil dibuat!'}`, 'text-emerald-600');
                 document.getElementById('addUserForm').reset();
             } else {
                 showMessage(messageEl, `❌ ${result.error || 'Gagal menambahkan user'}`, 'text-red-600');
             }
         } catch (err) {
-            showMessage(messageEl, '❌ Koneksi error. Coba lagi.', 'text-red-600');
+            console.error('Fetch Error:', err);
+            showMessage(messageEl, '❌ Koneksi error. Cek console browser (F12)', 'text-orange-600');
         } finally {
             btn.textContent = originalText;
             btn.disabled = false;
@@ -186,7 +186,9 @@
     function showMessage(el, text, color) {
         el.textContent = text;
         el.className = `mt-4 text-sm ${color} block`;
-        setTimeout(() => el.classList.add('hidden'), 5000);
+        setTimeout(() => {
+            el.classList.add('hidden');
+        }, 6000);
     }
 
     // === Language Handler ===
@@ -194,7 +196,6 @@
         const lang = document.getElementById('langSelect').value;
         localStorage.setItem('sys_lang', lang);
         alert(lang === 'id' ? 'Bahasa diubah ke Indonesia ✅' : 'Language changed to English ✅');
-        // Bisa ditambah logic real translation nanti
     }
 
     // Load saved preferences
@@ -204,7 +205,6 @@
 
         document.getElementById('themeSelect').value = savedTheme;
         document.getElementById('langSelect').value = savedLang;
-
         applyTheme(savedTheme);
     }
 </script>
