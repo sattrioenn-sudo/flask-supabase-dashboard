@@ -255,5 +255,50 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+# === USER MANAGEMENT ===
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    role = data.get('role', 'operator')
+
+    if not email or not password:
+        return jsonify({'error': 'Email dan password wajib diisi'}), 400
+
+    try:
+        # Cek apakah email sudah ada
+        existing = supabase.table('users').select('id').eq('email', email).execute()
+        if existing.data:
+            return jsonify({'error': 'Email sudah terdaftar'}), 409
+
+        # Hash password (pakai werkzeug seperti di auth)
+        from werkzeug.security import generate_password_hash
+        hashed_password = generate_password_hash(password)
+
+        new_user = {
+            "email": email,
+            "password": hashed_password,
+            "role": role,
+            "is_active": True
+        }
+
+        response = supabase.table('users').insert(new_user).execute()
+
+        if response.data:
+            return jsonify({
+                'message': 'User berhasil dibuat',
+                'email': email
+            }), 201
+        else:
+            return jsonify({'error': 'Gagal membuat user'}), 500
+
+    except Exception as e:
+        print(f"Add User Error: {e}")
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
