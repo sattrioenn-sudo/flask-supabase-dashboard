@@ -256,31 +256,80 @@ def accounting():
 def ticket_management():
     if 'user_id' not in session: return redirect(url_for('login'))
     
-    # Generate No Ticket otomatis unik berbasis tanggal & acak (Contoh: TCK-20260709-A4F1)
-    if request.method == 'GET':
-        timestamp = datetime.now().strftime("%Y%m%d")
-        unique_suffix = str(uuid.uuid4().hex[:4]).upper()
-        generated_ticket_no = f"TCK-{timestamp}-{unique_suffix}"
+    if request.method == 'POST':
+        # Menangani penyimpanan Form Ticket Baru ke Supabase
+        nomor_ticket = request.form.get('nomor_ticket')
+        nama_ticket = request.form.get('nama_ticket')
+        priority = request.form.get('priority', 'Normal')
+        reporter = request.form.get('reporter')
+        eksekutor = request.form.get('eksekutor')
+        keterangan = request.form.get('keterangan')
+        
+        data_ticket = {
+            "nomor_ticket": nomor_ticket,
+            "nama_ticket": nama_ticket,
+            "priority": priority,
+            "reporter": reporter,
+            "eksekutor": eksekutor if eksekutor else None,
+            "keterangan": keterangan,
+            "status_ticket": "Open"
+        }
         
         try:
-            # Ambil data ticket historis untuk ditampilkan di tabel
-            res_t = supabase.table('tickets').select("*").order('created_at', desc=True).execute()
-            db_tickets = res_t.data if res_t.data else []
+            supabase.table('tickets').insert(data_ticket).execute()
+            return redirect(url_for('ticket_management'))
         except Exception as e:
-            print(f"Error Fetching Tickets: {e}")
-            db_tickets = []
-            
-        return render_template('ticket.html', email=session.get('user_email'), ticket_no=generated_ticket_no, tickets=db_tickets)
+            print(f"Error Insert Ticket: {e}")
+            return f"Gagal menyimpan data ticket ke database: {e}", 500
 
-    if request.method == 'POST':
-        # Logika submit ticket baru akan kita implementasikan detailnya di langkah berikutnya
-        pass
+    # Logika GET: Menampilkan Halaman & Data Riwayat Tabel
+    timestamp = datetime.now().strftime("%Y%m%d")
+    unique_suffix = str(uuid.uuid4().hex[:4]).upper()
+    generated_ticket_no = f"TCK-{timestamp}-{unique_suffix}"
+    
+    try:
+        res_t = supabase.table('tickets').select("*").order('created_at', desc=True).execute()
+        db_tickets = res_t.data if res_t.data else []
+    except Exception as e:
+        print(f"Error Fetching Tickets: {e}")
+        db_tickets = []
+        
+    return render_template('ticket.html', email=session.get('user_email'), ticket_no=generated_ticket_no, tickets=db_tickets)
 
 
 @app.route('/spareparts', methods=['GET', 'POST'])
 def sparepart_management():
     if 'user_id' not in session: return redirect(url_for('login'))
     
+    if request.method == 'POST':
+        # Menangani penyimpanan Form Mutasi Sparepart Baru ke Supabase
+        request_bon = request.form.get('request_bon')
+        nama_barang = request.form.get('nama_barang')
+        jumlah = int(request.form.get('jumlah', 0))
+        satuan = request.form.get('satuan', 'Pcs')
+        tanggal_masuk = request.form.get('tanggal_masuk')
+        tanggal_keluar = request.form.get('tanggal_keluar')
+        untuk_user = request.form.get('untuk_user')
+        
+        data_sparepart = {
+            "request_bon": request_bon,
+            "nama_barang": nama_barang,
+            "jumlah": jumlah,
+            "satuan": satuan,
+            "tanggal_masuk": tanggal_masuk if tanggal_masuk else None,
+            "tanggal_keluar": tanggal_keluar if tanggal_keluar else None,
+            "untuk_user": untuk_user,
+            "status_approve": "Pending"
+        }
+        
+        try:
+            supabase.table('spareparts').insert(data_sparepart).execute()
+            return redirect(url_for('sparepart_management'))
+        except Exception as e:
+            print(f"Error Insert Sparepart: {e}")
+            return f"Gagal menyimpan mutasi sparepart: {e}", 500
+            
+    # Logika GET: Ambil Data Riwayat Tabel
     try:
         res_s = supabase.table('spareparts').select("*").order('created_at', desc=True).execute()
         db_spareparts = res_s.data if res_s.data else []
