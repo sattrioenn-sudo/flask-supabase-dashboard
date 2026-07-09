@@ -15,9 +15,9 @@
 
         <form action="/tickets" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nomor Ticket</label>
-                <input type="text" name="nomor_ticket" value="{{ ticket_no }}" readonly
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-600 outline-none">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nomor Ticket (Manual / Kosongkan untuk Auto)</label>
+                <input type="text" name="nomor_ticket" placeholder="Isi manual atau biarkan kosong"
+                    class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
             </div>
 
             <div>
@@ -121,7 +121,19 @@
                             {% endif %}
                         </td>
                         <td class="py-4 px-6 text-center">
-                            <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200/30">{{ ticket.status_ticket }}</span>
+                            <form action="/tickets/update_status/{{ ticket.id }}" method="POST" onchange="this.submit()">
+                                <select name="status_ticket" class="text-[11px] font-bold px-2.5 py-1 rounded-full border bg-white cursor-pointer outline-none transition-all
+                                    {% if ticket.status_ticket == 'Open' %} text-sky-600 border-sky-200 bg-sky-50
+                                    {% elif ticket.status_ticket == 'In Progress' %} text-amber-600 border-amber-200 bg-amber-50
+                                    {% elif ticket.status_ticket == 'Review' %} text-purple-600 border-purple-200 bg-purple-50
+                                    {% elif ticket.status_ticket == 'Resolved' %} text-emerald-600 border-emerald-200 bg-emerald-50
+                                    {% else %} text-slate-600 border-slate-200 bg-slate-50 {% endif %}">
+                                    <option value="Open" {% if ticket.status_ticket == 'Open' %}selected{% endif %}>🟢 Open</option>
+                                    <option value="In Progress" {% if ticket.status_ticket == 'In Progress' %}selected{% endif %}>🟡 In Progress</option>
+                                    <option value="Review" {% if ticket.status_ticket == 'Review' %}selected{% endif %}>🟣 Review</option>
+                                    <option value="Resolved" {% if ticket.status_ticket == 'Resolved' %}selected{% endif %}>🔵 Resolved</option>
+                                </select>
+                            </form>
                         </td>
                     </tr>
                     {% else %}
