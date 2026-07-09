@@ -1,6 +1,8 @@
 import os
 import sys
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from datetime import datetime
+import uuid
 
 # Path Management
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -142,7 +144,6 @@ def update_voucher_lock():
         return jsonify({"status": "success", "new_status": new_status}), 200
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
-# TAMBAHAN BARU: Route untuk Update Voucher via Form Edit di Front-End
 @app.route('/vouchers/update/<code_voucher>', methods=['POST'])
 def update_voucher_data(code_voucher):
     if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
@@ -154,7 +155,6 @@ def update_voucher_data(code_voucher):
         return jsonify({"status": "success"}), 200
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
-# TAMBAHAN BARU: Route untuk Unlock Voucher
 @app.route('/vouchers/unlock/<code_voucher>', methods=['POST'])
 def unlock_voucher_data(code_voucher):
     if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
@@ -163,8 +163,7 @@ def unlock_voucher_data(code_voucher):
         return jsonify({"status": "success"}), 200
     except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
 
-# TAMBAHAN BARU: Route untuk Delete Voucher
-@app.route('/vouchers/delete/<code_voucher>', methods=['`DELETE`', 'DELETE'])
+@app.route('/vouchers/delete/<code_voucher>', methods=['DELETE'])
 def delete_voucher_data(code_voucher):
     if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
     try:
@@ -220,13 +219,12 @@ def analytics():
     except: total_vouchers = 0
     return render_template('analytics.html', email=session.get('user_email'), total_vouchers=total_vouchers)
 
-# --- TAMBAHAN BARU: ACCOUNTING ROUTE (LOG TAGIHAN SUPABASE) ---
+# --- ACCOUNTING ROUTE (LOG TAGIHAN SUPABASE) ---
 @app.route('/accounting', methods=['GET', 'POST'])
 def accounting():
     if 'user_id' not in session: return redirect(url_for('login'))
     
     if request.method == 'POST':
-        # Penambahan log baru (Prinsip: Hanya insert data baru, tidak merusak data lama)
         data = {
             "bulan_tahun": request.form.get('bulan_tahun'),
             "nomor_telepon": request.form.get('nomor_telepon'),
@@ -239,7 +237,6 @@ def accounting():
         except Exception as e:
             return f"Gagal menyimpan data log tagihan: {e}", 500
 
-    # Ambil data log historis dari Supabase tabel 'log_tagihan'
     try:
         response = supabase.table('log_tagihan').select("*", count='exact').order('created_at', desc=True).execute()
         db_logs = response.data if response.data else []
@@ -249,6 +246,52 @@ def accounting():
         db_logs, total_logs = [], 0
 
     return render_template('accounting.html', email=session.get('user_email'), logs=db_logs, total_logs=total_logs)
+
+
+# =========================================================================
+# TAMBAHAN FITUR BARU: ROUTE TICKET & SPAREPART (TERSTRUKTUR & AMAN)
+# =========================================================================
+
+@app.route('/tickets', methods=['GET', 'POST'])
+def ticket_management():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    # Generate No Ticket otomatis unik berbasis tanggal & acak (Contoh: TCK-20260709-A4F1)
+    if request.method == 'GET':
+        timestamp = datetime.now().strftime("%Y%m%d")
+        unique_suffix = str(uuid.uuid4().hex[:4]).upper()
+        generated_ticket_no = f"TCK-{timestamp}-{unique_suffix}"
+        
+        try:
+            # Ambil data ticket historis untuk ditampilkan di tabel
+            res_t = supabase.table('tickets').select("*").order('created_at', desc=True).execute()
+            db_tickets = res_t.data if res_t.data else []
+        except Exception as e:
+            print(f"Error Fetching Tickets: {e}")
+            db_tickets = []
+            
+        return render_template('ticket.html', email=session.get('user_email'), ticket_no=generated_ticket_no, tickets=db_tickets)
+
+    if request.method == 'POST':
+        # Logika submit ticket baru akan kita implementasikan detailnya di langkah berikutnya
+        pass
+
+
+@app.route('/spareparts', methods=['GET', 'POST'])
+def sparepart_management():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    try:
+        res_s = supabase.table('spareparts').select("*").order('created_at', desc=True).execute()
+        db_spareparts = res_s.data if res_s.data else []
+    except Exception as e:
+        print(f"Error Fetching Spareparts: {e}")
+        db_spareparts = []
+        
+    return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts)
+
+# =========================================================================
+
 
 @app.route('/logout')
 def logout():
@@ -270,12 +313,10 @@ def add_user():
         return jsonify({'error': 'Email dan password wajib diisi'}), 400
 
     try:
-        # Cek apakah email sudah ada
         existing = supabase.table('users').select('id').eq('email', email).execute()
         if existing.data:
             return jsonify({'error': 'Email sudah terdaftar'}), 409
 
-        # Hash password (pakai werkzeug seperti di auth)
         from werkzeug.security import generate_password_hash
         hashed_password = generate_password_hash(password)
 
