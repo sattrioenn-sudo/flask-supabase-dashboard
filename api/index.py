@@ -414,6 +414,20 @@ def reject_sparepart(item_id):
         print(f"Error Reject Sparepart: {e}")
         return f"Gagal menolak sparepart: {e}", 500
 
+@app.route('/spareparts/master', methods=['GET'])
+def sparepart_master():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    try:
+        # Ambil data dari tabel master_spareparts
+        res_m = supabase.table('master_spareparts').select("*").order('nama_barang', desc=False).execute()
+        db_master = res_m.data if res_m.data else []
+    except Exception as e:
+        print(f"Error Fetching Master Spareparts: {e}")
+        db_master = []
+        
+    return render_template('sparepart_master.html', email=session.get('user_email'), master_stock=db_master)
+
 # =========================================================================
 
 
