@@ -1,6 +1,6 @@
 import os
 import sys
-from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from datetime import datetime
 import uuid
 # Library tambahan untuk Export PDF Landscape
@@ -461,7 +461,7 @@ def export_sparepart_pdf():
         doc.build(elements)
         
         buffer.seek(0)
-        return flask.send_file(buffer, as_attachment=True, download_name=f"Mutasi_Sparepart_{filter_type}.pdf", mimetype='application/pdf')
+        return send_file(buffer, as_attachment=True, download_name=f"Mutasi_Sparepart_{filter_type}.pdf", mimetype='application/pdf')
         
     except Exception as e:
         print(f"Error Export PDF: {e}")
