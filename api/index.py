@@ -258,7 +258,6 @@ def ticket_management():
     
     if request.method == 'POST':
         nomor_ticket = request.form.get('nomor_ticket').strip()
-        # Jika dikosongkan oleh user, sistem generate otomatis sebagai cadangan
         if not nomor_ticket:
             timestamp = datetime.now().strftime("%Y%m%d")
             unique_suffix = str(uuid.uuid4().hex[:4]).upper()
@@ -287,7 +286,6 @@ def ticket_management():
             print(f"Error Insert Ticket: {e}")
             return f"Gagal menyimpan data ticket ke database: {e}", 500
 
-    # Logika GET: Ambil Data Riwayat Tabel
     try:
         res_t = supabase.table('tickets').select("*").order('created_at', desc=True).execute()
         db_tickets = res_t.data if res_t.data else []
@@ -315,7 +313,6 @@ def sparepart_management():
     
     if request.method == 'POST':
         request_bon = request.form.get('request_bon').strip()
-        # Jika bon kosong, diset sebagai tanda '-' (tidak wajib pakai bon)
         if not request_bon:
             request_bon = "-"
             
@@ -344,15 +341,33 @@ def sparepart_management():
             print(f"Error Insert Sparepart: {e}")
             return f"Gagal menyimpan mutasi sparepart: {e}", 500
             
-    # Logika GET: Ambil Data Riwayat Tabel
+    # Logika GET: Cek juga parameter untuk print harian/bulanan
+    filter_type = request.args.get('filter_type', 'all')
+    target_date = request.args.get('target_date', datetime.now().strftime('%Y-%m-%d'))
+    is_print = request.args.get('print', 'false') == 'true'
+    
     try:
-        res_s = supabase.table('spareparts').select("*").order('created_at', desc=True).execute()
+        query = supabase.table('spareparts').select("*")
+        
+        # Logika Filter Laporan Harian / Bulanan untuk Print
+        if is_print and filter_type == 'daily':
+            query = query.or_(f"tanggal_masuk.eq.{target_date},tanggal_keluar.eq.{target_date}")
+        elif is_print and filter_type == 'monthly':
+            year_month = target_date[:7]
+            query = query.or_(f"tanggal_masuk.ilike.{year_month}%,tanggal_keluar.ilike.{year_month}%")
+
+        res_s = query.order('created_at', desc=True).execute()
         db_spareparts = res_s.data if res_s.data else []
     except Exception as e:
         print(f"Error Fetching Spareparts: {e}")
         db_spareparts = []
         
-    return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts)
+    return render_template('sparepart.html', 
+                           email=session.get('user_email'), 
+                           spareparts=db_spareparts, 
+                           is_print=is_print, 
+                           filter_type=filter_type, 
+                           target_date=target_date)
 
 @app.route('/spareparts/approve/<int:item_id>', methods=['POST'])
 def approve_sparepart(item_id):
