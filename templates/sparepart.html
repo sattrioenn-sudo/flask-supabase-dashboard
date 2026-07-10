@@ -15,7 +15,10 @@
             <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Rekapitulasi Stock Opname</h2>
             <p class="text-[10px] text-slate-400 font-medium mt-0.5">Ekspor laporan kondisi sparepart masuk dan keluar dalam format dokumen PDF.</p>
         </div>
-        <div class="flex gap-2 w-full sm:w-auto">
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <a href="/spareparts/master" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm text-center flex items-center justify-center gap-1">
+                📊 Master Stock (Total Akhir)
+            </a>
             <button onclick="exportOpnamePDF('Harian')" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm">
                 📋 PDF Opname Harian
             </button>
@@ -149,7 +152,6 @@
 
 {% block scripts %}
 <script>
-    // JAVASCRIPT REVISI: MENGENDALIKAN FIELD USER BERDASARKAN DROPDOWN MUTASI
     function toggleUserField() {
         const jenisMutasi = document.getElementById('jenis_mutasi').value;
         const inputUser = document.getElementById('untuk_user');
@@ -168,7 +170,6 @@
         }
     }
 
-    // Pastikan fungsi berjalan saat dokumen dimuat pertama kali
     document.addEventListener("DOMContentLoaded", function() {
         toggleUserField();
     });
