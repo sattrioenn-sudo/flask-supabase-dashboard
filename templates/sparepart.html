@@ -36,12 +36,6 @@
 
             <form action="/spareparts" method="POST" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">No. Request Bon (Opsional)</label>
-                    <input type="text" name="request_bon" placeholder="Contoh: BON-KCS-2026-002"
-                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
-                </div>
-
-                <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Barang</label>
                     <input type="text" name="nama_barang" placeholder="Contoh: Ribbon Cartridge Epson LQ2190" required
                         class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
@@ -153,13 +147,10 @@
 
 {% block scripts %}
 <script>
-    // Fungsi Generator PDF Rekap Opname Profesional menggunakan jsPDF (LANDSCAPE)
     function exportOpnamePDF(tipeLaporan) {
         const { jsPDF } = window.jspdf;
-        // Menggunakan orientasi Landscape ('l') agar tabel muat dengan lega
         const doc = new jsPDF('l', 'mm', 'a4'); 
         
-        // Header Instansi / Perusahaan
         doc.setFont("Plus Jakarta Sans", "bold");
         doc.setFontSize(14);
         doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 15);
@@ -170,16 +161,13 @@
         doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 21);
         doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 26);
         
-        // Garis Pembatas Header (Lebar disesuaikan ke area landscape A4 yakni ~283mm)
         doc.setDrawColor(226, 232, 240);
         doc.line(14, 30, 283, 30);
         
-        // Parsing data dari tabel DOM HTML ke Array PDF
         const rows = [];
         const table = document.getElementById("table-sparepart");
         const trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
         
-        // Validasi jika tabel kosong
         if (trs.length === 1 && trs[0].innerText.includes("Belum ada")) {
             alert("Tidak ada data mutasi sparepart untuk dicetak!");
             return;
@@ -188,10 +176,8 @@
         for (let i = 0; i < trs.length; i++) {
             const tds = trs[i].getElementsByTagName("td");
             if(tds.length >= 6) {
-                // Parsing teks tanggal masuk dan keluar secara rapi
                 const tanggalText = tds[3].innerText.replace('📥 In: ', '').replace('📤 Out: ', '\n');
                 
-                // Cek status approval, jika teks kosong atau mendeteksi elemen form/tombol, jadikan 'Pending'
                 let statusText = tds[5].innerText.trim();
                 if (statusText === "" || statusText.includes("Approve") || statusText.includes("Reject")) {
                     statusText = "Pending";
@@ -200,27 +186,25 @@
                 }
 
                 rows.push([
-                    tds[0].innerText,       // No. Bon
-                    tds[1].innerText,       // Nama Barang
-                    tds[2].innerText,       // Jumlah + Satuan
-                    tanggalText,            // Tanggal Mutasi
-                    tds[4].innerText,       // User
-                    statusText              // Status Approval (Bersih dari sisa teks tombol)
+                    tds[0].innerText,       
+                    tds[1].innerText,       
+                    tds[2].innerText,       
+                    tanggalText,            
+                    tds[4].innerText,       
+                    statusText              
                 ]);
             }
         }
         
-        // Set susunan struktur kolom tabel PDF
         const columns = ["No. Request Bon", "Nama Barang", "Jumlah", "Tgl Masuk / Keluar", "Peruntukan User", "Approval Status"];
         
-        // Eksekusi Render AutoTable ke Dokumen
         doc.autoTable({
             head: [columns],
             body: rows,
             startY: 35,
             theme: 'grid',
             headStyles: {
-                fillColor: [15, 23, 42], // Warna Slate-900 (Sesuai tema aplikasi)
+                fillColor: [15, 23, 42], 
                 textColor: [255, 255, 255],
                 fontSize: 9,
                 fontStyle: 'bold',
@@ -235,12 +219,11 @@
                 cellPadding: 3
             },
             columnStyles: {
-                2: { halign: 'center' }, // Kolom jumlah dibuat rata tengah
-                5: { halign: 'center' }  // Status dibuat rata tengah
+                2: { halign: 'center' }, 
+                5: { halign: 'center' }  
             }
         });
         
-        // Unduh File PDF secara instan ke browser client
         doc.save(`Rekap_Opname_Sparepart_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 </script>
