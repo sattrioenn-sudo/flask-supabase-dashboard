@@ -171,7 +171,7 @@
         toggleUserField();
     });
 
-    // REVISI DESIGN EKSPOR PDF PREMIUM + STRUKTUR BARU + DUA TANDA TANGAN
+    // PERBAIKAN LOGIKA STATUS PDF
     function exportOpnamePDF(tipeLaporan) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
@@ -193,7 +193,7 @@
         doc.setLineWidth(0.5);
         doc.line(14, 31, 283, 31);
         
-        // --- 2. Pemrosesan Data dari DOM Tabel Baru ---
+        // --- 2. Pemrosesan Data dari DOM Tabel ---
         const rows = [];
         const table = document.getElementById("table-sparepart");
         const trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
@@ -206,11 +206,14 @@
         for (let i = 0; i < trs.length; i++) {
             const tds = trs[i].getElementsByTagName("td");
             if(tds.length >= 6) {
-                let statusText = tds[5].innerText.trim();
-                if (statusText === "" || statusText.includes("Approve") || statusText.includes("Reject")) {
-                    statusText = "Pending";
-                } else {
-                    statusText = statusText.replace("✔ ", "").replace("✖ ", "");
+                let rawStatus = tds[5].innerText.trim();
+                let statusText = "Pending"; // Default jika tidak masuk kondisi bawah
+                
+                // Menggunakan .includes() agar pencocokan teks jauh lebih akurat dan aman dari glitch emoji
+                if (rawStatus.includes("Approved") || rawStatus.includes("Approved")) {
+                    statusText = "Approved";
+                } else if (rawStatus.includes("Rejected") || rawStatus.includes("Rejected")) {
+                    statusText = "Rejected";
                 }
 
                 rows.push([
@@ -219,12 +222,11 @@
                     tds[2].innerText, // Tanggal Masuk
                     tds[3].innerText, // Tanggal Keluar
                     tds[4].innerText, // Peruntukan User
-                    statusText        // Approval Status
+                    statusText        // Approval Status hasil konversi bersih
                 ]);
             }
         }
         
-        // Struktur Kolom Baru Tanpa No.Bon
         const columns = [
             "Nama Barang / Sparepart", 
             "Jumlah", 
@@ -241,7 +243,7 @@
             startY: 36,
             theme: 'grid',
             headStyles: {
-                fillColor: [15, 23, 42], // Slate 900 (Tema Gelap Elegan)
+                fillColor: [15, 23, 42], // Slate 900
                 textColor: [255, 255, 255],
                 fontSize: 9,
                 fontStyle: 'bold',
@@ -262,22 +264,22 @@
                 5: { halign: 'center', fontStyle: 'bold' }  // Status
             },
             didParseCell: function(data) {
-                // Memberikan warna khusus pada teks status PDF
+                // Mewarnai teks berdasarkan status bersih hasil konversi di atas
                 if (data.section === 'body' && data.column.index === 5) {
                     if (data.cell.raw === 'Approved') {
-                        data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
+                        data.cell.styles.textColor = [16, 124, 65]; // Emerald Green resmi
                     } else if (data.cell.raw === 'Rejected') {
-                        data.cell.styles.textColor = [220, 38, 38]; // Rose Red
+                        data.cell.styles.textColor = [220, 38, 38]; // Rose Red resmi
+                    } else {
+                        data.cell.styles.textColor = [100, 116, 139]; // Slate 500 untuk Pending
                     }
                 }
             }
         });
         
-        // --- 4. Penambahan Blok Tanda Tangan (TTD) Manager & Admin ---
-        // Menghitung posisi Y terakhir setelah tabel selesai digambar
+        // --- 4. Penambahan Blok Tanda Tangan (TTD) ---
         let finalY = doc.lastAutoTable.finalY + 15;
         
-        // Proteksi jika posisi TTD terlalu dekat dengan batas bawah kertas (buat halaman baru jika perlu)
         if (finalY > 160) {
             doc.addPage();
             finalY = 30;
@@ -285,16 +287,13 @@
         
         const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
         
-        // Kota/Tanggal Dokumen
         doc.setFontSize(9.5);
         doc.setFont("Helvetica", "normal");
         doc.setTextColor(51, 65, 85);
         doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
         
-        // Geser ke bawah untuk ruang tanda tangan
         finalY += 6;
         
-        // Label Jabatan Atas
         doc.setFont("Helvetica", "bold");
         doc.text("Disiapkan oleh,", 30, finalY);
         doc.text("Diketahui oleh,", 210, finalY);
@@ -303,15 +302,13 @@
         doc.text("IT Department", 30, finalY + 4);
         doc.text("Plant Manager", 210, finalY + 4);
         
-        // Ruang kosong untuk tanda tangan fisik (Garis TTD)
-        doc.setDrawColor(148, 163, 184); // Abu-abu terang border
+        doc.setDrawColor(148, 163, 184);
         doc.setLineWidth(0.3);
-        doc.line(30, finalY + 26, 85, finalY + 26);  // Garis Admin
-        doc.line(210, finalY + 26, 265, finalY + 26); // Garis Manager
+        doc.line(30, finalY + 26, 85, finalY + 26);  
+        doc.line(210, finalY + 26, 265, finalY + 26); 
         
-        // Label Nama Terang di bawah garis
         doc.setFont("Helvetica", "bold");
-        doc.text("Satrio Eko Nugroho", 30, finalY + 31);
+        doc.text("Satrio Eko Nugroho", 30, finalY + 31); // Menyesuaikan nama penandatangan dari gambar Anda
         doc.text("( ____________________ )", 210, finalY + 31);
         
         // --- 5. Download Output Dokumen ---
