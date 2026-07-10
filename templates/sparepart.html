@@ -153,10 +153,11 @@
 
 {% block scripts %}
 <script>
-    // Fungsi Generator PDF Rekap Opname Profesional menggunakan jsPDF
+    // Fungsi Generator PDF Rekap Opname Profesional menggunakan jsPDF (LANDSCAPE)
     function exportOpnamePDF(tipeLaporan) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
+        // Mengubah parameter orientasi menjadi 'l' (Landscape)
+        const doc = new jsPDF('l', 'mm', 'a4'); 
         
         // Header Instansi / Perusahaan
         doc.setFont("Plus Jakarta Sans", "bold");
@@ -169,9 +170,9 @@
         doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 21);
         doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 26);
         
-        // Garis Pembatas Header
+        // Garis Pembatas Header (Lebar disesuaikan ke area landscape A4 yakni ~283mm)
         doc.setDrawColor(226, 232, 240);
-        doc.line(14, 30, 196, 30);
+        doc.line(14, 30, 283, 30);
         
         // Parsing data dari tabel DOM HTML ke Array PDF
         const rows = [];
