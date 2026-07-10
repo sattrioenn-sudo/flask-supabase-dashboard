@@ -60,21 +60,23 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tgl Masuk</label>
-                        <input type="date" name="tanggal_masuk"
-                            class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Jenis Mutasi</label>
+                        <select name="jenis_mutasi" id="jenis_mutasi" onchange="toggleUserField()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                            <option value="Masuk" selected>📥 Barang Masuk</option>
+                            <option value="Keluar">📤 Barang Keluar</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tgl Keluar</label>
-                        <input type="date" name="tanggal_keluar"
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Tanggal Mutasi</label>
+                        <input type="date" name="tanggal_mutasi" required
                             class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Peruntukan User / Mesin</label>
-                    <input type="text" name="untuk_user" placeholder="Contoh: Pak Budi (Logistik)" required
-                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                    <input type="text" name="untuk_user" id="untuk_user" placeholder="Kunci otomatis jika barang masuk" disabled
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-400 outline-none transition-all cursor-not-allowed">
                 </div>
 
                 <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all shadow-sm">
@@ -147,6 +149,30 @@
 
 {% block scripts %}
 <script>
+    // JAVASCRIPT REVISI: MENGENDALIKAN FIELD USER BERDASARKAN DROPDOWN MUTASI
+    function toggleUserField() {
+        const jenisMutasi = document.getElementById('jenis_mutasi').value;
+        const inputUser = document.getElementById('untuk_user');
+
+        if (jenisMutasi === 'Masuk') {
+            inputUser.disabled = true;
+            inputUser.value = "";
+            inputUser.placeholder = "Kunci otomatis jika barang masuk";
+            inputUser.className = "w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-400 outline-none transition-all cursor-not-allowed";
+            inputUser.removeAttribute('required');
+        } else {
+            inputUser.disabled = false;
+            inputUser.placeholder = "Contoh: Pak Budi (Logistik)";
+            inputUser.className = "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all";
+            inputUser.setAttribute('required', 'required');
+        }
+    }
+
+    // Pastikan fungsi berjalan saat dokumen dimuat pertama kali
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleUserField();
+    });
+
     function exportOpnamePDF(tipeLaporan) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4'); 
