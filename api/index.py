@@ -3,6 +3,12 @@ import sys
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from datetime import datetime
 import uuid
+# Library tambahan untuk Export PDF Landscape
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+import io
 
 # Path Management
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -258,7 +264,6 @@ def ticket_management():
     
     if request.method == 'POST':
         nomor_ticket = request.form.get('nomor_ticket').strip()
-        # Jika dikosongkan oleh user, sistem generate otomatis sebagai cadangan
         if not nomor_ticket:
             timestamp = datetime.now().strftime("%Y%m%d")
             unique_suffix = str(uuid.uuid4().hex[:4]).upper()
@@ -287,7 +292,6 @@ def ticket_management():
             print(f"Error Insert Ticket: {e}")
             return f"Gagal menyimpan data ticket ke database: {e}", 500
 
-    # Logika GET: Ambil Data Riwayat Tabel
     try:
         res_t = supabase.table('tickets').select("*").order('created_at', desc=True).execute()
         db_tickets = res_t.data if res_t.data else []
@@ -315,7 +319,6 @@ def sparepart_management():
     
     if request.method == 'POST':
         request_bon = request.form.get('request_bon').strip()
-        # Jika bon kosong, diset sebagai tanda '-' (tidak wajib pakai bon)
         if not request_bon:
             request_bon = "-"
             
@@ -344,15 +347,17 @@ def sparepart_management():
             print(f"Error Insert Sparepart: {e}")
             return f"Gagal menyimpan mutasi sparepart: {e}", 500
             
-    # Logika GET: Ambil Data Riwayat Tabel
     try:
         res_s = supabase.table('spareparts').select("*").order('created_at', desc=True).execute()
         db_spareparts = res_s.data if res_s.data else []
+        # Mengambil data master stock terkini dari tabel stock baru
+        res_stock = supabase.table('inventory_stock').select("*").order('nama_barang', desc=False).execute()
+        db_stocks = res_stock.data if res_stock.data else []
     except Exception as e:
         print(f"Error Fetching Spareparts: {e}")
-        db_spareparts = []
+        db_spareparts, db_stocks = [], []
         
-    return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts)
+    return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts, inventory_stocks=db_stocks)
 
 @app.route('/spareparts/approve/<int:item_id>', methods=['POST'])
 def approve_sparepart(item_id):
@@ -374,6 +379,93 @@ def reject_sparepart(item_id):
         print(f"Error Reject Sparepart: {e}")
         return f"Gagal menolak sparepart: {e}", 500
 
+# --- FITUR TAMBAHAN: EXPORT PDF LANDSCAPE (HARIAN / BULANAN) ---
+@app.route('/spareparts/export-pdf', methods=['GET'])
+def export_sparepart_pdf():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    
+    filter_type = request.args.get('filter_type', 'all') # 'daily', 'monthly', atau 'all'
+    target_date = request.args.get('target_date', datetime.now().strftime('%Y-%m-%d'))
+    
+    try:
+        query = supabase.table('spareparts').select("*")
+        
+        if filter_type == 'daily':
+            # Filter harian berdasarkan tanggal_masuk atau tanggal_keluar
+            query = query.or_(f"tanggal_masuk.eq.{target_date},tanggal_keluar.eq.{target_date}")
+            title_pdf = f"LAPORAN HARIAN MUTASI SPAREPART ({target_date})"
+        elif filter_type == 'monthly':
+            # Filter bulanan (Format target_date dari HTML: YYYY-MM)
+            year_month = target_date[:7] 
+            query = query.or_(f"tanggal_masuk.ilike.{year_month}%,tanggal_keluar.ilike.{year_month}%")
+            title_pdf = f"LAPORAN BULANAN MUTASI SPAREPART ({year_month})"
+        else:
+            title_pdf = "LAPORAN KESELURUHAN MUTASI SPAREPART"
+
+        res = query.order('created_at', desc=True).execute()
+        data_mutasi = res.data if res.data else []
+        
+        # Proses pembuatan PDF secara in-memory (tanpa menyimpan file lokal)
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+        elements = []
+        
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle('TitleStyle', parent=styles['Heading1'], alignment=1, spaceAfter=20, fontSize=16)
+        cell_style = ParagraphStyle('CellStyle', parent=styles['Normal'], fontSize=9, leading=11)
+        header_style = ParagraphStyle('HeaderStyle', parent=styles['Normal'], fontSize=10, bold=True, textColor=colors.whitesmoke)
+        
+        elements.append(Paragraph(title_pdf, title_style))
+        elements.append(Spacer(1, 10))
+        
+        # Header Tabel PDF
+        table_data = [[
+            Paragraph("No. Bon", header_style),
+            Paragraph("Nama Barang", header_style),
+            Paragraph("Qty", header_style),
+            Paragraph("Satuan", header_style),
+            Paragraph("Tgl Masuk", header_style),
+            Paragraph("Tgl Keluar", header_style),
+            Paragraph("Untuk User", header_style),
+            Paragraph("Status", header_style)
+        ]]
+        
+        # Isi Baris Tabel PDF
+        for item in data_mutasi:
+            table_data.append([
+                Paragraph(str(item.get('request_bon') or '-'), cell_style),
+                Paragraph(str(item.get('nama_barang') or '-'), cell_style),
+                Paragraph(str(item.get('jumlah') or '0'), cell_style),
+                Paragraph(str(item.get('satuan') or 'Pcs'), cell_style),
+                Paragraph(str(item.get('tanggal_masuk') or '-'), cell_style),
+                Paragraph(str(item.get('tanggal_keluar') or '-'), cell_style),
+                Paragraph(str(item.get('untuk_user') or '-'), cell_style),
+                Paragraph(str(item.get('status_approve') or 'Pending'), cell_style)
+            ])
+            
+        # Styling Tabel agar Rapih & Bagus
+        t = Table(table_data, colWidths=[80, 150, 40, 50, 80, 80, 120, 80])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1e293b')), # Tema Dark Charcoal Slate
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('BOTTOMPADDING', (0,0), (-1,0), 8),
+            ('TOPPADDING', (0,0), (-1,0), 8),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#f8fafc')]),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
+            ('TOPPADDING', (0,1), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,1), (-1,-1), 6),
+        ]))
+        
+        elements.append(t)
+        doc.build(elements)
+        
+        buffer.seek(0)
+        return flask.send_file(buffer, as_attachment=True, download_name=f"Mutasi_Sparepart_{filter_type}.pdf", mimetype='application/pdf')
+        
+    except Exception as e:
+        print(f"Error Export PDF: {e}")
+        return f"Gagal mengeksport data ke PDF: {e}", 500
 # =========================================================================
 
 
