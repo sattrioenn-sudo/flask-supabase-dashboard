@@ -321,6 +321,7 @@ def sparepart_management():
         untuk_user = request.form.get('untuk_user')
         
         data_sparepart = {
+            "request_bon": "",  # Ditambahkan otomatis sebagai string kosong agar lolos validasi NOT NULL Supabase
             "nama_barang": nama_barang,
             "jumlah": jumlah,
             "satuan": satuan,
