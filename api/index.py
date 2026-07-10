@@ -356,6 +356,64 @@ def sparepart_management():
         
     return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts)
 
+@app.route('/spareparts/approve/<int:item_id>', methods=['POST'])
+def approve_sparepart(item_id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    try:
+        # 1. Ambil info item mutasi yang akan di-approve
+        target_res = supabase.table('spareparts').select("*").eq('id', item_id).execute()
+        if target_res.data:
+            item = target_res.data[0]
+            nama_barang = item.get('nama_barang')
+            jumlah = int(item.get('jumlah', 0))
+            satuan = item.get('satuan', 'Pcs')
+            tgl_masuk = item.get('tanggal_masuk')
+            tgl_keluar = item.get('tanggal_keluar')
+
+            # 2. Ambil master data untuk menghitung sinkronisasi stok ter-update
+            check_master = supabase.table('master_spareparts').select("*").eq('nama_barang', nama_barang).execute()
+            
+            if tgl_masuk and not tgl_keluar:
+                # KONDISI BARANG MASUK -> Tambah Stok di Master
+                if check_master.data:
+                    stok_baru = int(check_master.data[0].get('stok_sekarang', 0)) + jumlah
+                    supabase.table('master_spareparts').update({"stok_sekarang": stok_baru}).eq('nama_barang', nama_barang).execute()
+                else:
+                    supabase.table('master_spareparts').insert({"nama_barang": nama_barang, "stok_sekarang": jumlah, "satuan": satuan}).execute()
+            
+            elif tgl_keluar:
+                # KONDISI BARANG KELUAR -> Potong Stok di Master
+                if check_master.data:
+                    stok_baru = int(check_master.data[0].get('stok_sekarang', 0)) - jumlah
+                    if stok_baru < 0: 
+                        stok_baru = 0  # Mengunci batas minimum stok agar tidak minus
+                    supabase.table('master_spareparts').update({"stok_sekarang": stok_baru}).eq('nama_barang', nama_barang).execute()
+                else:
+                    # Inisialisasi master barang baru dengan stok 0 jika belum ada data sebelumnya
+                    supabase.table('master_spareparts').insert({"nama_barang": nama_barang, "stok_sekarang": 0, "satuan": satuan}).execute()
+
+        # 3. Ubah status data mutasi di log menjadi Approved
+        supabase.table('spareparts').update({"status_approve": "Approved"}).eq('id', item_id).execute()
+        return redirect(url_for('sparepart_management'))
+    except Exception as e:
+        print(f"Error Approve Sparepart: {e}")
+        return f"Gagal memproses approval: {e}", 500
+
+
+# ==========================================
+# RUTE UNTUK MENANGANI REJECT MUTASI SPAREPART
+# ==========================================
+@app.route('/spareparts/reject/<int:item_id>', methods=['POST'])
+def reject_sparepart(item_id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    try:
+        # Jika ditolak (Rejected), status langsung berubah tanpa mempengaruhi hitungan stok di master
+        supabase.table('spareparts').update({"status_approve": "Rejected"}).eq('id', item_id).execute()
+        return redirect(url_for('sparepart_management'))
+    except Exception as e:
+        print(f"Error Reject Sparepart: {e}")
+        return f"Gagal menolak sparepart: {e}", 500
+
 # =========================================================================
 
 
