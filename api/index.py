@@ -295,7 +295,7 @@ def ticket_management():
         
     return render_template('ticket.html', email=session.get('user_email'), tickets=db_tickets)
 
-@app.route('/tickets/update_status/<int:ticket_id>', methods=['POST'])
+@app.route('/tickets/update_status/<ticket_id>', methods=['POST'])
 def update_ticket_status(ticket_id):
     if 'user_id' not in session: return redirect(url_for('login'))
     new_status = request.form.get('status_ticket')
@@ -341,35 +341,16 @@ def sparepart_management():
             print(f"Error Insert Sparepart: {e}")
             return f"Gagal menyimpan mutasi sparepart: {e}", 500
             
-    # Logika GET: Cek juga parameter untuk print harian/bulanan
-    filter_type = request.args.get('filter_type', 'all')
-    target_date = request.args.get('target_date', datetime.now().strftime('%Y-%m-%d'))
-    is_print = request.args.get('print', 'false') == 'true'
-    
     try:
-        query = supabase.table('spareparts').select("*")
-        
-        # Logika Filter Laporan Harian / Bulanan untuk Print
-        if is_print and filter_type == 'daily':
-            query = query.or_(f"tanggal_masuk.eq.{target_date},tanggal_keluar.eq.{target_date}")
-        elif is_print and filter_type == 'monthly':
-            year_month = target_date[:7]
-            query = query.or_(f"tanggal_masuk.ilike.{year_month}%,tanggal_keluar.ilike.{year_month}%")
-
-        res_s = query.order('created_at', desc=True).execute()
+        res_s = supabase.table('spareparts').select("*").order('created_at', desc=True).execute()
         db_spareparts = res_s.data if res_s.data else []
     except Exception as e:
         print(f"Error Fetching Spareparts: {e}")
         db_spareparts = []
         
-    return render_template('sparepart.html', 
-                           email=session.get('user_email'), 
-                           spareparts=db_spareparts, 
-                           is_print=is_print, 
-                           filter_type=filter_type, 
-                           target_date=target_date)
+    return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts)
 
-@app.route('/spareparts/approve/<int:item_id>', methods=['POST'])
+@app.route('/spareparts/approve/<item_id>', methods=['POST'])
 def approve_sparepart(item_id):
     if 'user_id' not in session: return redirect(url_for('login'))
     try:
@@ -379,7 +360,7 @@ def approve_sparepart(item_id):
         print(f"Error Approve Sparepart: {e}")
         return f"Gagal menyetujui sparepart: {e}", 500
 
-@app.route('/spareparts/reject/<int:item_id>', methods=['POST'])
+@app.route('/spareparts/reject/<item_id>', methods=['POST'])
 def reject_sparepart(item_id):
     if 'user_id' not in session: return redirect(url_for('login'))
     try:
