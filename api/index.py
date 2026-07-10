@@ -307,7 +307,7 @@ def update_ticket_status(ticket_id):
         return f"Gagal mengubah status ticket: {e}", 500
 
 
-# !!! BAGIAN YANG DIPERBAIKI SESUAI REQUEST MUTASI OTOMATIS DAN PENGHAPUSAN REQUEST_BON !!!
+# !!! BAGIAN YANG DIPERBAIKI: INPUT KHUSUS MASUK/KELUAR VIA DROPDOWN & KONDISI USER !!!
 @app.route('/spareparts', methods=['GET', 'POST'])
 def sparepart_management():
     if 'user_id' not in session: return redirect(url_for('login'))
@@ -316,19 +316,28 @@ def sparepart_management():
         nama_barang = request.form.get('nama_barang').strip()
         jumlah = int(request.form.get('jumlah', 0))
         satuan = request.form.get('satuan', 'Pcs')
-        tanggal_masuk = request.form.get('tanggal_masuk')
-        tanggal_keluar = request.form.get('tanggal_keluar')
-        untuk_user = request.form.get('untuk_user')
+        jenis_mutasi = request.form.get('jenis_mutasi') # 'Masuk' atau 'Keluar'
+        tanggal_input = request.form.get('tanggal_mutasi') # Single date input dari form
         
+        # Logika pembagian tanggal dan peruntukan user berdasarkan Jenis Mutasi
+        if jenis_mutasi == 'Masuk':
+            tanggal_masuk = tanggal_input if tanggal_input else None
+            tanggal_keluar = None
+            untuk_user = "Gudang / Stock" # Otomatis diset ke gudang jika barang masuk
+        else:
+            tanggal_masuk = None
+            tanggal_keluar = tanggal_input if tanggal_input else None
+            untuk_user = request.form.get('untuk_user', '').strip()
+
         data_sparepart = {
-            "request_bon": "",  # Ditambahkan otomatis sebagai string kosong agar lolos validasi NOT NULL Supabase
+            "request_bon": "",  
             "nama_barang": nama_barang,
             "jumlah": jumlah,
             "satuan": satuan,
-            "tanggal_masuk": tanggal_masuk if tanggal_masuk else None,
-            "tanggal_keluar": tanggal_keluar if tanggal_keluar else None,
+            "tanggal_masuk": tanggal_masuk,
+            "tanggal_keluar": tanggal_keluar,
             "untuk_user": untuk_user,
-            "status_approve": "Pending"  # Menunggu konfirmasi admin sebelum mengubah stok master
+            "status_approve": "Pending" 
         }
         
         try:
@@ -346,60 +355,6 @@ def sparepart_management():
         db_spareparts = []
         
     return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts)
-
-@app.route('/spareparts/approve/<item_id>', methods=['POST'])
-def approve_sparepart(item_id):
-    if 'user_id' not in session: return redirect(url_for('login'))
-    try:
-        # 1. Ambil info item mutasi yang akan di-approve
-        target_res = supabase.table('spareparts').select("*").eq('id', item_id).execute()
-        if target_res.data:
-            item = target_res.data[0]
-            nama_barang = item.get('nama_barang')
-            jumlah = int(item.get('jumlah', 0))
-            satuan = item.get('satuan', 'Pcs')
-            tgl_masuk = item.get('tanggal_masuk')
-            tgl_keluar = item.get('tanggal_keluar')
-
-            # 2. Ambil master data untuk menghitung stok ter-update
-            check_master = supabase.table('master_spareparts').select("*").eq('nama_barang', nama_barang).execute()
-            
-            if tgl_masuk and not tgl_keluar:
-                # KONDISI BARANG MASUK -> Tambah Stok Master
-                if check_master.data:
-                    stok_baru = int(check_master.data[0].get('stok_sekarang', 0)) + jumlah
-                    supabase.table('master_spareparts').update({"stok_sekarang": stok_baru}).eq('nama_barang', nama_barang).execute()
-                else:
-                    supabase.table('master_spareparts').insert({"nama_barang": nama_barang, "stok_sekarang": jumlah, "satuan": satuan}).execute()
-            
-            elif tgl_keluar:
-                # KONDISI BARANG KELUAR -> Potong Stok Master
-                if check_master.data:
-                    stok_baru = int(check_master.data[0].get('stok_sekarang', 0)) - jumlah
-                    if stok_baru < 0: 
-                        stok_baru = 0  # Mengunci batas minimum stok agar tidak negatif
-                    supabase.table('master_spareparts').update({"stok_sekarang": stok_baru}).eq('nama_barang', nama_barang).execute()
-                else:
-                    # Inisialisasi master barang baru dengan stok 0 jika barang keluar di-input duluan
-                    supabase.table('master_spareparts').insert({"nama_barang": nama_barang, "stok_sekarang": 0, "satuan": satuan}).execute()
-
-        # 3. Ubah status data mutasi di log menjadi Approved
-        supabase.table('spareparts').update({"status_approve": "Approved"}).eq('id', item_id).execute()
-        return redirect(url_for('sparepart_management'))
-    except Exception as e:
-        print(f"Error Approve Sparepart & Sync Stock: {e}")
-        return f"Gagal menyetujui sparepart dan memperbarui stok: {e}", 500
-
-@app.route('/spareparts/reject/<item_id>', methods=['POST'])
-def reject_sparepart(item_id):
-    if 'user_id' not in session: return redirect(url_for('login'))
-    try:
-        # Jika ditolak (Rejected), stok master tidak mengalami perubahan kalkulasi
-        supabase.table('spareparts').update({"status_approve": "Rejected"}).eq('id', item_id).execute()
-        return redirect(url_for('sparepart_management'))
-    except Exception as e:
-        print(f"Error Reject Sparepart: {e}")
-        return f"Gagal menolak sparepart: {e}", 500
 
 # =========================================================================
 
