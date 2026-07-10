@@ -156,7 +156,7 @@
     // Fungsi Generator PDF Rekap Opname Profesional menggunakan jsPDF (LANDSCAPE)
     function exportOpnamePDF(tipeLaporan) {
         const { jsPDF } = window.jspdf;
-        // Mengubah parameter orientasi menjadi 'l' (Landscape)
+        // Menggunakan orientasi Landscape ('l') agar tabel muat dengan lega
         const doc = new jsPDF('l', 'mm', 'a4'); 
         
         // Header Instansi / Perusahaan
@@ -188,15 +188,24 @@
         for (let i = 0; i < trs.length; i++) {
             const tds = trs[i].getElementsByTagName("td");
             if(tds.length >= 6) {
-                // Parsing teks tanggal masuk dan keluar
+                // Parsing teks tanggal masuk dan keluar secara rapi
                 const tanggalText = tds[3].innerText.replace('📥 In: ', '').replace('📤 Out: ', '\n');
+                
+                // Cek status approval, jika teks kosong atau mendeteksi elemen form/tombol, jadikan 'Pending'
+                let statusText = tds[5].innerText.trim();
+                if (statusText === "" || statusText.includes("Approve") || statusText.includes("Reject")) {
+                    statusText = "Pending";
+                } else {
+                    statusText = statusText.replace("✔ ", "").replace("✖ ", "");
+                }
+
                 rows.push([
-                    tds[0].innerText, // No. Bon
-                    tds[1].innerText, // Nama Barang
-                    tds[2].innerText, // Jumlah + Satuan
-                    tanggalText,      // Tanggal Mutasi
-                    tds[4].innerText, // User
-                    tds[5].innerText.trim() // Status Approval
+                    tds[0].innerText,       // No. Bon
+                    tds[1].innerText,       // Nama Barang
+                    tds[2].innerText,       // Jumlah + Satuan
+                    tanggalText,            // Tanggal Mutasi
+                    tds[4].innerText,       // User
+                    statusText              // Status Approval (Bersih dari sisa teks tombol)
                 ]);
             }
         }
@@ -211,7 +220,7 @@
             startY: 35,
             theme: 'grid',
             headStyles: {
-                fillColor: [15, 23, 42], // Warna Slate-900 biar senada dengan tema aplikasi
+                fillColor: [15, 23, 42], // Warna Slate-900 (Sesuai tema aplikasi)
                 textColor: [255, 255, 255],
                 fontSize: 9,
                 fontStyle: 'bold',
