@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Master Stock Sparepart{% endblock %}
+{% block header_title %}Master Stock Inventory{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm gap-4">
+        <div>
+            <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">PT. KEMASAN CIPTATAMA SEMPURNA</h2>
+            <p class="text-[10px] text-slate-400 font-medium mt-0.5">Data total stok akhir sparepart yang tersedia di gudang (Real-time Stock).</p>
+        </div>
+        <div>
+            <a href="/spareparts" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm">
+                🔄 Kembali ke Input Mutasi
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Total Inventory Stock</h3>
+            <span class="bg-sky-50 text-sky-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200/40">Total: {{ master_stock|length }} Jenis Barang</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <th class="py-3 px-6">Nama Barang / Sparepart</th>
+                        <th class="py-3 px-6 text-center">Stok Saat Ini</th>
+                        <th class="py-3 px-6 text-center">Satuan</th>
+                        <th class="py-3 px-6 text-right">Terakhir Update</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs">
+                    {% for item in master_stock %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="py-4 px-6 font-semibold text-slate-800">{{ item.nama_barang }}</td>
+                        <td class="py-4 px-6 text-center">
+                            {% if item.stok_sekarang == 0 %}
+                                <span class="bg-rose-50 text-rose-600 font-bold px-3 py-1 rounded-md border border-rose-200/30">0</span>
+                            {% elif item.stok_sekarang <= 3 %}
+                                <span class="bg-amber-50 text-amber-600 font-bold px-3 py-1 rounded-md border border-amber-200/30">{{ item.stok_sekarang }}</span>
+                            {% else %}
+                                <span class="bg-emerald-50 text-emerald-600 font-bold px-3 py-1 rounded-md border border-emerald-200/30">{{ item.stok_sekarang }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-6 text-center text-slate-500 font-medium">{{ item.satuan }}</td>
+                        <td class="py-4 px-6 text-right text-slate-400 font-mono text-[11px]">
+                            {{ item.created_at[:10] if item.created_at else '-' }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="py-12 text-center text-slate-400 font-medium">Belum ada data akumulasi stok barang. Silakan lakukan approval mutasi terlebih dahulu.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
