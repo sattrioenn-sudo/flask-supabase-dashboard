@@ -13,7 +13,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm gap-4">
         <div>
             <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Rekapitulasi Stock Opname</h2>
-            <p class="text-[10px] text-slate-400 font-medium mt-0.5">Ekspor laporan kondisi sparepart masuk dan keluar dalam format dokumen PDF.</p>
+            <p class="text-[10px] text-slate-400 font-medium mt-0.5">Ekspor laporan kondisi sparepart masuk dan keluar dalam format dokumen PDF resmi.</p>
         </div>
         <div class="flex flex-wrap gap-2 w-full sm:w-auto">
             <a href="/spareparts/master" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm text-center flex items-center justify-center gap-1">
@@ -97,24 +97,21 @@
                 <table id="table-sparepart" class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                            <th class="py-3 px-4">No. Bon</th>
                             <th class="py-3 px-4">Nama Barang</th>
                             <th class="py-3 px-4 text-center">Jumlah</th>
-                            <th class="py-3 px-4">Tgl Masuk / Keluar</th>
-                            <th class="py-3 px-4">User</th>
+                            <th class="py-3 px-4 text-center">Tanggal Masuk</th>
+                            <th class="py-3 px-4 text-center">Tanggal Keluar</th>
+                            <th class="py-3 px-4">Peruntukan User</th>
                             <th class="py-3 px-4 text-center">Approval Admin</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs">
                         {% for item in spareparts %}
                         <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="py-4 px-4 font-mono font-bold text-slate-600">{{ item.request_bon or '-' }}</td>
                             <td class="py-4 px-4 font-semibold text-slate-800">{{ item.nama_barang }}</td>
                             <td class="py-4 px-4 text-center font-bold text-slate-700">{{ item.jumlah }} <span class="text-[10px] text-slate-400 font-normal">{{ item.satuan }}</span></td>
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <div class="text-[11px] text-emerald-600 font-medium">📥 In: {{ item.tanggal_masuk or '-' }}</div>
-                                <div class="text-[11px] text-rose-600 font-medium">📤 Out: {{ item.tanggal_keluar or '-' }}</div>
-                            </td>
+                            <td class="py-4 px-4 text-center font-medium text-emerald-600 font-mono">{{ item.tanggal_masuk or '-' }}</td>
+                            <td class="py-4 px-4 text-center font-medium text-rose-600 font-mono">{{ item.tanggal_keluar or '-' }}</td>
                             <td class="py-4 px-4 text-slate-600 font-medium">{{ item.untuk_user or '-' }}</td>
                             <td class="py-4 px-4 text-center">
                                 {% if item.status_approve == 'Approved' %}
@@ -164,7 +161,7 @@
             inputUser.removeAttribute('required');
         } else {
             inputUser.disabled = false;
-            inputUser.placeholder = "Contoh: Pak Budi (Logistik)";
+            inputUser.placeholder = "Contoh: Timbangan Timur";
             inputUser.className = "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all";
             inputUser.setAttribute('required', 'required');
         }
@@ -174,23 +171,29 @@
         toggleUserField();
     });
 
+    // REVISI DESIGN EKSPOR PDF PREMIUM + STRUKTUR BARU + DUA TANDA TANGAN
     function exportOpnamePDF(tipeLaporan) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4'); 
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
         
-        doc.setFont("Plus Jakarta Sans", "bold");
-        doc.setFontSize(14);
-        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 15);
+        // --- 1. Desain Kop Surat Resmi ---
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(15, 23, 42); // Slate 900
+        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 16);
         
         doc.setFontSize(10);
-        doc.setFont("Plus Jakarta Sans", "normal");
-        doc.setTextColor(100);
-        doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 21);
-        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 26);
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(100, 116, 139); // Slate 500
+        doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 22);
+        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 27);
         
-        doc.setDrawColor(226, 232, 240);
-        doc.line(14, 30, 283, 30);
+        // Garis Pembatas Kop
+        doc.setDrawColor(226, 232, 240); // Slate 200
+        doc.setLineWidth(0.5);
+        doc.line(14, 31, 283, 31);
         
+        // --- 2. Pemrosesan Data dari DOM Tabel Baru ---
         const rows = [];
         const table = document.getElementById("table-sparepart");
         const trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
@@ -203,8 +206,6 @@
         for (let i = 0; i < trs.length; i++) {
             const tds = trs[i].getElementsByTagName("td");
             if(tds.length >= 6) {
-                const tanggalText = tds[3].innerText.replace('📥 In: ', '').replace('📤 Out: ', '\n');
-                
                 let statusText = tds[5].innerText.trim();
                 if (statusText === "" || statusText.includes("Approve") || statusText.includes("Reject")) {
                     statusText = "Pending";
@@ -213,45 +214,108 @@
                 }
 
                 rows.push([
-                    tds[0].innerText,       
-                    tds[1].innerText,       
-                    tds[2].innerText,       
-                    tanggalText,            
-                    tds[4].innerText,       
-                    statusText              
+                    tds[0].innerText, // Nama Barang
+                    tds[1].innerText, // Jumlah + Satuan
+                    tds[2].innerText, // Tanggal Masuk
+                    tds[3].innerText, // Tanggal Keluar
+                    tds[4].innerText, // Peruntukan User
+                    statusText        // Approval Status
                 ]);
             }
         }
         
-        const columns = ["No. Request Bon", "Nama Barang", "Jumlah", "Tgl Masuk / Keluar", "Peruntukan User", "Approval Status"];
+        // Struktur Kolom Baru Tanpa No.Bon
+        const columns = [
+            "Nama Barang / Sparepart", 
+            "Jumlah", 
+            "Tanggal Masuk", 
+            "Tanggal Keluar", 
+            "Peruntukan User / Mesin", 
+            "Status"
+        ];
         
+        // --- 3. Render Tabel Menggunakan AutoTable ---
         doc.autoTable({
             head: [columns],
             body: rows,
-            startY: 35,
+            startY: 36,
             theme: 'grid',
             headStyles: {
-                fillColor: [15, 23, 42], 
+                fillColor: [15, 23, 42], // Slate 900 (Tema Gelap Elegan)
                 textColor: [255, 255, 255],
                 fontSize: 9,
                 fontStyle: 'bold',
                 halign: 'left'
             },
             bodyStyles: {
-                fontSize: 8,
-                textColor: [51, 65, 85]
+                fontSize: 8.5,
+                textColor: [51, 65, 85] // Slate 700
             },
             styles: {
                 overflow: 'linebreak',
-                cellPadding: 3
+                cellPadding: 4
             },
             columnStyles: {
-                2: { halign: 'center' }, 
-                5: { halign: 'center' }  
+                1: { halign: 'center', fontStyle: 'bold' }, // Jumlah
+                2: { halign: 'center' }, // Tgl Masuk
+                3: { halign: 'center' }, // Tgl Keluar
+                5: { halign: 'center', fontStyle: 'bold' }  // Status
+            },
+            didParseCell: function(data) {
+                // Memberikan warna khusus pada teks status PDF
+                if (data.section === 'body' && data.column.index === 5) {
+                    if (data.cell.raw === 'Approved') {
+                        data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
+                    } else if (data.cell.raw === 'Rejected') {
+                        data.cell.styles.textColor = [220, 38, 38]; // Rose Red
+                    }
+                }
             }
         });
         
-        doc.save(`Rekap_Opname_Sparepart_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
+        // --- 4. Penambahan Blok Tanda Tangan (TTD) Manager & Admin ---
+        // Menghitung posisi Y terakhir setelah tabel selesai digambar
+        let finalY = doc.lastAutoTable.finalY + 15;
+        
+        // Proteksi jika posisi TTD terlalu dekat dengan batas bawah kertas (buat halaman baru jika perlu)
+        if (finalY > 160) {
+            doc.addPage();
+            finalY = 30;
+        }
+        
+        const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        // Kota/Tanggal Dokumen
+        doc.setFontSize(9.5);
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(51, 65, 85);
+        doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
+        
+        // Geser ke bawah untuk ruang tanda tangan
+        finalY += 6;
+        
+        // Label Jabatan Atas
+        doc.setFont("Helvetica", "bold");
+        doc.text("Disiapkan oleh,", 30, finalY);
+        doc.text("Diketahui oleh,", 210, finalY);
+        
+        doc.setFont("Helvetica", "normal");
+        doc.text("IT Support Admin", 30, finalY + 4);
+        doc.text("Plant Manager", 210, finalY + 4);
+        
+        // Ruang kosong untuk tanda tangan fisik (Garis TTD)
+        doc.setDrawColor(148, 163, 184); // Abu-abu terang border
+        doc.setLineWidth(0.3);
+        doc.line(30, finalY + 26, 85, finalY + 26);  // Garis Admin
+        doc.line(210, finalY + 26, 265, finalY + 26); // Garis Manager
+        
+        // Label Nama Terang di bawah garis
+        doc.setFont("Helvetica", "bold");
+        doc.text("Nurcholis Fadli", 30, finalY + 31);
+        doc.text("( ____________________ )", 210, finalY + 31);
+        
+        // --- 5. Download Output Dokumen ---
+        doc.save(`Laporan_Opname_Sparepart_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 </script>
 {% endblock %}
