@@ -3,7 +3,8 @@ import sys
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify, send_file
 from datetime import datetime
 import uuid
-# Library tambahan untuk Export PDF Landscape
+
+# Library tambahan untuk Export PDF Landscape & In-Memory Buffer
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -350,14 +351,11 @@ def sparepart_management():
     try:
         res_s = supabase.table('spareparts').select("*").order('created_at', desc=True).execute()
         db_spareparts = res_s.data if res_s.data else []
-        # Mengambil data master stock terkini dari tabel stock baru
-        res_stock = supabase.table('inventory_stock').select("*").order('nama_barang', desc=False).execute()
-        db_stocks = res_stock.data if res_stock.data else []
     except Exception as e:
         print(f"Error Fetching Spareparts: {e}")
-        db_spareparts, db_stocks = [], []
+        db_spareparts = []
         
-    return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts, inventory_stocks=db_stocks)
+    return render_template('sparepart.html', email=session.get('user_email'), spareparts=db_spareparts)
 
 @app.route('/spareparts/approve/<int:item_id>', methods=['POST'])
 def approve_sparepart(item_id):
@@ -384,18 +382,16 @@ def reject_sparepart(item_id):
 def export_sparepart_pdf():
     if 'user_id' not in session: return redirect(url_for('login'))
     
-    filter_type = request.args.get('filter_type', 'all') # 'daily', 'monthly', atau 'all'
+    filter_type = request.args.get('filter_type', 'all') 
     target_date = request.args.get('target_date', datetime.now().strftime('%Y-%m-%d'))
     
     try:
         query = supabase.table('spareparts').select("*")
         
         if filter_type == 'daily':
-            # Filter harian berdasarkan tanggal_masuk atau tanggal_keluar
             query = query.or_(f"tanggal_masuk.eq.{target_date},tanggal_keluar.eq.{target_date}")
             title_pdf = f"LAPORAN HARIAN MUTASI SPAREPART ({target_date})"
         elif filter_type == 'monthly':
-            # Filter bulanan (Format target_date dari HTML: YYYY-MM)
             year_month = target_date[:7] 
             query = query.or_(f"tanggal_masuk.ilike.{year_month}%,tanggal_keluar.ilike.{year_month}%")
             title_pdf = f"LAPORAN BULANAN MUTASI SPAREPART ({year_month})"
@@ -405,7 +401,6 @@ def export_sparepart_pdf():
         res = query.order('created_at', desc=True).execute()
         data_mutasi = res.data if res.data else []
         
-        # Proses pembuatan PDF secara in-memory (tanpa menyimpan file lokal)
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
         elements = []
@@ -418,7 +413,6 @@ def export_sparepart_pdf():
         elements.append(Paragraph(title_pdf, title_style))
         elements.append(Spacer(1, 10))
         
-        # Header Tabel PDF
         table_data = [[
             Paragraph("No. Bon", header_style),
             Paragraph("Nama Barang", header_style),
@@ -430,7 +424,6 @@ def export_sparepart_pdf():
             Paragraph("Status", header_style)
         ]]
         
-        # Isi Baris Tabel PDF
         for item in data_mutasi:
             table_data.append([
                 Paragraph(str(item.get('request_bon') or '-'), cell_style),
@@ -443,10 +436,9 @@ def export_sparepart_pdf():
                 Paragraph(str(item.get('status_approve') or 'Pending'), cell_style)
             ])
             
-        # Styling Tabel agar Rapih & Bagus
         t = Table(table_data, colWidths=[80, 150, 40, 50, 80, 80, 120, 80])
         t.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1e293b')), # Tema Dark Charcoal Slate
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1e293b')), 
             ('ALIGN', (0,0), (-1,-1), 'LEFT'),
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('BOTTOMPADDING', (0,0), (-1,0), 8),
