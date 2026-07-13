@@ -212,53 +212,66 @@ def settings():
 
 @app.route('/analytics')
 def analytics():
-    # Inisialisasi struktur data bulanan default untuk tahun berjalan
     tahun_ini = datetime.now().year
     
-    # List nama bulan untuk mapping index
     nama_bulan = [
         "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
         "Juli", "Agustus", "September", "Oktober", "November", "Desember"
     ]
     
-    # Buat penampung data bulanan kosong
-    # Format: {"Januari": {"masuk": 0, "keluar": 0}, ...}
     stats_bulanan = {bulan: {"masuk": 0, "keluar": 0} for bulan in nama_bulan}
     stats_tahunan = {"masuk": 0, "keluar": 0}
 
     try:
-        # Ambil data mutasi yang berstatus 'Approved' (Masuk & Keluar)
-        response = supabase.table('spareparts').select('*').eq('status_approve', 'Approved').execute()
+        # PERBAIKAN 1: Hapus filter .eq('status_approve') dari query utama Supabase 
+        # Kita lakukan pemfilteran secara fleksibel di dalam loop Python saja biar aman dari typo huruf besar/kecil
+        response = supabase.table('spareparts').select('*').execute()
         mutasi_data = response.data if response and hasattr(response, 'data') else []
 
         if mutasi_data:
             for item in mutasi_data:
-                qty = 0
+                # PERBAIKAN 2: Validasi Status Approve secara toleran (lowercase)
+                status = str(item.get('status_approve', '')).strip().lower()
+                if status != 'approved':
+                    continue # Lewati jika belum diapprove
+                
+                # Mengambil jumlah barang
                 try:
                     qty = int(item.get('jumlah', 0))
                 except:
                     continue
                 
-                jenis = item.get('jenis_mutasi', '').lower() # 'masuk' atau 'keluar'
-                if jenis not in ['masuk', 'keluar']:
-                    continue
+                # PERBAIKAN 3: Toleransi penulisan jenis mutasi (mencari kata 'masuk' atau 'keluar')
+                jenis_raw = str(item.get('jenis_mutasi', '')).lower()
+                if 'masuk' in jenis_raw:
+                    jenis = 'masuk'
+                elif 'keluar' in jenis_raw:
+                    jenis = 'keluar'
+                else:
+                    continue # Lewati jika tidak cocok keduanya
 
-                # Ambil tanggal (bisa dari tanggal_masuk, tanggal_keluar, atau created_at)
+                # PERBAIKAN 4: Pembacaan tanggal yang jauh lebih kuat
                 tgl_raw = item.get('tanggal_masuk') or item.get('tanggal_keluar') or item.get('created_at')
                 
                 if tgl_raw:
                     try:
-                        # Parsing format tanggal YYYY-MM-DD
-                        date_obj = datetime.strptime(tgl_raw[:10], '%Y-%m-%d')
-                        idx_bulan = date_obj.month - 1 # dapat 0 - 11
-                        tahun_item = date_obj.year
+                        # Bersihkan string tanggal jika ada spasi bawaan dari database
+                        tgl_clean = str(tgl_raw).strip()
                         
-                        # Hitung Akumulasi Tahunan (Tahun Ini)
-                        if tahun_item == tahun_ini:
-                            bulan_nama = nama_bulan[idx_bulan]
-                            stats_bulanan[bulan_nama][jenis] += qty
-                            stats_tahunan[jenis] += qty
-                    except:
+                        # Cara aman: Ekstrak manual YYYY, MM, DD menggunakan split jika format ISO
+                        # Contoh: "2026-06-15" atau "2026-06-15T09:00:00"
+                        parts = tgl_clean[:10].split('-')
+                        if len(parts) == 3:
+                            tahun_item = int(parts[0])
+                            idx_bulan = int(parts[1]) - 1 # Bulan di python dimulai dari 0 (Januari)
+                            
+                            # Hitung hanya jika tahunnya cocok dengan tahun berjalan
+                            if tahun_item == tahun_ini and 0 <= idx_bulan <= 11:
+                                bulan_nama = nama_bulan[idx_bulan]
+                                stats_bulanan[bulan_nama][jenis] += qty
+                                stats_tahunan[jenis] += qty
+                    except Exception as date_err:
+                        print(f"Gagal membaca tanggal item: {tgl_raw}, Error: {date_err}")
                         pass
 
     except Exception as e:
