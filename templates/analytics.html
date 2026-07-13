@@ -1,32 +1,89 @@
 {% extends "base.html" %}
 
-{% block title %}Analytics{% endblock %}
+{% block title %}Analytics Overview{% endblock %}
 {% block header_title %}Analytics Overview{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
-    <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
-        <div class="flex items-center justify-between mb-10">
-            <div>
-                <h3 class="text-xl font-bold text-slate-800">Weekly Distribution</h3>
-                <p class="text-sm text-slate-400">Voucher usage analytics</p>
-            </div>
-            <select class="bg-slate-50 border-none rounded-xl text-xs font-bold p-3 text-slate-500 focus:ring-2 focus:ring-emerald-500">
-                <option>Last 7 Days</option>
-                <option>This Month</option>
-            </select>
-        </div>
+    <!-- Grid Dashboard Analytics -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 items-start">
         
-        <div class="flex items-end justify-between gap-4 h-64 px-4 border-b border-slate-100 pb-2">
-            <div class="w-full bg-slate-100 rounded-t-xl h-[40%] hover:bg-emerald-400 transition-all cursor-pointer"></div>
-            <div class="w-full bg-emerald-600 rounded-t-xl h-[85%]"></div>
-            <div class="w-full bg-slate-100 rounded-t-xl h-[60%] hover:bg-emerald-400 transition-all cursor-pointer"></div>
-            <div class="w-full bg-emerald-500 rounded-t-xl h-[95%]"></div>
-            <div class="w-full bg-slate-100 rounded-t-xl h-[30%] hover:bg-emerald-400 transition-all cursor-pointer"></div>
+        <!-- KIRI: Grafik Pengeluaran Sparepart Mingguan (2 Kolom di Layar Lebar) -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm xl:col-span-2">
+            <div class="flex items-center justify-between mb-10">
+                <div>
+                    <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Weekly Distribution</h3>
+                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">Analitik total volume pengeluaran sparepart (Senin - Jumat)</p>
+                </div>
+                <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/40">📥 Live Database</span>
+            </div>
+            
+            <!-- Grafik Batang Dinamis Menggunakan CSS Tinggi Persentase -->
+            {% set max_val = [stats_hari.values()|max, 1]|max %}
+            <div class="flex items-end justify-between gap-6 h-64 px-4 border-b border-slate-100 pb-2">
+                <!-- Senin -->
+                <div class="w-full flex flex-col items-center gap-2 group h-full justify-end">
+                    <span class="text-[9px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">{{ stats_hari.Monday }}</span>
+                    <div style="height: {{ (stats_hari.Monday / max_val * 100)|int }}%; min-height: 4px;" class="w-full bg-slate-100 rounded-t-xl group-hover:bg-rose-500 transition-all cursor-pointer shadow-sm"></div>
+                </div>
+                <!-- Selasa -->
+                <div class="w-full flex flex-col items-center gap-2 group h-full justify-end">
+                    <span class="text-[9px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">{{ stats_hari.Tuesday }}</span>
+                    <div style="height: {{ (stats_hari.Tuesday / max_val * 100)|int }}%; min-height: 4px;" class="w-full bg-slate-100 rounded-t-xl group-hover:bg-rose-500 transition-all cursor-pointer shadow-sm"></div>
+                </div>
+                <!-- Rabu -->
+                <div class="w-full flex flex-col items-center gap-2 group h-full justify-end">
+                    <span class="text-[9px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">{{ stats_hari.Wednesday }}</span>
+                    <div style="height: {{ (stats_hari.Wednesday / max_val * 100)|int }}%; min-height: 4px;" class="w-full bg-slate-100 rounded-t-xl group-hover:bg-rose-500 transition-all cursor-pointer shadow-sm"></div>
+                </div>
+                <!-- Kamis -->
+                <div class="w-full flex flex-col items-center gap-2 group h-full justify-end">
+                    <span class="text-[9px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">{{ stats_hari.Thursday }}</span>
+                    <div style="height: {{ (stats_hari.Thursday / max_val * 100)|int }}%; min-height: 4px;" class="w-full bg-slate-100 rounded-t-xl group-hover:bg-rose-500 transition-all cursor-pointer shadow-sm"></div>
+                </div>
+                <!-- Jumat -->
+                <div class="w-full flex flex-col items-center gap-2 group h-full justify-end">
+                    <span class="text-[9px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity">{{ stats_hari.Friday }}</span>
+                    <div style="height: {{ (stats_hari.Friday / max_val * 100)|int }}%; min-height: 4px;" class="w-full bg-rose-600 rounded-t-xl group-hover:bg-rose-700 transition-all cursor-pointer shadow-sm"></div>
+                </div>
+            </div>
+            
+            <!-- Label Hari -->
+            <div class="flex justify-between mt-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <span class="w-full text-center">Mon</span>
+                <span class="w-full text-center">Tue</span>
+                <span class="w-full text-center">Wed</span>
+                <span class="w-full text-center">Thu</span>
+                <span class="w-full text-center">Fri</span>
+            </div>
         </div>
-        <div class="flex justify-between mt-4 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span>
+
+        <!-- KANAN: Top 5 Sparepart Paling Sering Keluar (1 Kolom) -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm xl:col-span-1">
+            <div class="mb-6">
+                <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Top Sparepart Released</h3>
+                <p class="text-[10px] text-slate-400 font-medium mt-0.5">Item dengan tingkat pengeluaran tertinggi.</p>
+            </div>
+
+            <div class="space-y-4">
+                {% for nama, total in item_populer %}
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div class="truncate pr-2">
+                        <p class="text-xs font-bold text-slate-800 truncate" title="{{ nama }}">{{ nama }}</p>
+                        <p class="text-[10px] text-slate-400 font-medium">Mutasi Keluar</p>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="bg-rose-50 border border-rose-200/40 text-rose-600 font-mono font-bold text-xs px-2.5 py-1 rounded-xl">
+                            -{{ total }}
+                        </span>
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-xs text-center text-slate-400 py-8 font-medium">Belum ada riwayat sparepart keluar.</p>
+                {% endfor %}
+            </div>
         </div>
+
     </div>
 </div>
 {% endblock %}
