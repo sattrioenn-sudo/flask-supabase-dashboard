@@ -190,13 +190,11 @@
                 return Math.min(this.currentPage * this.perPage, this.filteredVouchers.length);
             },
 
-            // New: Refresh Logic
             async refreshData() {
                 this.isRefreshing = true;
                 try {
                     const res = await fetch(window.location.href);
                     if (res.ok) {
-                        // Reload data via server reload atau fetch API khusus data
                         window.location.reload(); 
                     }
                 } finally {
@@ -204,7 +202,6 @@
                 }
             },
 
-            // New: Modal Handlers
             openAddModal() {
                 this.isEditMode = false;
                 this.inputUser = '';
@@ -228,7 +225,6 @@
                     location: this.inputLocation 
                 };
                 try {
-                    // Pastikan route /vouchers/update/<code_voucher> tersedia di backend Anda
                     const res = await fetch(`/vouchers/update/${this.inputCode}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -290,18 +286,69 @@
 
             exportPDF() {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const rows = this.filteredVouchers.map((v, i) => [i+1, v.location, v.user_name, v.voucher_code, '15Mbps', v.is_locked ? 'Locked' : 'Available']);
-                doc.autoTable({ head: [['No', 'Location', 'User', 'Code', 'Speed', 'Status']], body: rows, startY: 20, theme: 'grid', headStyles: { fillColor: [30, 41, 59] } });
-                doc.save("Voucher_Report.pdf");
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // --- STYLING CLEAN & MINIMALIST FOR PDF ---
+                const rows = this.filteredVouchers.map((v, i) => [
+                    i + 1, 
+                    v.location, 
+                    v.user_name, 
+                    v.voucher_code, 
+                    '15Mbps', 
+                    v.is_locked ? 'Locked' : 'Available'
+                ]);
+
+                // Header Dokumen yang Rapi
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(16);
+                doc.setTextColor(30, 41, 59); // Slate-800
+                doc.text("WIFI VOUCHERS REPORT", 14, 18);
+                
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(9);
+                doc.setTextColor(148, 163, 184); // Slate-400
+                const tgl = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+                doc.text(`Dibuat otomatis pada: ${tgl}`, 14, 24);
+
+                // AutoTable Render
+                doc.autoTable({ 
+                    head: [['No', 'Location', 'User Name', 'Voucher Code', 'Speed', 'Status']], 
+                    body: rows, 
+                    startY: 30,
+                    theme: 'striped',
+                    headStyles: { 
+                        fillColor: [15, 23, 42], // Slate-900 
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        fontSize: 9,
+                        halign: 'left'
+                    },
+                    bodyStyles: {
+                        fontSize: 9,
+                        textColor: [51, 65, 85], // Slate-700
+                    },
+                    alternateRowStyles: {
+                        fillColor: [248, 250, 252] // Slate-50
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 12, halign: 'center' },
+                        3: { fontStyle: 'bold', textColor: [37, 99, 235] } // Code Bold & Biru
+                    },
+                    styles: {
+                        font: "helvetica",
+                        cellPadding: 3.5
+                    }
+                });
+
+                doc.save("WiFi_Vouchers_Report.pdf");
             },
 
             exportExcel() {
                 const data = this.filteredVouchers.map(v => ({ 'Location': v.location, 'User': v.user_name, 'Code': v.voucher_code, 'Status': v.is_locked ? 'Locked' : 'Available' }));
                 const ws = XLSX.utils.json_to_sheet(data);
                 const wb = XLSX.utils.book_new();
-                XXLSX.utils.book_append_sheet(wb, ws, "Vouchers");
-                XXLSX.writeFile(wb, "Nexus_Vouchers.xlsx");
+                XLSX.utils.book_append_sheet(wb, ws, "Vouchers"); // Fix typo XXLSX -> XLSX
+                XLSX.writeFile(wb, "Nexus_Vouchers.xlsx");        // Fix typo XXLSX -> XLSX
             },
 
             copyCode(code) { navigator.clipboard.writeText(code); alert("Copied!"); },
