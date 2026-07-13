@@ -3,6 +3,12 @@
 {% block title %}Master Stock Sparepart{% endblock %}
 {% block header_title %}Master Stock Inventory{% endblock %}
 
+{% block extra_head %}
+<!-- Library pendukung ekspor PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="space-y-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm gap-4">
@@ -10,8 +16,12 @@
             <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">PT. KEMASAN CIPTATAMA SEMPURNA</h2>
             <p class="text-[10px] text-slate-400 font-medium mt-0.5">Data total stok akhir sparepart yang tersedia di gudang (Real-time Stock).</p>
         </div>
-        <div>
-            <a href="/spareparts" class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm">
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <!-- Tombol Cetak PDF Baru -->
+            <button onclick="exportMasterPDF()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1">
+                🖨️ Cetak PDF Master Stock
+            </button>
+            <a href="/spareparts" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm text-center flex items-center justify-center">
                 🔄 Kembali ke Input Mutasi
             </a>
         </div>
@@ -38,7 +48,7 @@
         </div>
         
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table id="table-master" class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         <th class="py-3 px-6">Nama Barang / Sparepart</th>
@@ -62,7 +72,6 @@
                             {% endif %}
                         </td>
                         <td class="py-4 px-6 text-center text-slate-500 font-medium">{{ item.satuan }}</td>
-                        <!-- Kolom Alert Dinamis (0 = Out of Stock, <= 5 = Low Stock) -->
                         <td class="py-4 px-6 text-center">
                             {% if item.stok_sekarang == 0 %}
                                 <span class="bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-rose-300/40 inline-flex items-center gap-1 animate-pulse">🛑 OUT OF STOCK</span>
@@ -179,6 +188,142 @@
         rowsPerPage = parseInt(select.value);
         currentPage = 1; 
         initPagination();
+    }
+
+    // ========================================================
+    // FUNGSI BARU: GENERATE PDF MASTER STOCK DENGAN TTD RESMI
+    // ========================================================
+    function exportMasterPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4 agar longgar
+        
+        // --- 1. Header Laporan ---
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(15, 23, 42); // Slate 900
+        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 16);
+        
+        doc.setFontSize(10);
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(100, 116, 139); // Slate 500
+        doc.text("LAPORAN STATUS INVENTORY & MASTER STOK SPAREPART GUDANG", 14, 22);
+        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 27);
+        
+        // Garis Pembatas Kop
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.5);
+        doc.line(14, 31, 283, 31);
+        
+        // --- 2. Mengambil Seluruh Baris Data Master ---
+        const rows = [];
+        const tableRows = document.querySelectorAll(".master-row");
+        
+        if (tableRows.length === 0) {
+            alert("Tidak ada data master stock untuk dicetak!");
+            return;
+        }
+
+        tableRows.forEach(row => {
+            const tds = row.getElementsByTagName("td");
+            if (tds.length >= 5) {
+                // Bersihkan teks status dari emoji
+                let statusText = tds[3].innerText.replace("🛑 ", "").replace("⚠️ ", "").replace("✅ ", "").trim();
+                
+                rows.push([
+                    tds[0].innerText.trim(), // Nama Barang
+                    tds[1].innerText.trim(), // Stok Saat Ini
+                    tds[2].innerText.trim(), // Satuan
+                    statusText,              // Status Ambang Batas
+                    tds[4].innerText.trim()  // Terakhir Update
+                ]);
+            }
+        });
+        
+        const columns = [
+            "Nama Barang / Sparepart", 
+            "Stok Saat Ini", 
+            "Satuan", 
+            "Status Ambang Batas", 
+            "Terakhir Update"
+        ];
+        
+        // --- 3. Gambar Tabel ---
+        doc.autoTable({
+            head: [columns],
+            body: rows,
+            startY: 36,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [15, 23, 42], // Slate 900
+                textColor: [255, 255, 255],
+                fontSize: 9,
+                fontStyle: 'bold',
+                halign: 'left'
+            },
+            bodyStyles: {
+                fontSize: 8.5,
+                textColor: [51, 65, 85]
+            },
+            styles: {
+                overflow: 'linebreak',
+                cellPadding: 4
+            },
+            columnStyles: {
+                1: { halign: 'center', fontStyle: 'bold' }, // Stok
+                2: { halign: 'center' },                    // Satuan
+                3: { halign: 'center', fontStyle: 'bold' }, // Status
+                4: { halign: 'right' }                      // Terakhir Update
+            },
+            didParseCell: function(data) {
+                // Mewarnai text status di PDF secara rapi
+                if (data.section === 'body' && data.column.index === 3) {
+                    if (data.cell.raw === 'OUT OF STOCK') {
+                        data.cell.styles.textColor = [220, 38, 38]; // Red
+                    } else if (data.cell.raw === 'LOW STOCK') {
+                        data.cell.styles.textColor = [217, 119, 6]; // Amber
+                    } else if (data.cell.raw === 'AMAN') {
+                        data.cell.styles.textColor = [16, 124, 65];  // Green
+                    }
+                }
+            }
+        });
+        
+        // --- 4. Blok Tanda Tangan (TTD) ---
+        let finalY = doc.lastAutoTable.finalY + 15;
+        
+        if (finalY > 160) {
+            doc.addPage();
+            finalY = 30;
+        }
+        
+        const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        doc.setFontSize(9.5);
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(51, 65, 85);
+        doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
+        
+        finalY += 6;
+        
+        doc.setFont("Helvetica", "bold");
+        doc.text("Disiapkan oleh,", 30, finalY);
+        doc.text("Diketahui oleh,", 210, finalY);
+        
+        doc.setFont("Helvetica", "normal");
+        doc.text("IT Department", 30, finalY + 4);
+        doc.text("Plant Manager", 210, finalY + 4);
+        
+        doc.setDrawColor(148, 163, 184);
+        doc.setLineWidth(0.3);
+        doc.line(30, finalY + 26, 85, finalY + 26);  
+        doc.line(210, finalY + 26, 265, finalY + 26); 
+        
+        doc.setFont("Helvetica", "bold");
+        doc.text("Satrio Eko Nugroho", 30, finalY + 31); 
+        doc.text("( ____________________ )", 210, finalY + 31);
+        
+        // --- 5. Download Output File ---
+        doc.save(`Laporan_Master_Stock_Sparepart_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 </script>
 {% endblock %}
