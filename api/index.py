@@ -212,65 +212,71 @@ def settings():
 
 @app.route('/analytics')
 def analytics():
-    # Definisikan struktur dasar default agar template HTML tidak kekurangan variabel
-    stats_hari = {"Monday": 0, "Tuesday": 0, "Wednesday": 0, "Thursday": 0, "Friday": 0}
-    sorted_items = []
-    max_val = 1  # Nilai default untuk menghindari pembagian dengan angka 0 di HTML
+    # Inisialisasi struktur data bulanan default untuk tahun berjalan
+    tahun_ini = datetime.now().year
+    
+    # List nama bulan untuk mapping index
+    nama_bulan = [
+        "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ]
+    
+    # Buat penampung data bulanan kosong
+    # Format: {"Januari": {"masuk": 0, "keluar": 0}, ...}
+    stats_bulanan = {bulan: {"masuk": 0, "keluar": 0} for bulan in nama_bulan}
+    stats_tahunan = {"masuk": 0, "keluar": 0}
 
     try:
-        # 1. Ambil data mutasi yang berstatus 'Approved' dan berjenis 'Keluar'
-        # Gunakan query yang biasa Anda gunakan untuk Supabase
-        response = supabase.table('spareparts').select('*').eq('jenis_mutasi', 'Keluar').eq('status_approve', 'Approved').execute()
-        mutasi_keluar = response.data if response and hasattr(response, 'data') else []
-        
-        item_populer = {}
+        # Ambil data mutasi yang berstatus 'Approved' (Masuk & Keluar)
+        response = supabase.table('spareparts').select('*').eq('status_approve', 'Approved').execute()
+        mutasi_data = response.data if response and hasattr(response, 'data') else []
 
-        if mutasi_keluar:
-            for item in mutasi_keluar:
-                # Ambil jumlah dengan aman, convert ke int
+        if mutasi_data:
+            for item in mutasi_data:
                 qty = 0
                 try:
                     qty = int(item.get('jumlah', 0))
                 except:
-                    qty = 0
-                    
-                nama = item.get('nama_barang', 'Unknown')
+                    continue
                 
-                # Hitung untuk grafik mingguan berdasarkan tanggal_keluar atau created_at
-                tgl_raw = item.get('tanggal_keluar') or item.get('created_at')
+                jenis = item.get('jenis_mutasi', '').lower() # 'masuk' atau 'keluar'
+                if jenis not in ['masuk', 'keluar']:
+                    continue
+
+                # Ambil tanggal (bisa dari tanggal_masuk, tanggal_keluar, atau created_at)
+                tgl_raw = item.get('tanggal_masuk') or item.get('tanggal_keluar') or item.get('created_at')
+                
                 if tgl_raw:
                     try:
-                        # Ambil format YYYY-MM-DD
-                        date_str = tgl_raw[:10]
-                        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-                        nama_hari = date_obj.strftime('%A') # Mengeluarkan 'Monday', 'Tuesday', dll
+                        # Parsing format tanggal YYYY-MM-DD
+                        date_obj = datetime.strptime(tgl_raw[:10], '%Y-%m-%d')
+                        idx_bulan = date_obj.month - 1 # dapat 0 - 11
+                        tahun_item = date_obj.year
                         
-                        if nama_hari in stats_hari:
-                            stats_hari[nama_hari] += qty
+                        # Hitung Akumulasi Tahunan (Tahun Ini)
+                        if tahun_item == tahun_ini:
+                            bulan_nama = nama_bulan[idx_bulan]
+                            stats_bulanan[bulan_nama][jenis] += qty
+                            stats_tahunan[jenis] += qty
                     except:
-                        pass # Lewati jika format tanggal gagal diparsing
-                
-                # Hitung item paling banyak keluar
-                if nama != 'Unknown':
-                    item_populer[nama] = item_populer.get(nama, 0) + qty
-
-            # Ambil 5 item teratas
-            sorted_items = sorted(item_populer.items(), key=lambda x: x[1], reverse=True)[:5]
-            
-            # Tentukan nilai tertinggi untuk kalkulasi skala grafik di HTML
-            max_val = max(stats_hari.values())
-            if max_val < 1:
-                max_val = 1
+                        pass
 
     except Exception as e:
-        # Jika ada error database, log dicetak di terminal tapi server tetap jalan aman
-        print(f"Error pada Analytics Sparepart: {e}")
+        print(f"Error Analytics Berkala: {e}")
 
-    # Kirimkan data ke HTML. Variabel 'max_val' dikirim langsung dari Python agar HTML tidak error
+    # Mencari nilai maksimal gabungan untuk menentukan skala tinggi grafik batang
+    all_values = []
+    for b in stats_bulanan.values():
+        all_values.extend([b['masuk'], b['keluar']])
+    max_val = max(all_values) if all_values else 1
+    if max_val < 1:
+        max_val = 1
+
     return render_template('analytics.html', 
-                           stats_hari=stats_hari, 
-                           item_populer=sorted_items,
-                           max_val=max_val)
+                           stats_bulanan=stats_bulanan, 
+                           stats_tahunan=stats_tahunan,
+                           max_val=max_val,
+                           tahun=tahun_ini)
 
 # --- ACCOUNTING ROUTE (LOG TAGIHAN SUPABASE) ---
 @app.route('/accounting', methods=['GET', 'POST'])
