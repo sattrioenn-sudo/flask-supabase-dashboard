@@ -212,6 +212,7 @@ def settings():
 
 @app.route('/analytics')
 def analytics():
+    # Mengikuti tahun berjalan saat ini (2026)
     tahun_ini = datetime.now().year
     
     nama_bulan = [
@@ -223,68 +224,68 @@ def analytics():
     stats_tahunan = {"masuk": 0, "keluar": 0}
 
     try:
-        # Ambil semua data mutasi dari Supabase
+        # Ambil data mutasi dari tabel spareparts Anda
         response = supabase.table('spareparts').select('*').execute()
         mutasi_data = response.data if response and hasattr(response, 'data') else []
 
         if mutasi_data:
             for item in mutasi_data:
-                # 1. Cek status approval secara toleran
+                # 1. Cek Status Approve (Harus 'Approved')
                 status = str(item.get('status_approve', '')).strip().lower()
                 if status != 'approved':
-                    continue # Lewati jika belum disetujui
+                    continue
                 
-                # 2. Ambil kuantitas jumlah barang
+                # 2. Ambil Kuantitas Jumlah Barang
                 try:
                     qty = int(item.get('jumlah', 0))
                 except:
                     continue
 
-                # 3. Klasifikasi Jenis Mutasi
-                jenis_raw = str(item.get('jenis_mutasi', '')).lower()
-                if 'masuk' in jenis_raw:
-                    jenis = 'masuk'
-                elif 'keluar' in jenis_raw:
+                # 3. Ambil data nilai tanggal dari database Anda
+                tgl_masuk_raw = item.get('tanggal_masuk')
+                tgl_keluar_raw = item.get('tanggal_keluar')
+                created_at_raw = item.get('created_at')
+
+                jenis = None
+                tgl_pilihan = None
+
+                # 4. LOGIKA BARU: Tentukan jenis mutasi berdasarkan ketersediaan tanggal di database Anda
+                if tgl_keluar_raw and str(tgl_keluar_raw).strip().lower() != 'null':
+                    # Jika tanggal_keluar ada isinya, maka PASTI barang keluar
                     jenis = 'keluar'
+                    tgl_pilihan = tgl_keluar_raw
+                elif tgl_masuk_raw and str(tgl_masuk_raw).strip().lower() != 'null':
+                    # Jika tanggal_masuk ada isinya, maka barang masuk
+                    jenis = 'masuk'
+                    tgl_pilihan = tgl_masuk_raw
                 else:
-                    continue
+                    # Sesuai request Anda: Jika tanggal masuk lupa diinput (NULL), 
+                    # kita fallback gunakan 'created_at' sebagai bulan penempatan, tapi jenisnya tetap 'masuk'
+                    jenis = 'masuk'
+                    tgl_pilihan = created_at_raw
 
-                # 4. Penentuan Tanggal Berdasarkan Logika Baru Anda
-                tgl_raw = None
-                if jenis == 'masuk':
-                    # Jika barang masuk, prioritas tanggal_masuk. Jika kosong/lupa, backup pakai created_at
-                    tgl_raw = item.get('tanggal_masuk') or item.get('created_at')
-                else:
-                    # Jika barang keluar, WAJIB ada tanggal_keluar
-                    tgl_raw = item.get('tanggal_keluar')
-
-                # 5. Parsing ke Grafik Bulanan & Tahunan jika tanggal tersedia
-                if tgl_raw:
+                # 5. Plotting ke Grafik Bulanan & Tahunan
+                if tgl_pilihan and jenis:
                     try:
-                        tgl_clean = str(tgl_raw).strip()
+                        tgl_clean = str(tgl_pilihan).strip()
+                        # Potong format YYYY-MM-DD
                         parts = tgl_clean[:10].split('-')
                         if len(parts) == 3:
                             tahun_item = int(parts[0])
-                            idx_bulan = int(parts[1]) - 1
+                            idx_bulan = int(parts[1]) - 1 # Array index 0-11
                             
-                            # Kelompokkan ke tahun berjalan
+                            # Hitung hanya jika tahunnya masuk ke tahun berjalan (2026)
                             if tahun_item == tahun_ini and 0 <= idx_bulan <= 11:
                                 bulan_nama = nama_bulan[idx_bulan]
                                 stats_bulanan[bulan_nama][jenis] += qty
                                 stats_tahunan[jenis] += qty
                     except:
                         pass
-                else:
-                    # Kondisi jika barang masuk benar-benar tidak punya info tanggal sama sekali (Fallback)
-                    if jenis == 'masuk':
-                        # Anda bisa memilih untuk tidak memasukkannya ke grafik bulanan tertentu, 
-                        # tapi tetap dihitung di total akumulasi tahunan sebagai cadangan data.
-                        stats_tahunan['masuk'] += qty
 
     except Exception as e:
-        print(f"Error Analytics Berkala: {e}")
+        print(f"Error pada Kalkulasi Analytics: {e}")
 
-    # Hitung nilai puncak grafik
+    # Mencari nilai maksimal untuk skala grafik di HTML
     all_values = []
     for b in stats_bulanan.values():
         all_values.extend([b['masuk'], b['keluar']])
