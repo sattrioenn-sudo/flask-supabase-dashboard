@@ -223,61 +223,68 @@ def analytics():
     stats_tahunan = {"masuk": 0, "keluar": 0}
 
     try:
-        # PERBAIKAN 1: Hapus filter .eq('status_approve') dari query utama Supabase 
-        # Kita lakukan pemfilteran secara fleksibel di dalam loop Python saja biar aman dari typo huruf besar/kecil
+        # Ambil semua data mutasi dari Supabase
         response = supabase.table('spareparts').select('*').execute()
         mutasi_data = response.data if response and hasattr(response, 'data') else []
 
         if mutasi_data:
             for item in mutasi_data:
-                # PERBAIKAN 2: Validasi Status Approve secara toleran (lowercase)
+                # 1. Cek status approval secara toleran
                 status = str(item.get('status_approve', '')).strip().lower()
                 if status != 'approved':
-                    continue # Lewati jika belum diapprove
+                    continue # Lewati jika belum disetujui
                 
-                # Mengambil jumlah barang
+                # 2. Ambil kuantitas jumlah barang
                 try:
                     qty = int(item.get('jumlah', 0))
                 except:
                     continue
-                
-                # PERBAIKAN 3: Toleransi penulisan jenis mutasi (mencari kata 'masuk' atau 'keluar')
+
+                # 3. Klasifikasi Jenis Mutasi
                 jenis_raw = str(item.get('jenis_mutasi', '')).lower()
                 if 'masuk' in jenis_raw:
                     jenis = 'masuk'
                 elif 'keluar' in jenis_raw:
                     jenis = 'keluar'
                 else:
-                    continue # Lewati jika tidak cocok keduanya
+                    continue
 
-                # PERBAIKAN 4: Pembacaan tanggal yang jauh lebih kuat
-                tgl_raw = item.get('tanggal_masuk') or item.get('tanggal_keluar') or item.get('created_at')
-                
+                # 4. Penentuan Tanggal Berdasarkan Logika Baru Anda
+                tgl_raw = None
+                if jenis == 'masuk':
+                    # Jika barang masuk, prioritas tanggal_masuk. Jika kosong/lupa, backup pakai created_at
+                    tgl_raw = item.get('tanggal_masuk') or item.get('created_at')
+                else:
+                    # Jika barang keluar, WAJIB ada tanggal_keluar
+                    tgl_raw = item.get('tanggal_keluar')
+
+                # 5. Parsing ke Grafik Bulanan & Tahunan jika tanggal tersedia
                 if tgl_raw:
                     try:
-                        # Bersihkan string tanggal jika ada spasi bawaan dari database
                         tgl_clean = str(tgl_raw).strip()
-                        
-                        # Cara aman: Ekstrak manual YYYY, MM, DD menggunakan split jika format ISO
-                        # Contoh: "2026-06-15" atau "2026-06-15T09:00:00"
                         parts = tgl_clean[:10].split('-')
                         if len(parts) == 3:
                             tahun_item = int(parts[0])
-                            idx_bulan = int(parts[1]) - 1 # Bulan di python dimulai dari 0 (Januari)
+                            idx_bulan = int(parts[1]) - 1
                             
-                            # Hitung hanya jika tahunnya cocok dengan tahun berjalan
+                            # Kelompokkan ke tahun berjalan
                             if tahun_item == tahun_ini and 0 <= idx_bulan <= 11:
                                 bulan_nama = nama_bulan[idx_bulan]
                                 stats_bulanan[bulan_nama][jenis] += qty
                                 stats_tahunan[jenis] += qty
-                    except Exception as date_err:
-                        print(f"Gagal membaca tanggal item: {tgl_raw}, Error: {date_err}")
+                    except:
                         pass
+                else:
+                    # Kondisi jika barang masuk benar-benar tidak punya info tanggal sama sekali (Fallback)
+                    if jenis == 'masuk':
+                        # Anda bisa memilih untuk tidak memasukkannya ke grafik bulanan tertentu, 
+                        # tapi tetap dihitung di total akumulasi tahunan sebagai cadangan data.
+                        stats_tahunan['masuk'] += qty
 
     except Exception as e:
         print(f"Error Analytics Berkala: {e}")
 
-    # Mencari nilai maksimal gabungan untuk menentukan skala tinggi grafik batang
+    # Hitung nilai puncak grafik
     all_values = []
     for b in stats_bulanan.values():
         all_values.extend([b['masuk'], b['keluar']])
