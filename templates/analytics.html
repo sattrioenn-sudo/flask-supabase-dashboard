@@ -18,8 +18,7 @@
                 <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/40">📥 Live Database</span>
             </div>
             
-            <!-- Grafik Batang Dinamis Menggunakan CSS Tinggi Persentase -->
-            {% set max_val = [stats_hari.values()|max, 1]|max %}
+            <!-- Grafik Batang Dinamis Menggunakan Variabel max_val Aman dari Python -->
             <div class="flex items-end justify-between gap-6 h-64 px-4 border-b border-slate-100 pb-2">
                 <!-- Senin -->
                 <div class="w-full flex flex-col items-center gap-2 group h-full justify-end">
