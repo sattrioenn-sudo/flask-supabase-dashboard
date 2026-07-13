@@ -212,12 +212,50 @@ def settings():
 
 @app.route('/analytics')
 def analytics():
-    if 'user_id' not in session: return redirect(url_for('login'))
-    try:
-        response = supabase.table('vouchers').select("id", count='exact').execute()
-        total_vouchers = response.count if response.count is not None else 0
-    except: total_vouchers = 0
-    return render_template('analytics.html', email=session.get('user_email'), total_vouchers=total_vouchers)
+    # 1. Ambil data mutasi yang berstatus 'Approved' dan berjenis 'Keluar'
+    # Sesuaikan nama tabel dan kolom sesuai ekosistem Supabase Anda
+    response = supabase.table('spareparts')\
+        .select('*')\
+        .eq('jenis_mutasi', 'Keluar')\
+        .eq('status_approve', 'Approved')\
+        .execute()
+    
+    mutasi_keluar = response.data if response else []
+
+    # 2. Proses pengelompokan data mingguan (Senin-Jumat) untuk grafik
+    # Inisialisasi total pengeluaran per hari
+    stats_hari = {"Monday": 0, "Tuesday": 0, "Wednesday": 0, "Thursday": 0, "Friday": 0}
+    
+    # List untuk detail item yang paling banyak keluar
+    item_populer = {}
+
+    for item in mutasi_keluar:
+        qty = int(item.get('jumlah', 0))
+        nama = item.get('nama_barang', 'Unknown')
+        
+        # Hitung untuk grafik mingguan berdasarkan tanggal_keluar
+        if item.get('tanggal_keluar'):
+            try:
+                # Mengonversi string tanggal ke nama hari
+                from datetime import datetime
+                date_obj = datetime.strptime(item['tanggal_keluar'][:10], '%Y-%m-%d')
+                nama_hari = date_obj.strftime('%A') # Mengasilkan 'Monday', 'Tuesday', dll
+                if nama_hari in stats_hari:
+                    stats_hari[nama_hari] += qty
+            except:
+                pass
+        
+        # Hitung item paling banyak keluar
+        item_populer[nama] = item_populer.get(nama, 0) + qty
+
+    # Urutkan item populer dari yang terbesar
+    sorted_items = sorted(item_populer.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    # Kirim data ke file template HTML
+    return render_template('analytics.html', 
+                           stats_hari=stats_hari, 
+                           item_populer=sorted_items,
+                           voucher_data=[]) # Pertahankan data voucher Anda jika ada
 
 # --- ACCOUNTING ROUTE (LOG TAGIHAN SUPABASE) ---
 @app.route('/accounting', methods=['GET', 'POST'])
