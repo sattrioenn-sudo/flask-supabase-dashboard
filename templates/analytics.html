@@ -3,21 +3,41 @@
 {% block title %}Analytics Berkala Sparepart{% endblock %}
 {% block header_title %}Analytics Overview{% endblock %}
 
+{% block extra_head %}
+<!-- Library pendukung ekspor PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="space-y-8">
-    <!-- Ringkasan Akumulasi Tahunan -->
+    <!-- Ringkasan Akumulasi Tahunan + Tombol Cetak -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white border border-slate-200/60 rounded-2xl p-4 shadow-sm gap-4">
+        <div>
+            <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">PT. KEMASAN CIPTATAMA SEMPURNA</h2>
+            <p class="text-[10px] text-slate-400 font-medium mt-0.5">Analitik perbandingan mutasi barang masuk dan keluar gudang sparepart.</p>
+        </div>
+        <div class="w-full sm:w-auto">
+            <!-- Tombol Cetak PDF Analytics -->
+            <button onclick="exportAnalyticsPDF()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center justify-center gap-1">
+                🖨️ Cetak PDF Laporan Tahunan
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid Counter Box Tahunan -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="bg-white p-6 border border-slate-200/60 rounded-3xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Barang Masuk (Tahun {{ tahun }})</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1">{{ stats_tahunan.masuk }} <span class="text-xs font-bold text-slate-400">Pcs</span></h3>
+                <h3 id="total-masuk-tahun" class="text-2xl font-black text-slate-800 mt-1">{{ stats_tahunan.masuk }} <span class="text-xs font-bold text-slate-400">Pcs</span></h3>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200/40 flex items-center justify-center text-xl">📈</div>
         </div>
         <div class="bg-white p-6 border border-slate-200/60 rounded-3xl shadow-sm flex items-center justify-between">
             <div>
                 <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Total Barang Keluar (Tahun {{ tahun }})</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1">{{ stats_tahunan.keluar }} <span class="text-xs font-bold text-slate-400">Pcs</span></h3>
+                <h3 id="total-keluar-tahun" class="text-2xl font-black text-slate-800 mt-1">{{ stats_tahunan.keluar }} <span class="text-xs font-bold text-slate-400">Pcs</span></h3>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200/40 flex items-center justify-center text-xl">📉</div>
         </div>
@@ -39,7 +59,7 @@
             <!-- Area Grafik Batang -->
             <div class="flex items-end justify-between gap-2 h-72 px-2 border-b border-slate-100 pb-3 overflow-x-auto min-w-[600px]">
                 {% for bulan, data in stats_bulanan.items() %}
-                <div onclick="showDetailBulan('{{ bulan }}', {{ data.masuk }}, {{ data.keluar }})" class="flex-1 flex flex-col items-center gap-1 group h-full justify-end cursor-pointer p-1 rounded-xl hover:bg-slate-50 transition-all">
+                <div onclick="showDetailBulan('{{ bulan }}', {{ data.masuk }}, {{ data.keluar }})" data-bulan="{{ bulan }}" data-masuk="{{ data.masuk }}" data-keluar="{{ data.keluar }}" class="bulan-data-node flex-1 flex flex-col items-center gap-1 group h-full justify-end cursor-pointer p-1 rounded-xl hover:bg-slate-50 transition-all">
                     
                     <!-- Angka melayang saat hover -->
                     <div class="text-[8px] font-mono font-bold text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center leading-none">
@@ -96,7 +116,7 @@
             </div>
 
             <div class="mt-8 border-t border-slate-100 pt-4 text-center">
-                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">PT. Kemasan Ciptatama Sempurna</p>
+                <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">PASURUAN PLANT | INTEGRATED SYSTEM</p>
             </div>
         </div>
 
@@ -106,14 +126,12 @@
 
 {% block scripts %}
 <script>
-    // Fungsi interaktif ketika salah satu kolom bulan di-klik
     function showDetailBulan(bulan, masuk, keluar) {
         document.getElementById("detail-nama-bulan").innerText = bulan.toUpperCase();
         document.getElementById("detail-masuk").innerText = masuk + " Pcs";
         document.getElementById("detail-keluar").innerText = keluar + " Pcs";
     }
     
-    // Default load: Set ke bulan berjalan saat ini otomatis jika ada data
     document.addEventListener("DOMContentLoaded", function() {
         const namaBulanIndo = [
             "Januari", "Februari", "Maret", "April", "Mei", "Juni", 
@@ -122,9 +140,159 @@
         const currentMonthIdx = new Date().getMonth();
         const currentMonthName = namaBulanIndo[currentMonthIdx];
         
-        // Cari elemen data bulan ini untuk mentrigger visual default pertama kali dibuka
-        // Atau Anda bisa membiarkannya kosong sampai di-klik user.
-        document.getElementById("detail-nama-bulan").innerText = currentMonthName.toUpperCase();
+        // Trigger visual default ke bulan sekarang saat pertama kali dibuka
+        const activeNode = document.querySelector(`.bulan-data-node[data-bulan="${currentMonthName}"]`);
+        if(activeNode) {
+            const m = activeNode.getAttribute("data-masuk");
+            const k = activeNode.getAttribute("data-keluar");
+            showDetailBulan(currentMonthName, m, k);
+        } else {
+            document.getElementById("detail-nama-bulan").innerText = currentMonthName.toUpperCase();
+        }
     });
+
+    // ========================================================
+    // FUNGSI BARU: GENERATE PDF ANALYTICS DENGAN TTD RESMI
+    // ========================================================
+    function exportAnalyticsPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
+        
+        const tahunIni = "{{ tahun }}";
+        const totalMasukTahun = document.getElementById("total-masuk-tahun").innerText.replace(" Pcs","");
+        const totalKeluarTahun = document.getElementById("total-keluar-tahun").innerText.replace(" Pcs","");
+
+        // --- 1. Header Laporan ---
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(16);
+        doc.setTextColor(15, 23, 42); // Slate 900
+        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 16);
+        
+        doc.setFontSize(10);
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(100, 116, 139); // Slate 500
+        doc.text(`LAPORAN TAHUNAN ANALITIK TRAFIK MUTASI SPAREPART - TAHUN ${tahunIni}`, 14, 22);
+        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 27);
+        
+        // Garis Pembatas Kop
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.5);
+        doc.line(14, 31, 283, 31);
+        
+        // --- 2. Blok Summary Akumulasi Tahunan ---
+        doc.setFillColor(248, 250, 252); // Slate 50
+        doc.roundedRect(14, 36, 269, 18, 2, 2, 'F');
+        
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`TOTAL AKUMULASI TRAFIK BARANG MASUK (${tahunIni}):`, 20, 47);
+        doc.setTextColor(16, 124, 65); // Emerald Green
+        doc.text(`${totalMasukTahun} Pcs`, 105, 47);
+
+        doc.setTextColor(71, 85, 105);
+        doc.text(`TOTAL AKUMULASI TRAFIK BARANG KELUAR (${tahunIni}):`, 150, 47);
+        doc.setTextColor(220, 38, 38); // Rose Red
+        doc.text(`${totalKeluarTahun} Pcs`, 235, 47);
+
+        // --- 3. Mengambil Data Rincian Bulanan ---
+        const rows = [];
+        const nodes = document.querySelectorAll(".bulan-data-node");
+        
+        nodes.forEach(node => {
+            const bul = node.getAttribute("data-bulan");
+            const mas = node.getAttribute("data-masuk");
+            const kel = node.getAttribute("data-keluar");
+            
+            // Hitung selisih/selisih bersih
+            const selisih = parseInt(mas) - parseInt(kel);
+            const statusSelisih = selisih >= 0 ? `+${selisih}` : `${selisih}`;
+
+            rows.push([
+                bul,
+                `${mas} Pcs`,
+                `${kel} Pcs`,
+                `${statusSelisih} Pcs`
+            ]);
+        });
+
+        const columns = ["Bulan", "Kuantitas Barang Masuk (+)", "Kuantitas Barang Keluar (-)", "Selisih Aliran Stok"];
+
+        // --- 4. Render Tabel Data ---
+        doc.autoTable({
+            head: [columns],
+            body: rows,
+            startY: 60,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [15, 23, 42], // Slate 900
+                textColor: [255, 255, 255],
+                fontSize: 9.5,
+                fontStyle: 'bold',
+                halign: 'center'
+            },
+            bodyStyles: {
+                fontSize: 9,
+                textColor: [51, 65, 85],
+                halign: 'center'
+            },
+            styles: {
+                cellPadding: 4
+            },
+            columnStyles: {
+                0: { fontStyle: 'bold', halign: 'left' }, // Nama Bulan
+                1: { textColor: [16, 124, 65] },         // Masuk
+                2: { textColor: [220, 38, 38] }          // Keluar
+            },
+            didParseCell: function(data) {
+                // Beri warna khusus pada kolom selisih
+                if (data.section === 'body' && data.column.index === 3) {
+                    if (data.cell.raw.includes('-')) {
+                        data.cell.styles.textColor = [220, 38, 38]; // Merah jika minus
+                    } else if (data.cell.raw.includes('+') && data.cell.raw !== '+0 Pcs') {
+                        data.cell.styles.textColor = [16, 124, 65]; // Hijau jika plus
+                    }
+                }
+            }
+        });
+
+        // --- 5. Blok Tanda Tangan (TTD) ---
+        let finalY = doc.lastAutoTable.finalY + 15;
+        
+        // Cek space halaman jika mentok
+        if (finalY > 155) {
+            doc.addPage();
+            finalY = 30;
+        }
+
+        const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        doc.setFontSize(9.5);
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(51, 65, 85);
+        doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
+        
+        finalY += 6;
+        
+        doc.setFont("Helvetica", "bold");
+        doc.text("Disiapkan oleh,", 30, finalY);
+        doc.text("Diketahui oleh,", 210, finalY);
+        
+        doc.setFont("Helvetica", "normal");
+        doc.text("IT Department", 30, finalY + 4);
+        doc.text("Plant Manager", 210, finalY + 4);
+        
+        doc.setDrawColor(148, 163, 184);
+        doc.setLineWidth(0.3);
+        doc.line(30, finalY + 26, 85, finalY + 26);  
+        doc.line(210, finalY + 26, 265, finalY + 26); 
+        
+        doc.setFont("Helvetica", "bold");
+        doc.text("Satrio Eko Nugroho", 30, finalY + 31); 
+        doc.text("( ____________________ )", 210, finalY + 31);
+        
+        // --- 6. Simpan File PDF ---
+        doc.save(`Laporan_Tahunan_Analytics_Sparepart_${tahunIni}.pdf`);
+    }
 </script>
 {% endblock %}
