@@ -212,50 +212,65 @@ def settings():
 
 @app.route('/analytics')
 def analytics():
-    # 1. Ambil data mutasi yang berstatus 'Approved' dan berjenis 'Keluar'
-    # Sesuaikan nama tabel dan kolom sesuai ekosistem Supabase Anda
-    response = supabase.table('spareparts')\
-        .select('*')\
-        .eq('jenis_mutasi', 'Keluar')\
-        .eq('status_approve', 'Approved')\
-        .execute()
-    
-    mutasi_keluar = response.data if response else []
-
-    # 2. Proses pengelompokan data mingguan (Senin-Jumat) untuk grafik
-    # Inisialisasi total pengeluaran per hari
+    # Definisikan struktur dasar default agar template HTML tidak kekurangan variabel
     stats_hari = {"Monday": 0, "Tuesday": 0, "Wednesday": 0, "Thursday": 0, "Friday": 0}
-    
-    # List untuk detail item yang paling banyak keluar
-    item_populer = {}
+    sorted_items = []
+    max_val = 1  # Nilai default untuk menghindari pembagian dengan angka 0 di HTML
 
-    for item in mutasi_keluar:
-        qty = int(item.get('jumlah', 0))
-        nama = item.get('nama_barang', 'Unknown')
+    try:
+        # 1. Ambil data mutasi yang berstatus 'Approved' dan berjenis 'Keluar'
+        # Gunakan query yang biasa Anda gunakan untuk Supabase
+        response = supabase.table('spareparts').select('*').eq('jenis_mutasi', 'Keluar').eq('status_approve', 'Approved').execute()
+        mutasi_keluar = response.data if response and hasattr(response, 'data') else []
         
-        # Hitung untuk grafik mingguan berdasarkan tanggal_keluar
-        if item.get('tanggal_keluar'):
-            try:
-                # Mengonversi string tanggal ke nama hari
-                from datetime import datetime
-                date_obj = datetime.strptime(item['tanggal_keluar'][:10], '%Y-%m-%d')
-                nama_hari = date_obj.strftime('%A') # Mengasilkan 'Monday', 'Tuesday', dll
-                if nama_hari in stats_hari:
-                    stats_hari[nama_hari] += qty
-            except:
-                pass
-        
-        # Hitung item paling banyak keluar
-        item_populer[nama] = item_populer.get(nama, 0) + qty
+        item_populer = {}
 
-    # Urutkan item populer dari yang terbesar
-    sorted_items = sorted(item_populer.items(), key=lambda x: x[1], reverse=True)[:5]
+        if mutasi_keluar:
+            for item in mutasi_keluar:
+                # Ambil jumlah dengan aman, convert ke int
+                qty = 0
+                try:
+                    qty = int(item.get('jumlah', 0))
+                except:
+                    qty = 0
+                    
+                nama = item.get('nama_barang', 'Unknown')
+                
+                # Hitung untuk grafik mingguan berdasarkan tanggal_keluar atau created_at
+                tgl_raw = item.get('tanggal_keluar') or item.get('created_at')
+                if tgl_raw:
+                    try:
+                        # Ambil format YYYY-MM-DD
+                        date_str = tgl_raw[:10]
+                        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                        nama_hari = date_obj.strftime('%A') # Mengeluarkan 'Monday', 'Tuesday', dll
+                        
+                        if nama_hari in stats_hari:
+                            stats_hari[nama_hari] += qty
+                    except:
+                        pass # Lewati jika format tanggal gagal diparsing
+                
+                # Hitung item paling banyak keluar
+                if nama != 'Unknown':
+                    item_populer[nama] = item_populer.get(nama, 0) + qty
 
-    # Kirim data ke file template HTML
+            # Ambil 5 item teratas
+            sorted_items = sorted(item_populer.items(), key=lambda x: x[1], reverse=True)[:5]
+            
+            # Tentukan nilai tertinggi untuk kalkulasi skala grafik di HTML
+            max_val = max(stats_hari.values())
+            if max_val < 1:
+                max_val = 1
+
+    except Exception as e:
+        # Jika ada error database, log dicetak di terminal tapi server tetap jalan aman
+        print(f"Error pada Analytics Sparepart: {e}")
+
+    # Kirimkan data ke HTML. Variabel 'max_val' dikirim langsung dari Python agar HTML tidak error
     return render_template('analytics.html', 
                            stats_hari=stats_hari, 
                            item_populer=sorted_items,
-                           voucher_data=[]) # Pertahankan data voucher Anda jika ada
+                           max_val=max_val)
 
 # --- ACCOUNTING ROUTE (LOG TAGIHAN SUPABASE) ---
 @app.route('/accounting', methods=['GET', 'POST'])
