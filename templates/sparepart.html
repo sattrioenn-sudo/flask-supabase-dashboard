@@ -29,10 +29,12 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-        <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm xl:col-span-1">
-            <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
-                <div class="w-6 h-6 rounded-md bg-sky-50 flex items-center justify-center text-sky-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+        
+        <!-- KOTAK INPUT MUTASI DENGAN GRADIENT & BORDER COLOR PREMIUM -->
+        <div class="bg-gradient-to-b from-sky-50/50 via-white to-white border-t-4 border-t-sky-500 border-x border-b border-slate-200 rounded-2xl p-6 shadow-md xl:col-span-1">
+            <div class="flex items-center gap-2 mb-4 border-b border-sky-100 pb-3">
+                <div class="w-6 h-6 rounded-md bg-sky-500 flex items-center justify-center text-white shadow-sm shadow-sky-500/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
                 <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Input Mutasi Sparepart</h2>
             </div>
@@ -82,14 +84,14 @@
                         class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-400 outline-none transition-all cursor-not-allowed">
                 </div>
 
-                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all shadow-sm">
+                <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs uppercase tracking-wider py-3 rounded-xl transition-all shadow-md shadow-sky-500/10">
                     Simpan Data Barang
                 </button>
             </form>
         </div>
 
-        <!-- LOG MUTASI DENGAN CONTROLLER SEARCH & PAGINATION -->
-        <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden xl:col-span-2">
+        <!-- LOG MUTASI DENGAN WARNA WARNI BARIS TABEL YANG INDAH -->
+        <div class="bg-white border border-slate-200/60 rounded-2xl shadow-md overflow-hidden xl:col-span-2">
             
             <!-- Filter & Search Toolbar -->
             <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -128,42 +130,81 @@
             <div class="overflow-x-auto">
                 <table id="table-sparepart" class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                            <th class="py-3 px-4">Nama Barang</th>
-                            <th class="py-3 px-4 text-center">Jumlah</th>
-                            <th class="py-3 px-4 text-center">Tanggal Masuk</th>
-                            <th class="py-3 px-4 text-center">Tanggal Keluar</th>
-                            <th class="py-3 px-4">Peruntukan User</th>
-                            <th class="py-3 px-4 text-center">Approval Admin</th>
+                        <tr class="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="py-3 px-4 text-slate-700">Nama Barang</th>
+                            <th class="py-3 px-4 text-center text-indigo-600">Jumlah</th>
+                            <th class="py-3 px-4 text-center text-emerald-600">Tanggal Masuk</th>
+                            <th class="py-3 px-4 text-center text-rose-600">Tanggal Keluar</th>
+                            <th class="py-3 px-4 text-amber-600">Peruntukan User</th>
+                            <th class="py-3 px-4 text-center text-slate-600">Approval Admin</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs" id="tableBody">
                         <!-- MENGGUNAKAN LOOPING JINJA ASLI BAWAAN SISTEM ANDA AGAR DATA TIDAK CORRUPT ATAU ERROR -->
                         {% for item in spareparts %}
                         <tr class="hover:bg-slate-50/50 transition-colors sparepart-row">
-                            <td class="py-4 px-4 font-semibold text-slate-800 nama-barang">{{ item.nama_barang }}</td>
-                            <td class="py-4 px-4 text-center font-bold text-slate-700">
-                                <span>{{ item.jumlah }}</span> 
-                                <span class="text-[10px] text-slate-400 font-normal">{{ item.satuan }}</span>
+                            <!-- Kolom Nama Barang: Solid Slate text with Left Border Accent -->
+                            <td class="py-4 px-4 font-semibold text-slate-800 border-l-4 border-l-sky-500 nama-barang">
+                                {{ item.nama_barang }}
                             </td>
-                            <td class="py-4 px-4 text-center font-medium text-emerald-600 font-mono">{{ item.tanggal_masuk or '-' }}</td>
-                            <td class="py-4 px-4 text-center font-medium text-rose-600 font-mono">{{ item.tanggal_keluar or '-' }}</td>
-                            <td class="py-4 px-4 text-slate-600 font-medium">{{ item.untuk_user or '-' }}</td>
+                            
+                            <!-- Kolom Jumlah: Violet Badge Accent -->
+                            <td class="py-4 px-4 text-center">
+                                <span class="inline-flex items-center gap-1 bg-violet-50 text-violet-700 font-bold px-2.5 py-1 rounded-lg border border-violet-100">
+                                    {{ item.jumlah }}
+                                    <span class="text-[9px] text-violet-400 font-medium uppercase tracking-wider">{{ item.satuan }}</span>
+                                </span>
+                            </td>
+                            
+                            <!-- Kolom Tanggal Masuk: Soft Emerald Badge -->
+                            <td class="py-4 px-4 text-center font-medium font-mono">
+                                {% if item.tanggal_masuk %}
+                                    <span class="inline-block bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-100/55">
+                                        {{ item.tanggal_masuk }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-slate-300">-</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Kolom Tanggal Keluar: Soft Rose Badge -->
+                            <td class="py-4 px-4 text-center font-medium font-mono">
+                                {% if item.tanggal_keluar %}
+                                    <span class="inline-block bg-rose-50 text-rose-700 px-2.5 py-1 rounded-lg border border-rose-100/55">
+                                        {{ item.tanggal_keluar }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-slate-300">-</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Kolom Peruntukan User: Soft Amber Badge -->
+                            <td class="py-4 px-4 font-medium">
+                                {% if item.untuk_user %}
+                                    <span class="inline-block bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-100/55">
+                                        {{ item.untuk_user }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-slate-300">-</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Kolom Approval Admin: Soft Styled Pill Buttons and States -->
                             <td class="py-4 px-4 text-center">
                                 {% if item.status_approve == 'Approved' %}
-                                    <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200/30">✔ Approved</span>
+                                    <span class="bg-emerald-100/80 text-emerald-700 text-[10px] font-extrabold px-3 py-1 rounded-full border border-emerald-200">✔ Approved</span>
                                 {% elif item.status_approve == 'Rejected' %}
-                                    <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/30">✖ Rejected</span>
+                                    <span class="bg-rose-100/80 text-rose-700 text-[10px] font-extrabold px-3 py-1 rounded-full border border-rose-200">✖ Rejected</span>
                                 {% else %}
-                                    <div class="inline-flex gap-1">
+                                    <div class="inline-flex gap-1.5">
                                         <form action="/spareparts/approve/{{ item.id }}" method="POST" class="inline">
-                                            <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-md shadow-sm transition-all" title="Approve">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                            <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-lg shadow-sm shadow-emerald-500/10 transition-all hover:scale-105" title="Approve">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
                                             </button>
                                         </form>
                                         <form action="/spareparts/reject/{{ item.id }}" method="POST" class="inline">
-                                            <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-md shadow-sm transition-all" title="Reject">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white p-1.5 rounded-lg shadow-sm shadow-rose-500/10 transition-all hover:scale-105" title="Reject">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
                                             </button>
                                         </form>
                                     </div>
