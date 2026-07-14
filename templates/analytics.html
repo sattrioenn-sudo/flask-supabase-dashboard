@@ -172,7 +172,7 @@
             doc.setFontSize(9.5);
             doc.setFont("Helvetica", "normal");
             doc.setTextColor(100, 116, 139); // Slate 500
-            doc.text(`LAPORAN TAHUNAN ANALITIK TRAFIK MUTASI SPAREPART - TAHUN ${tahunIni}`, 14, 21);
+            doc.text(`LAPORAN TAHUNAN MUTASI SPAREPART - TAHUN ${tahunIni}`, 14, 21);
             doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 26);
             
             // Garis Pembatas Kop
@@ -232,12 +232,12 @@
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(71, 85, 105);
-        doc.text(`TOTAL AKUMULASI TRAFIK BARANG MASUK (${tahunIni}):`, 20, 42.5);
+        doc.text(`TOTAL AKUMULASI BARANG MASUK (${tahunIni}):`, 20, 42.5);
         doc.setTextColor(16, 124, 65); // Emerald Green
         doc.text(`${totalMasukTahun} Pcs`, 105, 42.5);
 
         doc.setTextColor(71, 85, 105);
-        doc.text(`TOTAL AKUMULASI TRAFIK BARANG KELUAR (${tahunIni}):`, 150, 42.5);
+        doc.text(`TOTAL AKUMULASI BARANG KELUAR (${tahunIni}):`, 150, 42.5);
         doc.setTextColor(220, 38, 38); // Rose Red
         doc.text(`${totalKeluarTahun} Pcs`, 235, 42.5);
 
@@ -245,7 +245,7 @@
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(11);
         doc.setTextColor(30, 41, 59); // Slate 800
-        doc.text("I. VISUALISASI GRAFIK BATANG TRAFIK MUTASI BULANAN", 14, 56);
+        doc.text("I. VISUALISASI GRAFIK BATANG MUTASI BULANAN", 14, 56);
 
         // Legenda Grafik di Kanan
         doc.setFontSize(8.5);
