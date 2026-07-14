@@ -142,17 +142,17 @@
                     <tbody class="divide-y divide-slate-100 text-xs" id="tableBody">
                         <!-- MENGGUNAKAN LOOPING JINJA ASLI BAWAAN SISTEM ANDA AGAR DATA TIDAK CORRUPT ATAU ERROR -->
                         {% for item in spareparts %}
-                        <tr class="hover:bg-sky-50/30 transition-colors sparepart-row">
-                            <!-- Kolom Nama Barang: Solid Sky Text & Left Border Accent -->
-                            <td class="py-4 px-4 font-semibold text-sky-900 border-l-4 border-l-sky-500 nama-barang">
+                        <tr class="hover:bg-slate-50/50 transition-colors sparepart-row">
+                            <!-- Kolom Nama Barang: Standar Hitam/Slate & Left Border Accent Sky Blue tipis -->
+                            <td class="py-4 px-4 font-semibold text-slate-800 border-l-4 border-l-sky-500 nama-barang">
                                 {{ item.nama_barang }}
                             </td>
                             
-                            <!-- Kolom Jumlah: Sky Badge Accent -->
+                            <!-- Kolom Jumlah: Standar Teks Hitam dengan Background Netral Gray -->
                             <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 bg-sky-50 text-sky-700 font-bold px-2.5 py-1 rounded-lg border border-sky-100">
+                                <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-800 font-bold px-2.5 py-1 rounded-lg border border-slate-200">
                                     {{ item.jumlah }}
-                                    <span class="text-[9px] text-sky-400 font-medium uppercase tracking-wider">{{ item.satuan }}</span>
+                                    <span class="text-[9px] text-slate-500 font-medium uppercase tracking-wider">{{ item.satuan }}</span>
                                 </span>
                             </td>
                             
@@ -178,10 +178,10 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- Kolom Peruntukan User: Sky Badge Accent -->
+                            <!-- Kolom Peruntukan User: Standar Teks Hitam dengan Background Netral Gray -->
                             <td class="py-4 px-4 font-medium">
                                 {% if item.untuk_user %}
-                                    <span class="inline-block bg-sky-50/80 text-sky-800 px-2.5 py-1 rounded-lg border border-sky-100/50">
+                                    <span class="inline-block bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200">
                                         {{ item.untuk_user }}
                                     </span>
                                 {% else %}
