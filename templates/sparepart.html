@@ -594,17 +594,63 @@
             },
             didParseCell: function(data) {
                 if (data.section === 'body') {
+                    // 1. Kolom Tanggal Masuk (Index 2) -> Beri warna hijau jika ada datanya
                     if (data.column.index === 2 && data.cell.raw !== "") {
                         data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
                     }
+                    
+                    // 2. Kolom Tanggal Keluar (Index 3) -> Beri warna merah jika ada datanya
                     if (data.column.index === 3 && data.cell.raw !== "") {
                         data.cell.styles.textColor = [220, 38, 38]; // Rose Red
+                    }
+
+                    // 3. Kolom Status Approval (Index 5) -> Tetap Hijau/Merah
+                    if (data.column.index === 5) {
+                        if (data.cell.raw === 'Approved') {
+                            data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
+                        } else if (data.cell.raw === 'Rejected') {
+                            data.cell.styles.textColor = [220, 38, 38]; // Rose Red
+                        }
                     }
                 }
             }
         });
         
-        doc.save(`Laporan_Stock_Opname_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
+        let finalY = doc.lastAutoTable.finalY + 12;
+        
+        // Cek jika space tanda tangan melewati batas halaman
+        if (finalY > 165) {
+            doc.addPage();
+            finalY = 25;
+        }
+        
+        const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        doc.setFontSize(9);
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(51, 65, 85);
+        doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
+        
+        finalY += 5;
+        
+        doc.setFont("Helvetica", "bold");
+        doc.text("Disiapkan oleh,", 30, finalY);
+        doc.text("Diketahui oleh,", 210, finalY);
+        
+        doc.setFont("Helvetica", "normal");
+        doc.text("IT Department", 30, finalY + 4);
+        doc.text("Plant Manager", 210, finalY + 4);
+        
+        doc.setDrawColor(148, 163, 184);
+        doc.setLineWidth(0.3);
+        doc.line(30, finalY + 22, 85, finalY + 22);  
+        doc.line(210, finalY + 22, 265, finalY + 22); 
+        
+        doc.setFont("Helvetica", "bold");
+        doc.text("(Satrio & Fadli)", 30, finalY + 27);
+        doc.text("(M Agus Ariffendi)", 210, finalY + 27);
+        
+        doc.save(`Laporan_Opname_Sparepart_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 </script>
 {% endblock %}
