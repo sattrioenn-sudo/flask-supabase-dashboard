@@ -30,7 +30,7 @@
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
         
-        <!-- KOTAK INPUT MUTASI DENGAN MODAL AUTOCOMPLETE SEARCH -->
+        <!-- KOTAK INPUT MUTASI DENGAN GRADIENT & BORDER COLOR PREMIUM -->
         <div class="bg-gradient-to-b from-sky-50/50 via-white to-white border-t-4 border-t-sky-500 border-x border-b border-slate-200 rounded-2xl p-6 shadow-md xl:col-span-1">
             <div class="flex items-center gap-2 mb-4 border-b border-sky-100 pb-3">
                 <div class="w-6 h-6 rounded-md bg-sky-500 flex items-center justify-center text-white shadow-sm shadow-sky-500/20">
@@ -39,20 +39,22 @@
                 <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Input Mutasi Sparepart</h2>
             </div>
 
+            <!-- Menambahkan id="formMutasi" dan validasi onsubmit -->
             <form action="/spareparts" method="POST" id="formMutasi" onsubmit="return validateForm()" class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Barang</label>
-                    <div class="relative">
-                        <!-- Input utama dibikin readonly agar user wajib mengklik untuk memicu Modal Pencarian Pintar -->
-                        <input type="text" name="nama_barang" id="nama_barang" placeholder="Klik untuk mencari sparepart..." required readonly onclick="openSearchModal()"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all cursor-pointer font-medium">
-                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                            <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </span>
-                    </div>
+                    <!-- Menggunakan list="masterStockList" untuk melink ke dropdown datalist -->
+                    <input type="text" name="nama_barang" id="nama_barang" list="masterStockList" placeholder="Contoh: Ribbon Cartridge Epson LQ2190" required autocomplete="off"
+                        class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
                     
-                    <p id="infoBarangBaru" class="text-[10px] text-amber-600 font-semibold mt-1 hidden">ℹ Item Baru (Akan otomatis didaftarkan ke master stock saat disimpan).</p>
-                    <p id="infoBarangAda" class="text-[10px] text-emerald-600 font-semibold mt-1 hidden">✓ Master barang terverifikasi di dalam sistem.</p>
+                    <!-- Datalist Tempat Menampung Koleksi Master Nama Barang -->
+                    <datalist id="masterStockList">
+                        <!-- Diisi secara dinamis oleh JavaScript di bawah dari data tabel log mutasi -->
+                    </datalist>
+                    
+                    <!-- Alert text info jika barang baru terdeteksi pada barang masuk -->
+                    <p id="infoBarangBaru" class="text-[10px] text-amber-600 font-semibold mt-1 hidden">ℹ Master barang belum terdaftar (Akan didaftarkan sebagai item baru).</p>
+                    <p id="infoBarangAda" class="text-[10px] text-emerald-600 font-semibold mt-1 hidden">✓ Master barang sudah terdaftar di sistem.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -101,6 +103,8 @@
 
         <!-- LOG MUTASI DENGAN WARNA WARNI BARIS TABEL YANG INDAH -->
         <div class="bg-white border border-slate-200/60 rounded-2xl shadow-md overflow-hidden xl:col-span-2">
+            
+            <!-- Filter & Search Toolbar -->
             <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Log Mutasi Sparepart</h3>
@@ -108,6 +112,7 @@
                 </div>
                 
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                    <!-- Search Input -->
                     <div class="relative flex-1 sm:w-60">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                             <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,6 +123,7 @@
                                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
                     </div>
 
+                    <!-- Page Size Selector -->
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider whitespace-nowrap">Baris:</span>
                         <select id="pageSizeSelect" onchange="changePageSize()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs text-slate-700 outline-none focus:border-sky-500 transition-all">
@@ -131,6 +137,7 @@
                 </div>
             </div>
 
+            <!-- Table Layout -->
             <div class="overflow-x-auto">
                 <table id="table-sparepart" class="w-full text-left border-collapse">
                     <thead>
@@ -214,6 +221,7 @@
                         </tr>
                         {% endfor %}
                         
+                        <!-- Dynamic No Match Row -->
                         <tr id="noMatchRow" class="hidden">
                             <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Barang yang Anda cari tidak ditemukan.</td>
                         </tr>
@@ -221,6 +229,7 @@
                 </table>
             </div>
 
+            <!-- Modern Pagination Controls -->
             <div id="paginationContainer" class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
                 <span class="text-[11px] text-slate-500 font-medium">
                     Menampilkan <span class="font-bold text-slate-700" id="pageStart">0</span> - 
@@ -229,48 +238,9 @@
                 </span>
                 
                 <div class="inline-flex items-center gap-1.5" id="paginationButtons">
-                    <!-- Pagination generated by JS -->
+                    <!-- Buttons generated dynamically by JavaScript -->
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- ================================================================= -->
-<!-- MODAL WINDOW: PENCARIAN INTELLIGENT MASTER STOCK (FLEXIBLE SEARCH) -->
-<!-- ================================================================= -->
-<div id="searchModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
-    <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[80vh] transform scale-95 transition-transform duration-200" id="modalContent">
-        
-        <!-- Header Modal -->
-        <div class="p-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-5 h-5 bg-sky-600 text-white rounded flex items-center justify-center text-xs shadow-sm">🔍</div>
-                <h4 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Cari Master Nama Barang</h4>
-            </div>
-            <button onclick="closeSearchModal()" type="button" class="text-slate-400 hover:text-slate-600 text-sm font-bold p-1">&times;</button>
-        </div>
-        
-        <!-- Search Input Context -->
-        <div class="p-4 border-b border-slate-100 bg-white">
-            <input type="text" id="modalSearchInput" oninput="liveFilterMasterStock()" placeholder="Ketik kata kunci (contoh: epson, ribbon, lq)..." autocomplete="off"
-                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-700 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
-            <p class="text-[9px] text-slate-400 font-medium mt-1.5">💡 Ketik nama barang baru jika belum terdaftar di sistem master stock.</p>
-        </div>
-        
-        <!-- Search Results List Area -->
-        <div class="overflow-y-auto flex-1 p-2 bg-slate-50/50" id="modalResultList">
-            <!-- Items populated dynamically by JS -->
-        </div>
-
-        <!-- Footer Modal -->
-        <div class="p-3 bg-white border-t border-slate-100 flex items-center justify-between">
-            <button onclick="selectNewItemFromModal()" type="button" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] uppercase tracking-wider px-3 py-2 rounded-xl transition-all shadow-sm">
-                ➕ Gunakan Sebagai Barang Baru
-            </button>
-            <button onclick="closeSearchModal()" type="button" class="border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider px-3 py-2 rounded-xl hover:bg-slate-50 transition-all">
-                Batal
-            </button>
         </div>
     </div>
 </div>
@@ -278,10 +248,11 @@
 
 {% block scripts %}
 <script>
+    // System Pagination & Search state (Pure Client Side)
     let currentPage = 1;
     let pageSize = 10;
     let filteredRows = [];
-    let masterStockArray = []; 
+    let masterStockArray = []; // Menyimpan daftar unik nama barang terdaftar
 
     function toggleUserField() {
         const jenisMutasi = document.getElementById('jenis_mutasi').value;
@@ -301,13 +272,14 @@
         }
     }
 
+    // Menggabungkan fungsi toggle dengan pengecekan real-time status master barang
     function handleMutationChange() {
         toggleUserField();
         checkMasterStockStatus();
     }
 
-    // Membaca baris log untuk memetakan master stock unik
-    function buildMasterStockList() {
+    // Membaca tabel log untuk membangun dropdown master stock secara otomatis
+    function buildMasterStockDropdown() {
         const rows = document.querySelectorAll(".sparepart-row");
         const uniqueItems = new Set();
         
@@ -320,85 +292,19 @@
                 }
             }
         });
-        masterStockArray = Array.from(uniqueItems).sort();
-    }
 
-    // Modal Control Functions
-    function openSearchModal() {
-        const modal = document.getElementById("searchModal");
-        const modalContent = document.getElementById("modalContent");
-        const searchInput = document.getElementById("modalSearchInput");
+        masterStockArray = Array.from(uniqueItems);
+        const datalist = document.getElementById("masterStockList");
+        datalist.innerHTML = "";
         
-        modal.classList.remove("hidden");
-        setTimeout(() => {
-            modalContent.classList.remove("scale-95");
-            modalContent.classList.add("scale-100");
-        }, 10);
-        
-        searchInput.value = "";
-        searchInput.focus();
-        liveFilterMasterStock();
-    }
-
-    function closeSearchModal() {
-        const modal = document.getElementById("searchModal");
-        const modalContent = document.getElementById("modalContent");
-        
-        modalContent.classList.remove("scale-100");
-        modalContent.classList.add("scale-95");
-        setTimeout(() => {
-            modal.classList.add("hidden");
-        }, 150);
-    }
-
-    // Filter dinamis di dalam Modal Search (Sangat Cepat & Responsive)
-    function liveFilterMasterStock() {
-        const query = document.getElementById("modalSearchInput").value.toLowerCase().trim();
-        const container = document.getElementById("modalResultList");
-        container.innerHTML = "";
-
-        // Filter list master berdasarkan input pencarian
-        const filtered = masterStockArray.filter(item => item.toLowerCase().includes(query));
-
-        if (filtered.length === 0) {
-            container.innerHTML = `
-                <div class="p-4 text-center text-xs text-slate-400 font-medium">
-                    Master barang tidak ditemukan.<br>
-                    Klik tombol <strong class="text-amber-600">"Gunakan Sebagai Barang Baru"</strong> di bawah jika ingin mendaftarkannya.
-                </div>`;
-            return;
-        }
-
-        filtered.forEach(item => {
-            const itemDiv = document.createElement("div");
-            itemDiv.className = "p-3 mb-1 bg-white border border-slate-200/70 rounded-xl text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:border-sky-300 cursor-pointer transition-colors flex items-center justify-between";
-            itemDiv.innerHTML = `<span>📦 ${item}</span> <span class="text-[9px] bg-slate-100 text-slate-400 px-2 py-0.5 rounded uppercase font-bold">Pilih</span>`;
-            itemDiv.onclick = function() {
-                selectItemFromModal(item);
-            };
-            container.appendChild(itemDiv);
+        masterStockArray.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item;
+            datalist.appendChild(option);
         });
     }
 
-    function selectItemFromModal(itemName) {
-        const mainInput = document.getElementById("nama_barang");
-        mainInput.value = itemName;
-        closeSearchModal();
-        checkMasterStockStatus();
-    }
-
-    function selectNewItemFromModal() {
-        const query = document.getElementById("modalSearchInput").value.trim();
-        if (!query) {
-            alert("Silakan ketik nama barang baru terlebih dahulu pada kolom pencarian.");
-            return;
-        }
-        const mainInput = document.getElementById("nama_barang");
-        mainInput.value = query;
-        closeSearchModal();
-        checkMasterStockStatus();
-    }
-
+    // Melakukan pengecekan status nama barang di form input secara interaktif
     function checkMasterStockStatus() {
         const inputName = document.getElementById("nama_barang").value.replace(/\s+/g, ' ').trim();
         const jenisMutasi = document.getElementById("jenis_mutasi").value;
@@ -422,24 +328,26 @@
                 infoBarangAda.classList.add("hidden");
             }
         } else {
+            // Jika mutasi Keluar, sembunyikan info teks bantuan (validasi langsung via popup saat submit)
             infoBarangBaru.classList.add("hidden");
             infoBarangAda.classList.add("hidden");
         }
     }
 
+    // Validasi utama pencegahan data terkirim jika tidak sesuai regulasi Anda
     function validateForm() {
         const inputName = document.getElementById("nama_barang").value.replace(/\s+/g, ' ').trim();
         const jenisMutasi = document.getElementById("jenis_mutasi").value;
         const isRegistered = masterStockArray.includes(inputName);
 
         if (jenisMutasi === "Keluar" && !isRegistered) {
-            alert("Gagal: Transaksi barang keluar tidak diizinkan untuk Nama Barang yang belum terdaftar di sistem master stock!");
-            return false;
+            alert("Master Nama Barang Tidak Terdaftar");
+            return false; // Menggagalkan submit form
         }
-        return true; 
+        return true; // Melanjutkan proses simpan data ke backend
     }
 
-    // Table Pagination & Filter Controls
+    // Fungsi Utama Filter & Pagination
     function initTableControl() {
         const rows = document.querySelectorAll(".sparepart-row");
         filteredRows = Array.from(rows);
@@ -464,6 +372,7 @@
             }
         });
 
+        // Toggle No Match Row
         const noMatchRow = document.getElementById("noMatchRow");
         if (filteredRows.length === 0 && rows.length > 0) {
             if (noMatchRow) noMatchRow.classList.remove("hidden");
@@ -500,6 +409,7 @@
             start = (currentPage - 1) * pageSize;
             end = Math.min(start + pageSize, total);
             
+            // Sembunyikan element di luar limit page saat ini
             filteredRows.forEach((row, idx) => {
                 if (idx >= start && idx < end) {
                     row.classList.remove("hidden");
@@ -511,6 +421,7 @@
             filteredRows.forEach(row => row.classList.remove("hidden"));
         }
 
+        // Update Text Info
         document.getElementById("pageStart").innerText = total > 0 ? start + 1 : 0;
         document.getElementById("pageEnd").innerText = end;
         document.getElementById("totalRows").innerText = total;
@@ -528,6 +439,7 @@
         const totalPages = Math.ceil(total / pageSize);
         if (totalPages <= 1) return;
 
+        // Button Prev
         const prevBtn = document.createElement("button");
         prevBtn.className = "p-2 border border-slate-200 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed";
         prevBtn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>`;
@@ -540,6 +452,7 @@
         };
         btnContainer.appendChild(prevBtn);
 
+        // Page Number Buttons
         for (let i = 1; i <= totalPages; i++) {
             const pageBtn = document.createElement("button");
             if (i === currentPage) {
@@ -555,6 +468,7 @@
             btnContainer.appendChild(pageBtn);
         }
 
+        // Button Next
         const nextBtn = document.createElement("button");
         nextBtn.className = "p-2 border border-slate-200 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed";
         nextBtn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>`;
@@ -571,34 +485,29 @@
     document.addEventListener("DOMContentLoaded", function() {
         toggleUserField();
         initTableControl();
-        buildMasterStockList();
-        
-        // Menutup modal otomatis jika klik di area luar kotak putih modal
-        window.onclick = function(event) {
-            const modal = document.getElementById("searchModal");
-            if (event.target === modal) {
-                closeSearchModal();
-            }
-        }
+        buildMasterStockDropdown();
+
+        // Listener untuk cek perubahan nama barang secara interaktif
+        document.getElementById("nama_barang").addEventListener("input", checkMasterStockStatus);
     });
 
-    // Fitur PDF Export menggunakan Data DOM Asli 
+    // EKSPOR LAPORAN TETAP MENGGUNAKAN DATA DOM TABEL ASLI
     function exportOpnamePDF(tipeLaporan) {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4');
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
         
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(14);
-        doc.setTextColor(15, 23, 42); 
+        doc.setTextColor(15, 23, 42); // Slate 900
         doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 14);
         
         doc.setFontSize(9);
         doc.setFont("Helvetica", "normal");
-        doc.setTextColor(100, 116, 139);
+        doc.setTextColor(100, 116, 139); // Slate 500
         doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 19);
         doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 23);
         
-        doc.setDrawColor(226, 232, 240);
+        doc.setDrawColor(226, 232, 240); // Slate 200
         doc.setLineWidth(0.5);
         doc.line(14, 26, 283, 26);
         
@@ -632,56 +541,70 @@
                 if (tglKeluar === "-") tglKeluar = "";
                 if (untukUser === "-") untukUser = "";
 
-                rows.push([namaBarang, jumlah, tglMasuk, tglKeluar, untukUser, statusText]);
+                rows.push([
+                    namaBarang,
+                    jumlah,
+                    tglMasuk,
+                    tglKeluar,
+                    untukUser,
+                    statusText
+                ]);
             }
         }
         
-        const columns = ["Nama Barang / Sparepart", "Jumlah", "Tanggal Masuk", "Tanggal Keluar", "Peruntukan User / Mesin", "Status"];
+        const columns = [
+            "Nama Barang / Sparepart", 
+            "Jumlah", 
+            "Tanggal Masuk", 
+            "Tanggal Keluar", 
+            "Peruntukan User / Mesin", 
+            "Status"
+        ];
         
         doc.autoTable({
             head: [columns],
             body: rows,
             startY: 30,
             theme: 'grid',
-            headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontSize: 8.5, fontStyle: 'bold', halign: 'left' },
-            bodyStyles: { fontSize: 8, textColor: [51, 65, 85] },
-            columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 25, halign: 'center' }, 2: { cellWidth: 35, halign: 'center' }, 3: { cellWidth: 35, halign: 'center' }, 4: { cellWidth: 55 }, 5: { cellWidth: 30, halign: 'center' } },
+            headStyles: {
+                fillColor: [15, 23, 42], // Slate 900
+                textColor: [255, 255, 255],
+                fontSize: 8.5,
+                fontStyle: 'bold',
+                halign: 'left',
+                valign: 'middle'
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: [51, 65, 85], // Slate 700
+                valign: 'middle'
+            },
+            styles: {
+                overflow: 'linebreak',
+                cellPadding: 2,
+                lineColor: [226, 232, 240]
+            },
+            columnStyles: {
+                0: { cellWidth: 90 },  
+                1: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, 
+                2: { cellWidth: 35, halign: 'center', fontStyle: 'bold' },
+                3: { cellWidth: 35, halign: 'center', fontStyle: 'bold' },
+                4: { cellWidth: 55, halign: 'left' },
+                5: { cellWidth: 30, halign: 'center', fontStyle: 'bold' }
+            },
             didParseCell: function(data) {
                 if (data.section === 'body') {
-                    if (data.column.index === 2 && data.cell.raw !== "") data.cell.styles.textColor = [16, 124, 65];
-                    if (data.column.index === 3 && data.cell.raw !== "") data.cell.styles.textColor = [220, 38, 38];
-                    if (data.column.index === 5) {
-                        if (data.cell.raw === 'Approved') data.cell.styles.textColor = [16, 124, 65];
-                        if (data.cell.raw === 'Rejected') data.cell.styles.textColor = [220, 38, 38];
+                    if (data.column.index === 2 && data.cell.raw !== "") {
+                        data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
+                    }
+                    if (data.column.index === 3 && data.cell.raw !== "") {
+                        data.cell.styles.textColor = [220, 38, 38]; // Rose Red
                     }
                 }
             }
         });
         
-        let finalY = doc.lastAutoTable.finalY + 12;
-        if (finalY > 165) {
-            doc.addPage();
-            finalY = 25;
-        }
-        
-        const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-        doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
-        finalY += 5;
-        doc.setFont("Helvetica", "bold");
-        doc.text("Disiapkan oleh,", 30, finalY);
-        doc.text("Diketahui oleh,", 210, finalY);
-        doc.setFont("Helvetica", "normal");
-        doc.text("IT Department", 30, finalY + 4);
-        doc.text("Plant Manager", 210, finalY + 4);
-        
-        doc.setDrawColor(148, 163, 184);
-        doc.line(30, finalY + 22, 85, finalY + 22);  
-        doc.line(210, finalY + 22, 265, finalY + 22); 
-        
-        doc.setFont("Helvetica", "bold");
-        doc.text("(Satrio & Fadli)", 30, finalY + 27);
-        doc.text("(M Agus Ariffendi)", 210, finalY + 27);
-        
-        doc.save(`Laporan_Opname_Sparepart_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
+        doc.save(`Laporan_Stock_Opname_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 </script>
+{% endblock %}
