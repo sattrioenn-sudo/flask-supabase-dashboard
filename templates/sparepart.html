@@ -413,19 +413,19 @@
         const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
         
         doc.setFont("Helvetica", "bold");
-        doc.setFontSize(16);
+        doc.setFontSize(14);
         doc.setTextColor(15, 23, 42); // Slate 900
-        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 16);
+        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 14);
         
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setFont("Helvetica", "normal");
         doc.setTextColor(100, 116, 139); // Slate 500
-        doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 22);
-        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 27);
+        doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 19);
+        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 23);
         
         doc.setDrawColor(226, 232, 240); // Slate 200
         doc.setLineWidth(0.5);
-        doc.line(14, 31, 283, 31);
+        doc.line(14, 26, 283, 26);
         
         const rows = [];
         const table = document.getElementById("table-sparepart");
@@ -439,22 +439,33 @@
         for (let i = 0; i < trs.length; i++) {
             const tds = trs[i].getElementsByTagName("td");
             if (tds.length >= 6) {
-                let rawStatus = tds[5].innerText.trim();
-                let statusText = "Pending";
+                // Membersihkan ekstra spasi, tab, dan baris baru dari elemen HTML
+                let namaBarang = tds[0].innerText.replace(/\s+/g, ' ').trim();
+                let jumlah = tds[1].innerText.replace(/\s+/g, ' ').trim();
+                let tglMasuk = tds[2].innerText.replace(/\s+/g, ' ').trim();
+                let tglKeluar = tds[3].innerText.replace(/\s+/g, ' ').trim();
+                let untukUser = tds[4].innerText.replace(/\s+/g, ' ').trim();
+                let rawStatus = tds[5].innerText.replace(/\s+/g, ' ').trim();
                 
+                let statusText = "Pending";
                 if (rawStatus.includes("Approved")) {
                     statusText = "Approved";
                 } else if (rawStatus.includes("Rejected")) {
                     statusText = "Rejected";
                 }
 
+                // Jika kolom kosong berisi "-", bersihkan agar rapi
+                if (tglMasuk === "-") tglMasuk = "";
+                if (tglKeluar === "-") tglKeluar = "";
+                if (untukUser === "-") untukUser = "";
+
                 rows.push([
-                    tds[0].innerText, // Nama Barang
-                    tds[1].innerText, // Jumlah + Satuan
-                    tds[2].innerText, // Tanggal Masuk
-                    tds[3].innerText, // Tanggal Keluar
-                    tds[4].innerText, // Peruntukan User
-                    statusText        // Approval Status
+                    namaBarang,
+                    jumlah,
+                    tglMasuk,
+                    tglKeluar,
+                    untukUser,
+                    statusText
                 ]);
             }
         }
@@ -471,57 +482,62 @@
         doc.autoTable({
             head: [columns],
             body: rows,
-            startY: 36,
+            startY: 30,
             theme: 'grid',
             headStyles: {
-                fillColor: [15, 23, 42],
+                fillColor: [15, 23, 42], // Slate 900
                 textColor: [255, 255, 255],
-                fontSize: 9,
+                fontSize: 8.5,
                 fontStyle: 'bold',
-                halign: 'left'
+                halign: 'left',
+                valign: 'middle'
             },
             bodyStyles: {
-                fontSize: 8.5,
-                textColor: [51, 65, 85]
+                fontSize: 8,
+                textColor: [51, 65, 85], // Slate 700
+                valign: 'middle'
             },
             styles: {
                 overflow: 'linebreak',
-                cellPadding: 4
+                cellPadding: 2, // Diperkecil dari 4 ke 2 agar baris tidak terlalu tinggi/mubazir ruang
+                lineColor: [226, 232, 240] // Garis border tipis abu-abu terang
             },
             columnStyles: {
-                1: { halign: 'center', fontStyle: 'bold' },
-                2: { halign: 'center' },
-                3: { halign: 'center' },
-                5: { halign: 'center', fontStyle: 'bold' }
+                0: { cellWidth: 90 },  // Lebar kolom Nama Barang lebih luas agar tidak gampang wrap
+                1: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, // Kolom Jumlah dipersempit
+                2: { cellWidth: 35, halign: 'center' },
+                3: { cellWidth: 35, halign: 'center' },
+                4: { cellWidth: 55, halign: 'left' },
+                5: { cellWidth: 30, halign: 'center', fontStyle: 'bold' }
             },
             didParseCell: function(data) {
+                // Mewarnai teks status Approved (Hijau) / Rejected (Merah) demi estetika
                 if (data.section === 'body' && data.column.index === 5) {
                     if (data.cell.raw === 'Approved') {
-                        data.cell.styles.textColor = [16, 124, 65];
+                        data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
                     } else if (data.cell.raw === 'Rejected') {
-                        data.cell.styles.textColor = [220, 38, 38];
-                    } else {
-                        data.cell.styles.textColor = [100, 116, 139];
+                        data.cell.styles.textColor = [220, 38, 38]; // Rose Red
                     }
                 }
             }
         });
         
-        let finalY = doc.lastAutoTable.finalY + 15;
+        let finalY = doc.lastAutoTable.finalY + 12;
         
-        if (finalY > 160) {
+        // Cek jika space tanda tangan melewati batas halaman
+        if (finalY > 165) {
             doc.addPage();
-            finalY = 30;
+            finalY = 25;
         }
         
         const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
         
-        doc.setFontSize(9.5);
+        doc.setFontSize(9);
         doc.setFont("Helvetica", "normal");
         doc.setTextColor(51, 65, 85);
         doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
         
-        finalY += 6;
+        finalY += 5;
         
         doc.setFont("Helvetica", "bold");
         doc.text("Disiapkan oleh,", 30, finalY);
@@ -533,12 +549,12 @@
         
         doc.setDrawColor(148, 163, 184);
         doc.setLineWidth(0.3);
-        doc.line(30, finalY + 26, 85, finalY + 26);  
-        doc.line(210, finalY + 26, 265, finalY + 26); 
+        doc.line(30, finalY + 22, 85, finalY + 22);  
+        doc.line(210, finalY + 22, 265, finalY + 22); 
         
         doc.setFont("Helvetica", "bold");
-        doc.text("Satrio Eko Nugroho", 30, finalY + 31);
-        doc.text("( ____________________ )", 210, finalY + 31);
+        doc.text("(Satrio & Fadli)", 30, finalY + 27);
+        doc.text("(M Agus Ariffendi)", 210, finalY + 27);
         
         doc.save(`Laporan_Opname_Sparepart_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
     }
