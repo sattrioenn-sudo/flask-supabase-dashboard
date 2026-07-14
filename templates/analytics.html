@@ -152,11 +152,11 @@
     });
 
     // ========================================================
-    // FUNGSI BARU: GENERATE PDF ANALYTICS DENGAN TTD RESMI
+    // FUNGSI UTAMA: EXPORT PDF DENGAN GRAFIK BATANG VECTOR DUA WARNA
     // ========================================================
     function exportAnalyticsPDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4 (297mm x 210mm)
         
         const tahunIni = "{{ tahun }}";
         const totalMasukTahun = document.getElementById("total-masuk-tahun").innerText.replace(" Pcs","");
@@ -181,31 +181,35 @@
         
         // --- 2. Blok Summary Akumulasi Tahunan ---
         doc.setFillColor(248, 250, 252); // Slate 50
-        doc.roundedRect(14, 36, 269, 18, 2, 2, 'F');
+        doc.roundedRect(14, 36, 269, 14, 2, 2, 'F');
         
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(9);
         doc.setTextColor(71, 85, 105);
-        doc.text(`TOTAL AKUMULASI TRAFIK BARANG MASUK (${tahunIni}):`, 20, 47);
+        doc.text(`TOTAL AKUMULASI TRAFIK BARANG MASUK (${tahunIni}):`, 20, 45);
         doc.setTextColor(16, 124, 65); // Emerald Green
-        doc.text(`${totalMasukTahun} Pcs`, 105, 47);
+        doc.text(`${totalMasukTahun} Pcs`, 105, 45);
 
         doc.setTextColor(71, 85, 105);
-        doc.text(`TOTAL AKUMULASI TRAFIK BARANG KELUAR (${tahunIni}):`, 150, 47);
+        doc.text(`TOTAL AKUMULASI TRAFIK BARANG KELUAR (${tahunIni}):`, 150, 45);
         doc.setTextColor(220, 38, 38); // Rose Red
-        doc.text(`${totalKeluarTahun} Pcs`, 235, 47);
+        doc.text(`${totalKeluarTahun} Pcs`, 235, 45);
 
-        // --- 3. Mengambil Data Rincian Bulanan ---
+        // --- 3. Parsing Data Rincian dari DOM HTML ---
         const rows = [];
-        const nodes = document.querySelectorAll(".bulan-data-node");
+        const chartData = [];
+        let maxValFound = 0; 
         
+        const nodes = document.querySelectorAll(".bulan-data-node");
         nodes.forEach(node => {
             const bul = node.getAttribute("data-bulan");
-            const mas = node.getAttribute("data-masuk");
-            const kel = node.getAttribute("data-keluar");
+            const mas = parseInt(node.getAttribute("data-masuk")) || 0;
+            const kel = parseInt(node.getAttribute("data-keluar")) || 0;
             
-            // Hitung selisih/selisih bersih
-            const selisih = parseInt(mas) - parseInt(kel);
+            if (mas > maxValFound) maxValFound = mas;
+            if (kel > maxValFound) maxValFound = kel;
+
+            const selisih = mas - kel;
             const statusSelisih = selisih >= 0 ? `+${selisih}` : `${selisih}`;
 
             rows.push([
@@ -214,38 +218,118 @@
                 `${kel} Pcs`,
                 `${statusSelisih} Pcs`
             ]);
+
+            chartData.push({
+                bulan: bul.substring(0, 3).toUpperCase(),
+                masuk: mas,
+                keluar: kel
+            });
         });
 
+        if (maxValFound === 0) maxValFound = 100; // Proteksi pembagian nol
+
+        // --- 4. RENDER Vektor Grafik Batang Bulanan ---
+        const chartStartX = 18;
+        const chartStartY = 95;
+        const chartHeight = 35; // Tinggi maksimum batang grafik (mm)
+        const spaceBetweenMonths = 22; // Lebar blok alokasi per bulan
+        const barWidth = 4; // Lebar per bar/batang (mm)
+
+        // Judul Grafik di PDF
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(30, 41, 59); // Slate 800
+        doc.text("GRAFIK BATANG KOMPARASI MUTASI BULANAN", 14, 57);
+
+        // Subtitle & Legenda Grafik
+        doc.setFontSize(8);
+        doc.setFont("Helvetica", "normal");
+        doc.setTextColor(148, 163, 184);
+        doc.text("Tinggi batang proporsional terhadap kuantitas mutasi tertinggi.", 14, 61);
+        
+        // Kotak Legenda Hijau (Barang Masuk)
+        doc.setFillColor(16, 124, 65);
+        doc.rect(200, 56, 3, 3, 'F');
+        doc.setTextColor(71, 85, 105);
+        doc.setFont("Helvetica", "bold");
+        doc.text("Barang Masuk (+)", 205, 59.5);
+
+        // Kotak Legenda Merah (Barang Keluar)
+        doc.setFillColor(220, 38, 38);
+        doc.rect(240, 56, 3, 3, 'F');
+        doc.text("Barang Keluar (-)", 245, 59.5);
+
+        // Gambar Garis Base-line Grafik
+        doc.setDrawColor(203, 213, 225); // Slate 300
+        doc.setLineWidth(0.4);
+        doc.line(14, chartStartY, 280, chartStartY);
+
+        // Iterasi menggambar batang untuk 12 Bulan
+        chartData.forEach((d, index) => {
+            const currentX = chartStartX + (index * spaceBetweenMonths);
+
+            // Hitung tinggi proporsional masing-masing batang
+            const heightMasuk = (d.masuk / maxValFound) * chartHeight;
+            const heightKeluar = (d.keluar / maxValFound) * chartHeight;
+
+            // Gambar Batang Barang Masuk (Hijau)
+            if (heightMasuk > 0) {
+                doc.setFillColor(16, 124, 65);
+                doc.rect(currentX, chartStartY - heightMasuk, barWidth, heightMasuk, 'F');
+                // Angka kuantitas di atas batang masuk
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(7);
+                doc.setTextColor(16, 124, 65);
+                doc.text(`${d.masuk}`, currentX, chartStartY - heightMasuk - 1.5);
+            }
+
+            // Gambar Batang Barang Keluar (Merah) -> Digeser ke sebelah kanannya
+            if (heightKeluar > 0) {
+                doc.setFillColor(220, 38, 38);
+                doc.rect(currentX + barWidth + 1, chartStartY - heightKeluar, barWidth, heightKeluar, 'F');
+                // Angka kuantitas di atas batang keluar
+                doc.setFont("Helvetica", "normal");
+                doc.setFontSize(7);
+                doc.setTextColor(220, 38, 38);
+                doc.text(`${d.keluar}`, currentX + barWidth + 1, chartStartY - heightKeluar - 1.5);
+            }
+
+            // Label Singkatan Nama Bulan di bawah Baseline
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(8);
+            doc.setTextColor(100, 116, 139);
+            doc.text(d.bulan, currentX + 1, chartStartY + 4);
+        });
+
+        // --- 5. Render Tabel Data Mutasi ---
         const columns = ["Bulan", "Kuantitas Barang Masuk (+)", "Kuantitas Barang Keluar (-)", "Selisih Aliran Stok"];
 
-        // --- 4. Render Tabel Data ---
         doc.autoTable({
             head: [columns],
             body: rows,
-            startY: 60,
+            startY: 106, // Diposisikan tepat di bawah grafik batang agar pas satu halaman
             theme: 'grid',
             headStyles: {
                 fillColor: [15, 23, 42], // Slate 900
                 textColor: [255, 255, 255],
-                fontSize: 9.5,
+                fontSize: 9,
                 fontStyle: 'bold',
                 halign: 'center'
             },
             bodyStyles: {
-                fontSize: 9,
+                fontSize: 8.5,
                 textColor: [51, 65, 85],
                 halign: 'center'
             },
             styles: {
-                cellPadding: 4
+                cellPadding: 3
             },
             columnStyles: {
                 0: { fontStyle: 'bold', halign: 'left' }, // Nama Bulan
-                1: { textColor: [16, 124, 65] },         // Masuk
-                2: { textColor: [220, 38, 38] }          // Keluar
+                1: { textColor: [16, 124, 65] },          // Masuk
+                2: { textColor: [220, 38, 38] }           // Keluar
             },
             didParseCell: function(data) {
-                // Beri warna khusus pada kolom selisih
                 if (data.section === 'body' && data.column.index === 3) {
                     if (data.cell.raw.includes('-')) {
                         data.cell.styles.textColor = [220, 38, 38]; // Merah jika minus
@@ -256,23 +340,23 @@
             }
         });
 
-        // --- 5. Blok Tanda Tangan (TTD) ---
-        let finalY = doc.lastAutoTable.finalY + 15;
+        // --- 6. Blok Pengesahan / Tanda Tangan (TTD) ---
+        let finalY = doc.lastAutoTable.finalY + 12;
         
-        // Cek space halaman jika mentok
-        if (finalY > 155) {
+        // Pengecekan sisa halaman (jika meluap, buat halaman baru)
+        if (finalY > 165) {
             doc.addPage();
-            finalY = 30;
+            finalY = 25;
         }
 
         const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
         
-        doc.setFontSize(9.5);
+        doc.setFontSize(9);
         doc.setFont("Helvetica", "normal");
         doc.setTextColor(51, 65, 85);
         doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
         
-        finalY += 6;
+        finalY += 5;
         
         doc.setFont("Helvetica", "bold");
         doc.text("Disiapkan oleh,", 30, finalY);
@@ -284,14 +368,14 @@
         
         doc.setDrawColor(148, 163, 184);
         doc.setLineWidth(0.3);
-        doc.line(30, finalY + 26, 85, finalY + 26);  
-        doc.line(210, finalY + 26, 265, finalY + 26); 
+        doc.line(30, finalY + 22, 85, finalY + 22);  
+        doc.line(210, finalY + 22, 265, finalY + 22); 
         
         doc.setFont("Helvetica", "bold");
-        doc.text("Satrio Eko Nugroho", 30, finalY + 31); 
-        doc.text("( ____________________ )", 210, finalY + 31);
+        doc.text("Satrio Eko Nugroho", 30, finalY + 26); 
+        doc.text("( ____________________ )", 210, finalY + 26);
         
-        // --- 6. Simpan File PDF ---
+        // --- 7. Simpan File PDF Tergenerate ---
         doc.save(`Laporan_Tahunan_Analytics_Sparepart_${tahunIni}.pdf`);
     }
 </script>
