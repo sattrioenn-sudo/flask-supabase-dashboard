@@ -403,7 +403,7 @@ def sparepart_management():
         if jenis_mutasi == 'Masuk':
             tanggal_masuk = tanggal_input if tanggal_input else None
             tanggal_keluar = None
-            untuk_user = "Gudang / Stock" # Otomatis diset ke gudang jika barang masuk
+            untuk_user = "STOCK" # Otomatis diset ke gudang jika barang masuk
         else:
             tanggal_masuk = None
             tanggal_keluar = tanggal_input if tanggal_input else None
