@@ -152,7 +152,7 @@
     });
 
     // ========================================================
-    // FUNGSI UTAMA: EXPORT PDF DENGAN GRAFIK BATANG VECTOR DUA WARNA
+    // FUNGSI UTAMA: EXPORT PDF MULTI-HALAMAN (HAL 1: GRAFIK | HAL 2: TABEL & TTD)
     // ========================================================
     function exportAnalyticsPDF() {
         const { jsPDF } = window.jspdf;
@@ -162,40 +162,32 @@
         const totalMasukTahun = document.getElementById("total-masuk-tahun").innerText.replace(" Pcs","");
         const totalKeluarTahun = document.getElementById("total-keluar-tahun").innerText.replace(" Pcs","");
 
-        // --- 1. Header Laporan ---
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(16);
-        doc.setTextColor(15, 23, 42); // Slate 900
-        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 16);
-        
-        doc.setFontSize(10);
-        doc.setFont("Helvetica", "normal");
-        doc.setTextColor(100, 116, 139); // Slate 500
-        doc.text(`LAPORAN TAHUNAN ANALITIK TRAFIK MUTASI SPAREPART - TAHUN ${tahunIni}`, 14, 22);
-        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 27);
-        
-        // Garis Pembatas Kop
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.5);
-        doc.line(14, 31, 283, 31);
-        
-        // --- 2. Blok Summary Akumulasi Tahunan ---
-        doc.setFillColor(248, 250, 252); // Slate 50
-        doc.roundedRect(14, 36, 269, 14, 2, 2, 'F');
-        
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(9);
-        doc.setTextColor(71, 85, 105);
-        doc.text(`TOTAL AKUMULASI TRAFIK BARANG MASUK (${tahunIni}):`, 20, 45);
-        doc.setTextColor(16, 124, 65); // Emerald Green
-        doc.text(`${totalMasukTahun} Pcs`, 105, 45);
+        // --- FUNGSI TEMPLATE HEADER UNTUK SETIAP HALAMAN ---
+        function writeHeaderPage(pageNumber) {
+            doc.setFont("Helvetica", "bold");
+            doc.setFontSize(15);
+            doc.setTextColor(15, 23, 42); // Slate 900
+            doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 15);
+            
+            doc.setFontSize(9.5);
+            doc.setFont("Helvetica", "normal");
+            doc.setTextColor(100, 116, 139); // Slate 500
+            doc.text(`LAPORAN TAHUNAN ANALITIK TRAFIK MUTASI SPAREPART - TAHUN ${tahunIni}`, 14, 21);
+            doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 26);
+            
+            // Garis Pembatas Kop
+            doc.setDrawColor(226, 232, 240);
+            doc.setLineWidth(0.4);
+            doc.line(14, 29, 283, 29);
 
-        doc.setTextColor(71, 85, 105);
-        doc.text(`TOTAL AKUMULASI TRAFIK BARANG KELUAR (${tahunIni}):`, 150, 45);
-        doc.setTextColor(220, 38, 38); // Rose Red
-        doc.text(`${totalKeluarTahun} Pcs`, 235, 45);
+            // Penomoran Halaman di Pojok Kanan Atas
+            doc.setFontSize(8);
+            doc.setFont("Helvetica", "bold");
+            doc.setTextColor(148, 163, 184);
+            doc.text(`Halaman ${pageNumber} dari 2`, 265, 15);
+        }
 
-        // --- 3. Parsing Data Rincian dari DOM HTML ---
+        // --- 1. PROSES DATA DARI DOM ---
         const rows = [];
         const chartData = [];
         let maxValFound = 0; 
@@ -228,101 +220,134 @@
 
         if (maxValFound === 0) maxValFound = 100; // Proteksi pembagian nol
 
-        // --- 4. RENDER Vektor Grafik Batang Bulanan ---
-        const chartStartX = 18;
-        const chartStartY = 95;
-        const chartHeight = 35; // Tinggi maksimum batang grafik (mm)
-        const spaceBetweenMonths = 22; // Lebar blok alokasi per bulan
-        const barWidth = 4; // Lebar per bar/batang (mm)
+        // ========================================================
+        // HALAMAN 1: SUMMARY & GRAFIK BATANG EKSEKUTIF
+        // ========================================================
+        writeHeaderPage(1);
 
-        // Judul Grafik di PDF
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(10);
-        doc.setTextColor(30, 41, 59); // Slate 800
-        doc.text("GRAFIK BATANG KOMPARASI MUTASI BULANAN", 14, 57);
-
-        // Subtitle & Legenda Grafik
-        doc.setFontSize(8);
-        doc.setFont("Helvetica", "normal");
-        doc.setTextColor(148, 163, 184);
-        doc.text("Tinggi batang proporsional terhadap kuantitas mutasi tertinggi.", 14, 61);
+        // Blok Akumulasi Ringkasan Tahunan
+        doc.setFillColor(248, 250, 252); // Slate 50
+        doc.roundedRect(14, 34, 269, 13, 2, 2, 'F');
         
-        // Kotak Legenda Hijau (Barang Masuk)
-        doc.setFillColor(16, 124, 65);
-        doc.rect(200, 56, 3, 3, 'F');
-        doc.setTextColor(71, 85, 105);
         doc.setFont("Helvetica", "bold");
-        doc.text("Barang Masuk (+)", 205, 59.5);
+        doc.setFontSize(9);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`TOTAL AKUMULASI TRAFIK BARANG MASUK (${tahunIni}):`, 20, 42.5);
+        doc.setTextColor(16, 124, 65); // Emerald Green
+        doc.text(`${totalMasukTahun} Pcs`, 105, 42.5);
 
-        // Kotak Legenda Merah (Barang Keluar)
-        doc.setFillColor(220, 38, 38);
-        doc.rect(240, 56, 3, 3, 'F');
-        doc.text("Barang Keluar (-)", 245, 59.5);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`TOTAL AKUMULASI TRAFIK BARANG KELUAR (${tahunIni}):`, 150, 42.5);
+        doc.setTextColor(220, 38, 38); // Rose Red
+        doc.text(`${totalKeluarTahun} Pcs`, 235, 42.5);
 
-        // Gambar Garis Base-line Grafik
+        // Judul Area Grafik
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(30, 41, 59); // Slate 800
+        doc.text("I. VISUALISASI GRAFIK BATANG TRAFIK MUTASI BULANAN", 14, 56);
+
+        // Legenda Grafik di Kanan
+        doc.setFontSize(8.5);
+        doc.setFillColor(16, 124, 65); // Hijau Masuk
+        doc.rect(205, 52.5, 3.5, 3.5, 'F');
+        doc.setTextColor(71, 85, 105);
+        doc.text("Barang Masuk (+)", 211, 56);
+
+        doc.setFillColor(220, 38, 38); // Merah Keluar
+        doc.rect(245, 52.5, 3.5, 3.5, 'F');
+        doc.text("Barang Keluar (-)", 251, 56);
+
+        // Parameter Penggambaran Grafik (Skala Lebih Besar & Longgar)
+        const chartStartX = 24;
+        const chartStartY = 165; // Letak baseline grafik di bawah halaman 1
+        const chartHeight = 85;  // Tinggi grafik maksimum (jauh lebih tinggi & megah)
+        const spaceBetweenMonths = 22; 
+        const barWidth = 5;      // Batang diperlebar sedikit agar tegas
+
+        // Garis Baseline Vektor
         doc.setDrawColor(203, 213, 225); // Slate 300
-        doc.setLineWidth(0.4);
-        doc.line(14, chartStartY, 280, chartStartY);
+        doc.setLineWidth(0.5);
+        doc.line(14, chartStartY, 283, chartStartY);
 
-        // Iterasi menggambar batang untuk 12 Bulan
+        // Loop Render Vektor Halaman 1
         chartData.forEach((d, index) => {
             const currentX = chartStartX + (index * spaceBetweenMonths);
 
-            // Hitung tinggi proporsional masing-masing batang
+            // Hitung tinggi berdasarkan skala max
             const heightMasuk = (d.masuk / maxValFound) * chartHeight;
             const heightKeluar = (d.keluar / maxValFound) * chartHeight;
 
-            // Gambar Batang Barang Masuk (Hijau)
+            // Batang Barang Masuk
             if (heightMasuk > 0) {
                 doc.setFillColor(16, 124, 65);
                 doc.rect(currentX, chartStartY - heightMasuk, barWidth, heightMasuk, 'F');
-                // Angka kuantitas di atas batang masuk
+                // Teks Angka Masuk di atas batang
                 doc.setFont("Helvetica", "normal");
-                doc.setFontSize(7);
+                doc.setFontSize(7.5);
                 doc.setTextColor(16, 124, 65);
-                doc.text(`${d.masuk}`, currentX, chartStartY - heightMasuk - 1.5);
+                doc.text(`${d.masuk}`, currentX - 0.5, chartStartY - heightMasuk - 2);
             }
 
-            // Gambar Batang Barang Keluar (Merah) -> Digeser ke sebelah kanannya
+            // Batang Barang Keluar (Disamping kanan batang masuk)
             if (heightKeluar > 0) {
                 doc.setFillColor(220, 38, 38);
-                doc.rect(currentX + barWidth + 1, chartStartY - heightKeluar, barWidth, heightKeluar, 'F');
-                // Angka kuantitas di atas batang keluar
+                doc.rect(currentX + barWidth + 1.2, chartStartY - heightKeluar, barWidth, heightKeluar, 'F');
+                // Teks Angka Keluar di atas batang
                 doc.setFont("Helvetica", "normal");
-                doc.setFontSize(7);
+                doc.setFontSize(7.5);
                 doc.setTextColor(220, 38, 38);
-                doc.text(`${d.keluar}`, currentX + barWidth + 1, chartStartY - heightKeluar - 1.5);
+                doc.text(`${d.keluar}`, currentX + barWidth + 0.7, chartStartY - heightKeluar - 2);
             }
 
-            // Label Singkatan Nama Bulan di bawah Baseline
+            // Teks Label Singkatan Bulan di Bawah Garis Baseline
             doc.setFont("Helvetica", "bold");
-            doc.setFontSize(8);
-            doc.setTextColor(100, 116, 139);
-            doc.text(d.bulan, currentX + 1, chartStartY + 4);
+            doc.setFontSize(8.5);
+            doc.setTextColor(71, 85, 105);
+            doc.text(d.bulan, currentX + 1.5, chartStartY + 5);
         });
 
-        // --- 5. Render Tabel Data Mutasi ---
+        // Catatan Kaki Halaman 1
+        doc.setFont("Helvetica", "italic");
+        doc.setFontSize(7.5);
+        doc.setTextColor(148, 163, 184);
+        doc.text("Laporan Grafis Vektor Otomatis - PT. Kemasan Ciptatama Sempurna", 14, 198);
+
+
+        // ========================================================
+        // HALAMAN 2: RINCIAN TABEL DATA & OTORISASI TTD
+        // ========================================================
+        doc.addPage();
+        writeHeaderPage(2);
+
+        // Judul Bagian Tabel
+        doc.setFont("Helvetica", "bold");
+        doc.setFontSize(11);
+        doc.setTextColor(30, 41, 59);
+        doc.text("II. TABEL RINCIAN KUANTITAS MUTASI SPAREPART BULANAN", 14, 38);
+
         const columns = ["Bulan", "Kuantitas Barang Masuk (+)", "Kuantitas Barang Keluar (-)", "Selisih Aliran Stok"];
 
+        // Render Autotable di Halaman 2
         doc.autoTable({
             head: [columns],
             body: rows,
-            startY: 106, // Diposisikan tepat di bawah grafik batang agar pas satu halaman
+            startY: 43,
             theme: 'grid',
             headStyles: {
                 fillColor: [15, 23, 42], // Slate 900
                 textColor: [255, 255, 255],
-                fontSize: 9,
+                fontSize: 9.5,
                 fontStyle: 'bold',
                 halign: 'center'
             },
             bodyStyles: {
-                fontSize: 8.5,
+                fontSize: 9,
                 textColor: [51, 65, 85],
                 halign: 'center'
             },
             styles: {
-                cellPadding: 3
+                cellPadding: 3.5
             },
             columnStyles: {
                 0: { fontStyle: 'bold', halign: 'left' }, // Nama Bulan
@@ -332,21 +357,22 @@
             didParseCell: function(data) {
                 if (data.section === 'body' && data.column.index === 3) {
                     if (data.cell.raw.includes('-')) {
-                        data.cell.styles.textColor = [220, 38, 38]; // Merah jika minus
+                        data.cell.styles.textColor = [220, 38, 38];
                     } else if (data.cell.raw.includes('+') && data.cell.raw !== '+0 Pcs') {
-                        data.cell.styles.textColor = [16, 124, 65]; // Hijau jika plus
+                        data.cell.styles.textColor = [16, 124, 65];
                     }
                 }
             }
         });
 
-        // --- 6. Blok Pengesahan / Tanda Tangan (TTD) ---
+        // Area Pengesahan Tanda Tangan (TTD) diletakkan aman setelah tabel berakhir
         let finalY = doc.lastAutoTable.finalY + 12;
         
-        // Pengecekan sisa halaman (jika meluap, buat halaman baru)
+        // Proteksi jika sisa ruang halaman 2 tidak cukup untuk TTD
         if (finalY > 165) {
             doc.addPage();
-            finalY = 25;
+            writeHeaderPage(3); // Jika ekstrim meluap
+            finalY = 40;
         }
 
         const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -375,7 +401,7 @@
         doc.text("Satrio Eko Nugroho", 30, finalY + 26); 
         doc.text("( ____________________ )", 210, finalY + 26);
         
-        // --- 7. Simpan File PDF Tergenerate ---
+        // --- 7. SIMPAN LAPORAN PDF ---
         doc.save(`Laporan_Tahunan_Analytics_Sparepart_${tahunIni}.pdf`);
     }
 </script>
