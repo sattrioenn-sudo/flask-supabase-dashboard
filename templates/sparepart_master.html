@@ -28,22 +28,35 @@
     </div>
 
     <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
+        <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3">
                 <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Total Inventory Stock</h3>
                 <span class="bg-sky-50 text-sky-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-sky-200/40">Total: {{ master_stock|length }} Jenis Barang</span>
             </div>
             
-            <!-- Pengatur Jumlah Data Per Halaman -->
-            <div class="flex items-center gap-2 self-end sm:self-auto">
-                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tampilkan:</label>
-                <select id="entriesPerPage" onchange="changeEntriesPerPage()" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-semibold focus:border-sky-500 outline-none transition-all">
-                    <option value="5" selected>5</option>
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="25">25</option>
-                </select>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data</span>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                <!-- Kolom Search Master Stock Baru -->
+                <div class="relative flex-1 sm:w-64">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </span>
+                    <input type="text" id="masterSearch" oninput="filterMasterTable()" placeholder="Cari nama sparepart..." 
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                </div>
+
+                <!-- Pengatur Jumlah Data Per Halaman -->
+                <div class="flex items-center gap-2 self-end sm:self-auto">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Tampilkan:</label>
+                    <select id="entriesPerPage" onchange="changeEntriesPerPage()" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 font-semibold focus:border-sky-500 outline-none transition-all">
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="25">25</option>
+                    </select>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data</span>
+                </div>
             </div>
         </div>
         
@@ -61,7 +74,10 @@
                 <tbody id="master-stock-tbody" class="divide-y divide-slate-100 text-xs">
                     {% for item in master_stock %}
                     <tr class="master-row hover:bg-slate-50/50 transition-colors">
-                        <td class="py-4 px-6 font-semibold text-slate-800">{{ item.nama_barang }}</td>
+                        <!-- Baris Nama Barang: Hitam Standar dengan Indikator Border Samping Biru Tipis -->
+                        <td class="py-4 px-6 font-semibold text-slate-800 border-l-4 border-l-sky-500 nama-barang-cell">{{ item.nama_barang }}</td>
+                        
+                        <!-- Baris Stok: Desain Standar Dengan Border Halus Sesuai Ambang Batas -->
                         <td class="py-4 px-6 text-center">
                             {% if item.stok_sekarang == 0 %}
                                 <span class="bg-rose-50 text-rose-600 font-bold px-3 py-1 rounded-md border border-rose-200/30">0</span>
@@ -71,7 +87,11 @@
                                 <span class="bg-emerald-50 text-emerald-600 font-bold px-3 py-1 rounded-md border border-emerald-200/30">{{ item.stok_sekarang }}</span>
                             {% endif %}
                         </td>
-                        <td class="py-4 px-6 text-center text-slate-500 font-medium">{{ item.satuan }}</td>
+                        
+                        <!-- Baris Satuan: Hitam Standar Ringan -->
+                        <td class="py-4 px-6 text-center text-slate-700 font-semibold uppercase">{{ item.satuan }}</td>
+                        
+                        <!-- Baris Status: Tetap Menampilkan Warna Alert Penanda Status -->
                         <td class="py-4 px-6 text-center">
                             {% if item.stok_sekarang == 0 %}
                                 <span class="bg-rose-100 text-rose-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-rose-300/40 inline-flex items-center gap-1 animate-pulse">🛑 OUT OF STOCK</span>
@@ -81,22 +101,29 @@
                                 <span class="bg-emerald-100 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-300/40 inline-flex items-center gap-1">✅ AMAN</span>
                             {% endif %}
                         </td>
-                        <td class="py-4 px-6 text-right text-slate-400 font-mono text-[11px]">
+                        
+                        <!-- Baris Tanggal: Hitam Standar Monospace Rapi -->
+                        <td class="py-4 px-6 text-right text-slate-600 font-mono text-[11px] font-medium">
                             {{ item.created_at[:10] if item.created_at else '-' }}
                         </td>
                     </tr>
                     {% else %}
-                    <tr>
+                    <tr id="emptyRow">
                         <td colspan="5" class="py-12 text-center text-slate-400 font-medium">Belum ada data akumulasi stok barang. Silakan lakukan approval mutasi terlebih dahulu.</td>
                     </tr>
                     {% endfor %}
+                    
+                    <!-- Row jika pencarian kosong -->
+                    <tr id="noMasterMatchRow" class="hidden">
+                        <td colspan="5" class="py-12 text-center text-slate-400 font-medium">Nama sparepart yang Anda cari tidak ditemukan.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
         <!-- Footer Navigasi Pagination -->
         <div id="pagination-controls" class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30">
-            <div class="text-[11px] text-slate-400 font-medium">
+            <div class="text-[11px] text-slate-500 font-medium">
                 Menampilkan <span id="showing-start" class="font-bold text-slate-700">0</span> sampai <span id="showing-end" class="font-bold text-slate-700">0</span> dari <span id="showing-total" class="font-bold text-slate-700">0</span> entri data
             </div>
             <div class="flex items-center gap-1" id="pagination-buttons">
@@ -111,6 +138,7 @@
 <script>
     let currentPage = 1;
     let rowsPerPage = 5;
+    let filteredMasterRows = [];
 
     document.addEventListener("DOMContentLoaded", function() {
         initPagination();
@@ -118,32 +146,75 @@
 
     function initPagination() {
         const rows = Array.from(document.querySelectorAll(".master-row"));
-        if (rows.length === 0) {
-            document.getElementById("pagination-controls").classList.add("hidden");
-            return;
-        }
+        filteredMasterRows = rows;
+        renderMasterTable();
+    }
 
-        const totalRows = rows.length;
-        const totalPages = Math.ceil(totalRows / rowsPerPage);
-
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        rows.forEach((row, index) => {
-            const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            
-            if (index >= start && index < end) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
+    // Fungsi Pencarian Real-time pada Master Stock
+    function filterMasterTable() {
+        const query = document.getElementById("masterSearch").value.toLowerCase();
+        const rows = Array.from(document.querySelectorAll(".master-row"));
+        
+        filteredMasterRows = [];
+        rows.forEach(row => {
+            const nameEl = row.querySelector(".nama-barang-cell");
+            if (nameEl) {
+                const nameText = nameEl.textContent.toLowerCase();
+                if (nameText.includes(query)) {
+                    filteredMasterRows.push(row);
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
             }
         });
 
-        const startEntry = totalRows === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
-        const endEntry = Math.min(currentPage * rowsPerPage, totalRows);
+        // Toggle info jika hasil pencarian kosong
+        const noMatchRow = document.getElementById("noMasterMatchRow");
+        if (filteredMasterRows.length === 0 && rows.length > 0) {
+            if (noMatchRow) noMatchRow.classList.remove("hidden");
+        } else {
+            if (noMatchRow) noMatchRow.classList.add("hidden");
+        }
+
+        currentPage = 1;
+        renderMasterTable();
+    }
+
+    function renderMasterTable() {
+        const totalRows = filteredMasterRows.length;
+        const paginationContainer = document.getElementById("pagination-controls");
+        
+        if (totalRows === 0) {
+            if (paginationContainer) paginationContainer.classList.add("hidden");
+            document.getElementById("showing-start").innerText = 0;
+            document.getElementById("showing-end").innerText = 0;
+            document.getElementById("showing-total").innerText = 0;
+            return;
+        } else {
+            if (paginationContainer) paginationContainer.classList.remove("hidden");
+        }
+
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = Math.min(start + rowsPerPage, totalRows);
+
+        // Atur visibilitas baris tersaring sesuai pagination
+        const allRows = document.querySelectorAll(".master-row");
+        allRows.forEach(row => row.style.display = "none"); // Sembunyikan semua dulu
+
+        filteredMasterRows.forEach((row, index) => {
+            if (index >= start && index < end) {
+                row.style.display = "";
+            }
+        });
+
+        const startEntry = totalRows === 0 ? 0 : start + 1;
         document.getElementById("showing-start").innerText = startEntry;
-        document.getElementById("showing-end").innerText = endEntry;
+        document.getElementById("showing-end").innerText = end;
         document.getElementById("showing-total").innerText = totalRows;
 
         renderPaginationButtons(totalPages);
@@ -160,7 +231,7 @@
         prevBtn.innerText = "«";
         prevBtn.className = `px-2.5 py-1 text-xs font-bold border rounded-lg transition-all ${currentPage === 1 ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`;
         if (currentPage > 1) {
-            prevBtn.onclick = () => { currentPage--; initPagination(); };
+            prevBtn.onclick = () => { currentPage--; renderMasterTable(); };
         }
         buttonContainer.appendChild(prevBtn);
 
@@ -169,7 +240,7 @@
             const pageBtn = document.createElement("button");
             pageBtn.innerText = i;
             pageBtn.className = `px-2.5 py-1 text-xs font-bold border rounded-lg transition-all ${currentPage === i ? 'bg-sky-600 border-sky-600 text-white shadow-sm' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`;
-            pageBtn.onclick = () => { currentPage = i; initPagination(); };
+            pageBtn.onclick = () => { currentPage = i; renderMasterTable(); };
             buttonContainer.appendChild(pageBtn);
         }
 
@@ -178,7 +249,7 @@
         nextBtn.innerText = "»";
         nextBtn.className = `px-2.5 py-1 text-xs font-bold border rounded-lg transition-all ${currentPage === totalPages ? 'border-slate-200 text-slate-300 cursor-not-allowed' : 'border-slate-200 text-slate-600 hover:bg-slate-50'}`;
         if (currentPage < totalPages) {
-            nextBtn.onclick = () => { currentPage++; initPagination(); };
+            nextBtn.onclick = () => { currentPage++; renderMasterTable(); };
         }
         buttonContainer.appendChild(nextBtn);
     }
@@ -187,32 +258,32 @@
         const select = document.getElementById("entriesPerPage");
         rowsPerPage = parseInt(select.value);
         currentPage = 1; 
-        initPagination();
+        renderMasterTable();
     }
 
     // ========================================================
-    // FUNGSI BARU: GENERATE PDF MASTER STOCK DENGAN TTD RESMI
+    // FUNGSI PDF MASTER STOCK DENGAN DESAIN CLEAN & HEMAT RUANG
     // ========================================================
     function exportMasterPDF() {
         const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4 agar longgar
+        const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
         
         // --- 1. Header Laporan ---
         doc.setFont("Helvetica", "bold");
-        doc.setFontSize(16);
+        doc.setFontSize(14);
         doc.setTextColor(15, 23, 42); // Slate 900
-        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 16);
+        doc.text("PT. KEMASAN CIPTATAMA SEMPURNA", 14, 14);
         
-        doc.setFontSize(10);
+        doc.setFontSize(9);
         doc.setFont("Helvetica", "normal");
         doc.setTextColor(100, 116, 139); // Slate 500
-        doc.text("LAPORAN STATUS INVENTORY & MASTER STOK SPAREPART GUDANG", 14, 22);
-        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 27);
+        doc.text("LAPORAN STATUS INVENTORY & MASTER STOK SPAREPART GUDANG", 14, 19);
+        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 23);
         
         // Garis Pembatas Kop
         doc.setDrawColor(226, 232, 240);
         doc.setLineWidth(0.5);
-        doc.line(14, 31, 283, 31);
+        doc.line(14, 26, 283, 26);
         
         // --- 2. Mengambil Seluruh Baris Data Master ---
         const rows = [];
@@ -226,15 +297,19 @@
         tableRows.forEach(row => {
             const tds = row.getElementsByTagName("td");
             if (tds.length >= 5) {
-                // Bersihkan teks status dari emoji
-                let statusText = tds[3].innerText.replace("🛑 ", "").replace("⚠️ ", "").replace("✅ ", "").trim();
+                // Bersihkan teks status dari emoji dan whitespace
+                let namaBarang = tds[0].innerText.replace(/\s+/g, ' ').trim();
+                let stokSaatIni = tds[1].innerText.replace(/\s+/g, ' ').trim();
+                let satuan = tds[2].innerText.replace(/\s+/g, ' ').trim();
+                let statusText = tds[3].innerText.replace("🛑 ", "").replace("⚠️ ", "").replace("✅ ", "").replace(/\s+/g, ' ').trim();
+                let terakhirUpdate = tds[4].innerText.replace(/\s+/g, ' ').trim();
                 
                 rows.push([
-                    tds[0].innerText.trim(), // Nama Barang
-                    tds[1].innerText.trim(), // Stok Saat Ini
-                    tds[2].innerText.trim(), // Satuan
-                    statusText,              // Status Ambang Batas
-                    tds[4].innerText.trim()  // Terakhir Update
+                    namaBarang,
+                    stokSaatIni,
+                    satuan,
+                    statusText,
+                    terakhirUpdate
                 ]);
             }
         });
@@ -251,31 +326,35 @@
         doc.autoTable({
             head: [columns],
             body: rows,
-            startY: 36,
+            startY: 30,
             theme: 'grid',
             headStyles: {
                 fillColor: [15, 23, 42], // Slate 900
                 textColor: [255, 255, 255],
-                fontSize: 9,
+                fontSize: 8.5,
                 fontStyle: 'bold',
-                halign: 'left'
+                halign: 'left',
+                valign: 'middle'
             },
             bodyStyles: {
-                fontSize: 8.5,
-                textColor: [51, 65, 85]
+                fontSize: 8,
+                textColor: [51, 65, 85], // Slate 700
+                valign: 'middle'
             },
             styles: {
                 overflow: 'linebreak',
-                cellPadding: 4
+                cellPadding: 2, // Diperkecil agar baris tipis, padat & efisien ruang
+                lineColor: [226, 232, 240]
             },
             columnStyles: {
-                1: { halign: 'center', fontStyle: 'bold' }, // Stok
-                2: { halign: 'center' },                    // Satuan
-                3: { halign: 'center', fontStyle: 'bold' }, // Status
-                4: { halign: 'right' }                      // Terakhir Update
+                0: { cellWidth: 110 },                       // Nama Barang diberikan ruang ekstra
+                1: { cellWidth: 30, halign: 'center', fontStyle: 'bold' }, // Stok
+                2: { cellWidth: 30, halign: 'center' },                    // Satuan
+                3: { cellWidth: 50, halign: 'center', fontStyle: 'bold' }, // Status
+                4: { cellWidth: 40, halign: 'right' }                      // Terakhir Update
             },
             didParseCell: function(data) {
-                // Mewarnai text status di PDF secara rapi
+                // Mewarnai teks status di PDF secara dinamis dan rapi
                 if (data.section === 'body' && data.column.index === 3) {
                     if (data.cell.raw === 'OUT OF STOCK') {
                         data.cell.styles.textColor = [220, 38, 38]; // Red
@@ -289,21 +368,21 @@
         });
         
         // --- 4. Blok Tanda Tangan (TTD) ---
-        let finalY = doc.lastAutoTable.finalY + 15;
+        let finalY = doc.lastAutoTable.finalY + 12;
         
-        if (finalY > 160) {
+        if (finalY > 165) {
             doc.addPage();
-            finalY = 30;
+            finalY = 25;
         }
         
         const tanggalSaja = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
         
-        doc.setFontSize(9.5);
+        doc.setFontSize(9);
         doc.setFont("Helvetica", "normal");
         doc.setTextColor(51, 65, 85);
         doc.text(`Pasuruan, ${tanggalSaja}`, 210, finalY);
         
-        finalY += 6;
+        finalY += 5;
         
         doc.setFont("Helvetica", "bold");
         doc.text("Disiapkan oleh,", 30, finalY);
@@ -315,12 +394,12 @@
         
         doc.setDrawColor(148, 163, 184);
         doc.setLineWidth(0.3);
-        doc.line(30, finalY + 26, 85, finalY + 26);  
-        doc.line(210, finalY + 26, 265, finalY + 26); 
+        doc.line(30, finalY + 22, 85, finalY + 22);  
+        doc.line(210, finalY + 22, 265, finalY + 22); 
         
         doc.setFont("Helvetica", "bold");
-        doc.text("Satrio & Fadli", 30, finalY + 31); 
-        doc.text("( M Agus Ariffendi )", 210, finalY + 31);
+        doc.text("Satrio & Fadli", 30, finalY + 27); 
+        doc.text("( M Agus Ariffendi )", 210, finalY + 27);
         
         // --- 5. Download Output File ---
         doc.save(`Laporan_Master_Stock_Sparepart_${new Date().toISOString().slice(0,10)}.pdf`);
