@@ -6,6 +6,8 @@
 {% block extra_head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<!-- Memastikan Alpine.js ter-load dengan baik jika di base.html belum di-include -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -88,11 +90,79 @@
             </form>
         </div>
 
-        <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden xl:col-span-2">
-            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
-                <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Log Mutasi Sparepart</h3>
-                <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-200/40">Total: {{ spareparts|length }} Item</span>
+        <!-- LOG MUTASI DENGAN CONTROLLER SEARCH & PAGINATION -->
+        <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden xl:col-span-2" 
+             x-data="{ 
+                searchQuery: '',
+                currentPage: 1,
+                pageSize: 10,
+                allData: [
+                    {% for item in spareparts %}
+                    {
+                        id: '{{ item.id }}',
+                        nama_barang: '{{ item.nama_barang|escapejs }}',
+                        jumlah: '{{ item.jumlah }}',
+                        satuan: '{{ item.satuan }}',
+                        tanggal_masuk: '{{ item.tanggal_masuk or '-' }}',
+                        tanggal_keluar: '{{ item.tanggal_keluar or '-' }}',
+                        untuk_user: '{{ item.untuk_user or '-' }}',
+                        status_approve: '{{ item.status_approve }}'
+                    },
+                    {% endfor %}
+                ],
+                get filteredData() {
+                    return this.allData.filter(item => 
+                        item.nama_barang.toLowerCase().includes(this.searchQuery.toLowerCase())
+                    );
+                },
+                get paginatedData() {
+                    if (this.pageSize === 'all') return this.filteredData;
+                    let start = (this.currentPage - 1) * parseInt(this.pageSize);
+                    let end = start + parseInt(this.pageSize);
+                    return this.filteredData.slice(start, end);
+                },
+                get totalPages() {
+                    if (this.pageSize === 'all') return 1;
+                    return Math.max(1, Math.ceil(this.filteredData.length / parseInt(this.pageSize)));
+                },
+                init() {
+                    this.$watch('searchQuery', () => this.currentPage = 1);
+                    this.$watch('pageSize', () => this.currentPage = 1);
+                }
+             }">
+            
+            <!-- Filter & Search Toolbar -->
+            <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Log Mutasi Sparepart</h3>
+                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">Menampilkan log historis keluar masuk item.</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                    <!-- Search Input -->
+                    <div class="relative flex-1 sm:w-60">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </span>
+                        <input type="text" x-model="searchQuery" placeholder="Cari nama barang..." 
+                               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                    </div>
+
+                    <!-- Page Size Selector -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider whitespace-nowrap">Baris:</span>
+                        <select x-model="pageSize" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs text-slate-700 outline-none focus:border-sky-500 transition-all">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="all">Semua</option>
+                        </select>
+                    </div>
+                </div>
             </div>
+
+            <!-- Table Layout -->
             <div class="overflow-x-auto">
                 <table id="table-sparepart" class="w-full text-left border-collapse">
                     <thead>
@@ -106,41 +176,78 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs">
-                        {% for item in spareparts %}
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="py-4 px-4 font-semibold text-slate-800">{{ item.nama_barang }}</td>
-                            <td class="py-4 px-4 text-center font-bold text-slate-700">{{ item.jumlah }} <span class="text-[10px] text-slate-400 font-normal">{{ item.satuan }}</span></td>
-                            <td class="py-4 px-4 text-center font-medium text-emerald-600 font-mono">{{ item.tanggal_masuk or '-' }}</td>
-                            <td class="py-4 px-4 text-center font-medium text-rose-600 font-mono">{{ item.tanggal_keluar or '-' }}</td>
-                            <td class="py-4 px-4 text-slate-600 font-medium">{{ item.untuk_user or '-' }}</td>
-                            <td class="py-4 px-4 text-center">
-                                {% if item.status_approve == 'Approved' %}
-                                    <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200/30">✔ Approved</span>
-                                {% elif item.status_approve == 'Rejected' %}
-                                    <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/30">✖ Rejected</span>
-                                {% else %}
-                                    <div class="inline-flex gap-1">
-                                        <form action="/spareparts/approve/{{ item.id }}" method="POST" class="inline">
-                                            <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-md shadow-sm transition-all" title="Approve">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                            </button>
-                                        </form>
-                                        <form action="/spareparts/reject/{{ item.id }}" method="POST" class="inline">
-                                            <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-md shadow-sm transition-all" title="Reject">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                {% endif %}
-                            </td>
+                        <!-- Iterasi via Alpine JS -->
+                        <template x-for="item in paginatedData" :key="item.id">
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="py-4 px-4 font-semibold text-slate-800" x-text="item.nama_barang"></td>
+                                <td class="py-4 px-4 text-center font-bold text-slate-700">
+                                    <span x-text="item.jumlah"></span> 
+                                    <span class="text-[10px] text-slate-400 font-normal" x-text="item.satuan"></span>
+                                </td>
+                                <td class="py-4 px-4 text-center font-medium text-emerald-600 font-mono" x-text="item.tanggal_masuk"></td>
+                                <td class="py-4 px-4 text-center font-medium text-rose-600 font-mono" x-text="item.tanggal_keluar"></td>
+                                <td class="py-4 px-4 text-slate-600 font-medium" x-text="item.untuk_user"></td>
+                                <td class="py-4 px-4 text-center">
+                                    <template x-if="item.status_approve === 'Approved'">
+                                        <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200/30">✔ Approved</span>
+                                    </template>
+                                    <template x-if="item.status_approve === 'Rejected'">
+                                        <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/30">✖ Rejected</span>
+                                    </template>
+                                    <template x-if="item.status_approve !== 'Approved' && item.status_approve !== 'Rejected'">
+                                        <div class="inline-flex gap-1">
+                                            <form :action="'/spareparts/approve/' + item.id" method="POST" class="inline">
+                                                <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-md shadow-sm transition-all" title="Approve">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                                </button>
+                                            </form>
+                                            <form :action="'/spareparts/reject/' + item.id" method="POST" class="inline">
+                                                <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-md shadow-sm transition-all" title="Reject">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </template>
+                                </td>
+                            </tr>
+                        </template>
+
+                        <!-- Empty State Row -->
+                        <tr x-show="filteredData.length === 0">
+                            <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Barang yang Anda cari tidak ditemukan.</td>
                         </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Belum ada mutasi log sparepart.</td>
-                        </tr>
-                        {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Modern Pagination Controls -->
+            <div class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50" x-show="pageSize !== 'all' && filteredData.length > 0">
+                <span class="text-[11px] text-slate-500 font-medium">
+                    Menampilkan <span class="font-bold text-slate-700" x-text="((currentPage - 1) * parseInt(pageSize)) + 1"></span> - 
+                    <span class="font-bold text-slate-700" x-text="Math.min(currentPage * parseInt(pageSize), filteredData.length)"></span> 
+                    dari <span class="font-bold text-slate-700" x-text="filteredData.length"></span> item
+                </span>
+                
+                <div class="inline-flex items-center gap-1.5">
+                    <button @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1"
+                            class="p-2 border border-slate-200 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+
+                    <!-- Render Nomor Halaman -->
+                    <template x-for="p in totalPages" :key="p">
+                        <button @click="currentPage = p" 
+                                :class="currentPage === p ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+                                class="px-3 py-1.5 border rounded-lg text-xs font-bold transition-all"
+                                x-text="p">
+                        </button>
+                    </template>
+
+                    <button @click="currentPage = Math.min(totalPages, currentPage + 1)" :disabled="currentPage === totalPages"
+                            class="p-2 border border-slate-200 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -171,12 +278,11 @@
         toggleUserField();
     });
 
-    // PERBAIKAN LOGIKA STATUS PDF
+    // EKSPOR LAPORAN TETAP MENGGUNAKAN DATA DOM TABEL ASLI
     function exportOpnamePDF(tipeLaporan) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('l', 'mm', 'a4'); // Landscape A4
         
-        // --- 1. Desain Kop Surat Resmi ---
         doc.setFont("Helvetica", "bold");
         doc.setFontSize(16);
         doc.setTextColor(15, 23, 42); // Slate 900
@@ -188,16 +294,15 @@
         doc.text(`LAPORAN STOCK OPNAME INVENTORY SPAREPART (${tipeLaporan.toUpperCase()})`, 14, 22);
         doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')} | Jam: ${new Date().toLocaleTimeString('id-ID')}`, 14, 27);
         
-        // Garis Pembatas Kop
         doc.setDrawColor(226, 232, 240); // Slate 200
         doc.setLineWidth(0.5);
         doc.line(14, 31, 283, 31);
         
-        // --- 2. Pemrosesan Data dari DOM Tabel ---
         const rows = [];
         const table = document.getElementById("table-sparepart");
         const trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
         
+        // Memeriksa jika data kosong dari struktur DOM asli
         if (trs.length === 1 && trs[0].innerText.includes("Belum ada")) {
             alert("Tidak ada data mutasi sparepart untuk dicetak!");
             return;
@@ -205,14 +310,13 @@
 
         for (let i = 0; i < trs.length; i++) {
             const tds = trs[i].getElementsByTagName("td");
-            if(tds.length >= 6) {
+            if(tds.length >= 6 && !trs[i].innerText.includes("tidak ditemukan")) {
                 let rawStatus = tds[5].innerText.trim();
-                let statusText = "Pending"; // Default jika tidak masuk kondisi bawah
+                let statusText = "Pending";
                 
-                // Menggunakan .includes() agar pencocokan teks jauh lebih akurat dan aman dari glitch emoji
-                if (rawStatus.includes("Approved") || rawStatus.includes("Approved")) {
+                if (rawStatus.includes("Approved")) {
                     statusText = "Approved";
-                } else if (rawStatus.includes("Rejected") || rawStatus.includes("Rejected")) {
+                } else if (rawStatus.includes("Rejected")) {
                     statusText = "Rejected";
                 }
 
@@ -222,7 +326,7 @@
                     tds[2].innerText, // Tanggal Masuk
                     tds[3].innerText, // Tanggal Keluar
                     tds[4].innerText, // Peruntukan User
-                    statusText        // Approval Status hasil konversi bersih
+                    statusText        // Approval Status
                 ]);
             }
         }
@@ -236,14 +340,13 @@
             "Status"
         ];
         
-        // --- 3. Render Tabel Menggunakan AutoTable ---
         doc.autoTable({
             head: [columns],
             body: rows,
             startY: 36,
             theme: 'grid',
             headStyles: {
-                fillColor: [15, 23, 42], // Slate 900
+                fillColor: [15, 23, 42],
                 textColor: [255, 255, 255],
                 fontSize: 9,
                 fontStyle: 'bold',
@@ -251,33 +354,31 @@
             },
             bodyStyles: {
                 fontSize: 8.5,
-                textColor: [51, 65, 85] // Slate 700
+                textColor: [51, 65, 85]
             },
             styles: {
                 overflow: 'linebreak',
                 cellPadding: 4
             },
             columnStyles: {
-                1: { halign: 'center', fontStyle: 'bold' }, // Jumlah
-                2: { halign: 'center' }, // Tgl Masuk
-                3: { halign: 'center' }, // Tgl Keluar
-                5: { halign: 'center', fontStyle: 'bold' }  // Status
+                1: { halign: 'center', fontStyle: 'bold' },
+                2: { halign: 'center' },
+                3: { halign: 'center' },
+                5: { halign: 'center', fontStyle: 'bold' }
             },
             didParseCell: function(data) {
-                // Mewarnai teks berdasarkan status bersih hasil konversi di atas
                 if (data.section === 'body' && data.column.index === 5) {
                     if (data.cell.raw === 'Approved') {
-                        data.cell.styles.textColor = [16, 124, 65]; // Emerald Green resmi
+                        data.cell.styles.textColor = [16, 124, 65];
                     } else if (data.cell.raw === 'Rejected') {
-                        data.cell.styles.textColor = [220, 38, 38]; // Rose Red resmi
+                        data.cell.styles.textColor = [220, 38, 38];
                     } else {
-                        data.cell.styles.textColor = [100, 116, 139]; // Slate 500 untuk Pending
+                        data.cell.styles.textColor = [100, 116, 139];
                     }
                 }
             }
         });
         
-        // --- 4. Penambahan Blok Tanda Tangan (TTD) ---
         let finalY = doc.lastAutoTable.finalY + 15;
         
         if (finalY > 160) {
@@ -308,10 +409,9 @@
         doc.line(210, finalY + 26, 265, finalY + 26); 
         
         doc.setFont("Helvetica", "bold");
-        doc.text("Satrio Eko Nugroho", 30, finalY + 31); // Menyesuaikan nama penandatangan dari gambar Anda
+        doc.text("Satrio Eko Nugroho", 30, finalY + 31);
         doc.text("( ____________________ )", 210, finalY + 31);
         
-        // --- 5. Download Output Dokumen ---
         doc.save(`Laporan_Opname_Sparepart_${tipeLaporan}_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 </script>
