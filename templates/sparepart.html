@@ -6,8 +6,6 @@
 {% block extra_head %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-<!-- Memastikan Alpine.js ter-load dengan baik jika di base.html belum di-include -->
-<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -91,45 +89,7 @@
         </div>
 
         <!-- LOG MUTASI DENGAN CONTROLLER SEARCH & PAGINATION -->
-        <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden xl:col-span-2" 
-             x-data="{ 
-                searchQuery: '',
-                currentPage: 1,
-                pageSize: 10,
-                allData: [
-                    {% for item in spareparts %}
-                    {
-                        id: '{{ item.id }}',
-                        nama_barang: '{{ item.nama_barang|escapejs }}',
-                        jumlah: '{{ item.jumlah }}',
-                        satuan: '{{ item.satuan }}',
-                        tanggal_masuk: '{{ item.tanggal_masuk or '-' }}',
-                        tanggal_keluar: '{{ item.tanggal_keluar or '-' }}',
-                        untuk_user: '{{ item.untuk_user or '-' }}',
-                        status_approve: '{{ item.status_approve }}'
-                    },
-                    {% endfor %}
-                ],
-                get filteredData() {
-                    return this.allData.filter(item => 
-                        item.nama_barang.toLowerCase().includes(this.searchQuery.toLowerCase())
-                    );
-                },
-                get paginatedData() {
-                    if (this.pageSize === 'all') return this.filteredData;
-                    let start = (this.currentPage - 1) * parseInt(this.pageSize);
-                    let end = start + parseInt(this.pageSize);
-                    return this.filteredData.slice(start, end);
-                },
-                get totalPages() {
-                    if (this.pageSize === 'all') return 1;
-                    return Math.max(1, Math.ceil(this.filteredData.length / parseInt(this.pageSize)));
-                },
-                init() {
-                    this.$watch('searchQuery', () => this.currentPage = 1);
-                    this.$watch('pageSize', () => this.currentPage = 1);
-                }
-             }">
+        <div class="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden xl:col-span-2">
             
             <!-- Filter & Search Toolbar -->
             <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -142,17 +102,19 @@
                     <!-- Search Input -->
                     <div class="relative flex-1 sm:w-60">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <svg class="h-3.5 w-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
                         </span>
-                        <input type="text" x-model="searchQuery" placeholder="Cari nama barang..." 
+                        <input type="text" id="searchInput" oninput="filterTable()" placeholder="Cari nama barang..." 
                                class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
                     </div>
 
                     <!-- Page Size Selector -->
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider whitespace-nowrap">Baris:</span>
-                        <select x-model="pageSize" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs text-slate-700 outline-none focus:border-sky-500 transition-all">
-                            <option value="10">10</option>
+                        <select id="pageSizeSelect" onchange="changePageSize()" class="bg-slate-50 border border-slate-200 rounded-xl px-2 py-2 text-xs text-slate-700 outline-none focus:border-sky-500 transition-all">
+                            <option value="10" selected>10</option>
                             <option value="25">25</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
@@ -175,45 +137,47 @@
                             <th class="py-3 px-4 text-center">Approval Admin</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-xs">
-                        <!-- Iterasi via Alpine JS -->
-                        <template x-for="item in paginatedData" :key="item.id">
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="py-4 px-4 font-semibold text-slate-800" x-text="item.nama_barang"></td>
-                                <td class="py-4 px-4 text-center font-bold text-slate-700">
-                                    <span x-text="item.jumlah"></span> 
-                                    <span class="text-[10px] text-slate-400 font-normal" x-text="item.satuan"></span>
-                                </td>
-                                <td class="py-4 px-4 text-center font-medium text-emerald-600 font-mono" x-text="item.tanggal_masuk"></td>
-                                <td class="py-4 px-4 text-center font-medium text-rose-600 font-mono" x-text="item.tanggal_keluar"></td>
-                                <td class="py-4 px-4 text-slate-600 font-medium" x-text="item.untuk_user"></td>
-                                <td class="py-4 px-4 text-center">
-                                    <template x-if="item.status_approve === 'Approved'">
-                                        <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200/30">✔ Approved</span>
-                                    </template>
-                                    <template x-if="item.status_approve === 'Rejected'">
-                                        <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/30">✖ Rejected</span>
-                                    </template>
-                                    <template x-if="item.status_approve !== 'Approved' && item.status_approve !== 'Rejected'">
-                                        <div class="inline-flex gap-1">
-                                            <form :action="'/spareparts/approve/' + item.id" method="POST" class="inline">
-                                                <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-md shadow-sm transition-all" title="Approve">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                                                </button>
-                                            </form>
-                                            <form :action="'/spareparts/reject/' + item.id" method="POST" class="inline">
-                                                <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-md shadow-sm transition-all" title="Reject">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </template>
-                                </td>
-                            </tr>
-                        </template>
-
-                        <!-- Empty State Row -->
-                        <tr x-show="filteredData.length === 0">
+                    <tbody class="divide-y divide-slate-100 text-xs" id="tableBody">
+                        <!-- MENGGUNAKAN LOOPING JINJA ASLI BAWAAN SISTEM ANDA AGAR DATA TIDAK CORRUPT ATAU ERROR -->
+                        {% for item in spareparts %}
+                        <tr class="hover:bg-slate-50/50 transition-colors sparepart-row">
+                            <td class="py-4 px-4 font-semibold text-slate-800 nama-barang">{{ item.nama_barang }}</td>
+                            <td class="py-4 px-4 text-center font-bold text-slate-700">
+                                <span>{{ item.jumlah }}</span> 
+                                <span class="text-[10px] text-slate-400 font-normal">{{ item.satuan }}</span>
+                            </td>
+                            <td class="py-4 px-4 text-center font-medium text-emerald-600 font-mono">{{ item.tanggal_masuk or '-' }}</td>
+                            <td class="py-4 px-4 text-center font-medium text-rose-600 font-mono">{{ item.tanggal_keluar or '-' }}</td>
+                            <td class="py-4 px-4 text-slate-600 font-medium">{{ item.untuk_user or '-' }}</td>
+                            <td class="py-4 px-4 text-center">
+                                {% if item.status_approve == 'Approved' %}
+                                    <span class="bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200/30">✔ Approved</span>
+                                {% elif item.status_approve == 'Rejected' %}
+                                    <span class="bg-rose-50 text-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-full border border-rose-200/30">✖ Rejected</span>
+                                {% else %}
+                                    <div class="inline-flex gap-1">
+                                        <form action="/spareparts/approve/{{ item.id }}" method="POST" class="inline">
+                                            <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white p-1 rounded-md shadow-sm transition-all" title="Approve">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
+                                            </button>
+                                        </form>
+                                        <form action="/spareparts/reject/{{ item.id }}" method="POST" class="inline">
+                                            <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white p-1 rounded-md shadow-sm transition-all" title="Reject">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr id="emptyRow">
+                            <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Belum ada data transaksi sparepart.</td>
+                        </tr>
+                        {% endfor %}
+                        
+                        <!-- Dynamic No Match Row -->
+                        <tr id="noMatchRow" class="hidden">
                             <td colspan="6" class="py-8 text-center text-slate-400 font-medium">Barang yang Anda cari tidak ditemukan.</td>
                         </tr>
                     </tbody>
@@ -221,32 +185,15 @@
             </div>
 
             <!-- Modern Pagination Controls -->
-            <div class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50" x-show="pageSize !== 'all' && filteredData.length > 0">
+            <div id="paginationContainer" class="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
                 <span class="text-[11px] text-slate-500 font-medium">
-                    Menampilkan <span class="font-bold text-slate-700" x-text="((currentPage - 1) * parseInt(pageSize)) + 1"></span> - 
-                    <span class="font-bold text-slate-700" x-text="Math.min(currentPage * parseInt(pageSize), filteredData.length)"></span> 
-                    dari <span class="font-bold text-slate-700" x-text="filteredData.length"></span> item
+                    Menampilkan <span class="font-bold text-slate-700" id="pageStart">0</span> - 
+                    <span class="font-bold text-slate-700" id="pageEnd">0</span> 
+                    dari <span class="font-bold text-slate-700" id="totalRows">0</span> item
                 </span>
                 
-                <div class="inline-flex items-center gap-1.5">
-                    <button @click="currentPage = Math.max(1, currentPage - 1)" :disabled="currentPage === 1"
-                            class="p-2 border border-slate-200 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-
-                    <!-- Render Nomor Halaman -->
-                    <template x-for="p in totalPages" :key="p">
-                        <button @click="currentPage = p" 
-                                :class="currentPage === p ? 'bg-sky-600 text-white border-sky-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
-                                class="px-3 py-1.5 border rounded-lg text-xs font-bold transition-all"
-                                x-text="p">
-                        </button>
-                    </template>
-
-                    <button @click="currentPage = Math.min(totalPages, currentPage + 1)" :disabled="currentPage === totalPages"
-                            class="p-2 border border-slate-200 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-                    </button>
+                <div class="inline-flex items-center gap-1.5" id="paginationButtons">
+                    <!-- Buttons generated dynamically by JavaScript -->
                 </div>
             </div>
         </div>
@@ -256,6 +203,11 @@
 
 {% block scripts %}
 <script>
+    // System Pagination & Search state (Pure Client Side)
+    let currentPage = 1;
+    let pageSize = 10;
+    let filteredRows = [];
+
     function toggleUserField() {
         const jenisMutasi = document.getElementById('jenis_mutasi').value;
         const inputUser = document.getElementById('untuk_user');
@@ -274,8 +226,144 @@
         }
     }
 
+    // Fungsi Utama Filter & Pagination
+    function initTableControl() {
+        const rows = document.querySelectorAll(".sparepart-row");
+        filteredRows = Array.from(rows);
+        renderTable();
+    }
+
+    function filterTable() {
+        const query = document.getElementById("searchInput").value.toLowerCase();
+        const rows = document.querySelectorAll(".sparepart-row");
+        
+        filteredRows = [];
+        rows.forEach(row => {
+            const nameEl = row.querySelector(".nama-barang");
+            if (nameEl) {
+                const nameText = nameEl.textContent.toLowerCase();
+                if (nameText.includes(query)) {
+                    filteredRows.push(row);
+                    row.classList.remove("hidden");
+                } else {
+                    row.classList.add("hidden");
+                }
+            }
+        });
+
+        // Toggle No Match Row
+        const noMatchRow = document.getElementById("noMatchRow");
+        if (filteredRows.length === 0 && rows.length > 0) {
+            if (noMatchRow) noMatchRow.classList.remove("hidden");
+        } else {
+            if (noMatchRow) noMatchRow.classList.add("hidden");
+        }
+
+        currentPage = 1;
+        renderTable();
+    }
+
+    function changePageSize() {
+        const selectVal = document.getElementById("pageSizeSelect").value;
+        pageSize = selectVal === "all" ? "all" : parseInt(selectVal);
+        currentPage = 1;
+        renderTable();
+    }
+
+    function renderTable() {
+        const total = filteredRows.length;
+        const paginationContainer = document.getElementById("paginationContainer");
+        
+        if (total === 0) {
+            if (paginationContainer) paginationContainer.classList.add("hidden");
+            return;
+        } else {
+            if (paginationContainer) paginationContainer.classList.remove("hidden");
+        }
+
+        let start = 0;
+        let end = total;
+
+        if (pageSize !== "all") {
+            start = (currentPage - 1) * pageSize;
+            end = Math.min(start + pageSize, total);
+            
+            // Sembunyikan element di luar limit page saat ini
+            filteredRows.forEach((row, idx) => {
+                if (idx >= start && idx < end) {
+                    row.classList.remove("hidden");
+                } else {
+                    row.classList.add("hidden");
+                }
+            });
+        } else {
+            filteredRows.forEach(row => row.classList.remove("hidden"));
+        }
+
+        // Update Text Info
+        document.getElementById("pageStart").innerText = total > 0 ? start + 1 : 0;
+        document.getElementById("pageEnd").innerText = end;
+        document.getElementById("totalRows").innerText = total;
+
+        renderPaginationButtons(total);
+    }
+
+    function renderPaginationButtons(total) {
+        const btnContainer = document.getElementById("paginationButtons");
+        if (!btnContainer) return;
+        btnContainer.innerHTML = "";
+
+        if (pageSize === "all") return;
+
+        const totalPages = Math.ceil(total / pageSize);
+        if (totalPages <= 1) return;
+
+        // Button Prev
+        const prevBtn = document.createElement("button");
+        prevBtn.className = "p-2 border border-slate-200 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed";
+        prevBtn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>`;
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        };
+        btnContainer.appendChild(prevBtn);
+
+        // Page Number Buttons
+        for (let i = 1; i <= totalPages; i++) {
+            const pageBtn = document.createElement("button");
+            if (i === currentPage) {
+                pageBtn.className = "px-3 py-1.5 border rounded-lg text-xs font-bold transition-all bg-sky-600 text-white border-sky-600";
+            } else {
+                pageBtn.className = "px-3 py-1.5 border rounded-lg text-xs font-bold transition-all bg-white text-slate-600 border-slate-200 hover:bg-slate-50";
+            }
+            pageBtn.innerText = i;
+            pageBtn.onclick = () => {
+                currentPage = i;
+                renderTable();
+            };
+            btnContainer.appendChild(pageBtn);
+        }
+
+        // Button Next
+        const nextBtn = document.createElement("button");
+        nextBtn.className = "p-2 border border-slate-200 rounded-lg text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-40 disabled:cursor-not-allowed";
+        nextBtn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>`;
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
+        };
+        btnContainer.appendChild(nextBtn);
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         toggleUserField();
+        initTableControl();
     });
 
     // EKSPOR LAPORAN TETAP MENGGUNAKAN DATA DOM TABEL ASLI
@@ -300,17 +388,16 @@
         
         const rows = [];
         const table = document.getElementById("table-sparepart");
-        const trs = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+        const trs = table.getElementsByTagName("tbody")[0].getElementsByClassName("sparepart-row");
         
-        // Memeriksa jika data kosong dari struktur DOM asli
-        if (trs.length === 1 && trs[0].innerText.includes("Belum ada")) {
+        if (trs.length === 0) {
             alert("Tidak ada data mutasi sparepart untuk dicetak!");
             return;
         }
 
         for (let i = 0; i < trs.length; i++) {
             const tds = trs[i].getElementsByTagName("td");
-            if(tds.length >= 6 && !trs[i].innerText.includes("tidak ditemukan")) {
+            if (tds.length >= 6) {
                 let rawStatus = tds[5].innerText.trim();
                 let statusText = "Pending";
                 
