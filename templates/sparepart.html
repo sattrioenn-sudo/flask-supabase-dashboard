@@ -130,33 +130,33 @@
             <div class="overflow-x-auto">
                 <table id="table-sparepart" class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50/70 border-b border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                            <th class="py-3 px-4 text-slate-700">Nama Barang</th>
-                            <th class="py-3 px-4 text-center text-indigo-600">Jumlah</th>
-                            <th class="py-3 px-4 text-center text-emerald-600">Tanggal Masuk</th>
-                            <th class="py-3 px-4 text-center text-rose-600">Tanggal Keluar</th>
-                            <th class="py-3 px-4 text-amber-600">Peruntukan User</th>
-                            <th class="py-3 px-4 text-center text-slate-600">Approval Admin</th>
+                        <tr class="bg-sky-50 border-b border-sky-100 text-[10px] font-bold text-sky-700 uppercase tracking-wider">
+                            <th class="py-3 px-4">Nama Barang</th>
+                            <th class="py-3 px-4 text-center">Jumlah</th>
+                            <th class="py-3 px-4 text-center">Tanggal Masuk</th>
+                            <th class="py-3 px-4 text-center">Tanggal Keluar</th>
+                            <th class="py-3 px-4">Peruntukan User</th>
+                            <th class="py-3 px-4 text-center">Approval Admin</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs" id="tableBody">
                         <!-- MENGGUNAKAN LOOPING JINJA ASLI BAWAAN SISTEM ANDA AGAR DATA TIDAK CORRUPT ATAU ERROR -->
                         {% for item in spareparts %}
-                        <tr class="hover:bg-slate-50/50 transition-colors sparepart-row">
-                            <!-- Kolom Nama Barang: Solid Slate text with Left Border Accent -->
-                            <td class="py-4 px-4 font-semibold text-slate-800 border-l-4 border-l-sky-500 nama-barang">
+                        <tr class="hover:bg-sky-50/30 transition-colors sparepart-row">
+                            <!-- Kolom Nama Barang: Solid Sky Text & Left Border Accent -->
+                            <td class="py-4 px-4 font-semibold text-sky-900 border-l-4 border-l-sky-500 nama-barang">
                                 {{ item.nama_barang }}
                             </td>
                             
-                            <!-- Kolom Jumlah: Violet Badge Accent -->
+                            <!-- Kolom Jumlah: Sky Badge Accent -->
                             <td class="py-4 px-4 text-center">
-                                <span class="inline-flex items-center gap-1 bg-violet-50 text-violet-700 font-bold px-2.5 py-1 rounded-lg border border-violet-100">
+                                <span class="inline-flex items-center gap-1 bg-sky-50 text-sky-700 font-bold px-2.5 py-1 rounded-lg border border-sky-100">
                                     {{ item.jumlah }}
-                                    <span class="text-[9px] text-violet-400 font-medium uppercase tracking-wider">{{ item.satuan }}</span>
+                                    <span class="text-[9px] text-sky-400 font-medium uppercase tracking-wider">{{ item.satuan }}</span>
                                 </span>
                             </td>
                             
-                            <!-- Kolom Tanggal Masuk: Soft Emerald Badge -->
+                            <!-- Kolom Tanggal Masuk: Tetap Hijau (Emerald) Sesuai Instruksi -->
                             <td class="py-4 px-4 text-center font-medium font-mono">
                                 {% if item.tanggal_masuk %}
                                     <span class="inline-block bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-100/55">
@@ -167,7 +167,7 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- Kolom Tanggal Keluar: Soft Rose Badge -->
+                            <!-- Kolom Tanggal Keluar: Tetap Merah (Rose) Sesuai Instruksi -->
                             <td class="py-4 px-4 text-center font-medium font-mono">
                                 {% if item.tanggal_keluar %}
                                     <span class="inline-block bg-rose-50 text-rose-700 px-2.5 py-1 rounded-lg border border-rose-100/55">
@@ -178,10 +178,10 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- Kolom Peruntukan User: Soft Amber Badge -->
+                            <!-- Kolom Peruntukan User: Sky Badge Accent -->
                             <td class="py-4 px-4 font-medium">
                                 {% if item.untuk_user %}
-                                    <span class="inline-block bg-amber-50 text-amber-800 px-2.5 py-1 rounded-lg border border-amber-100/55">
+                                    <span class="inline-block bg-sky-50/80 text-sky-800 px-2.5 py-1 rounded-lg border border-sky-100/50">
                                         {{ item.untuk_user }}
                                     </span>
                                 {% else %}
@@ -189,7 +189,7 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- Kolom Approval Admin: Soft Styled Pill Buttons and States -->
+                            <!-- Kolom Approval Admin: Tetap Hijau/Merah Sesuai Status Approval -->
                             <td class="py-4 px-4 text-center">
                                 {% if item.status_approve == 'Approved' %}
                                     <span class="bg-emerald-100/80 text-emerald-700 text-[10px] font-extrabold px-3 py-1 rounded-full border border-emerald-200">✔ Approved</span>
