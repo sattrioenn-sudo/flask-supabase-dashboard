@@ -39,11 +39,22 @@
                 <h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">Input Mutasi Sparepart</h2>
             </div>
 
-            <form action="/spareparts" method="POST" class="space-y-4">
+            <!-- Menambahkan id="formMutasi" dan validasi onsubmit -->
+            <form action="/spareparts" method="POST" id="formMutasi" onsubmit="return validateForm()" class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Barang</label>
-                    <input type="text" name="nama_barang" placeholder="Contoh: Ribbon Cartridge Epson LQ2190" required
+                    <!-- Menggunakan list="masterStockList" untuk melink ke dropdown datalist -->
+                    <input type="text" name="nama_barang" id="nama_barang" list="masterStockList" placeholder="Contoh: Ribbon Cartridge Epson LQ2190" required autocomplete="off"
                         class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                    
+                    <!-- Datalist Tempat Menampung Koleksi Master Nama Barang -->
+                    <datalist id="masterStockList">
+                        <!-- Diisi secara dinamis oleh JavaScript di bawah dari data tabel log mutasi -->
+                    </datalist>
+                    
+                    <!-- Alert text info jika barang baru terdeteksi pada barang masuk -->
+                    <p id="infoBarangBaru" class="text-[10px] text-amber-600 font-semibold mt-1 hidden">ℹ Master barang belum terdaftar (Akan didaftarkan sebagai item baru).</p>
+                    <p id="infoBarangAda" class="text-[10px] text-emerald-600 font-semibold mt-1 hidden">✓ Master barang sudah terdaftar di sistem.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -66,7 +77,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Jenis Mutasi</label>
-                        <select name="jenis_mutasi" id="jenis_mutasi" onchange="toggleUserField()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
+                        <select name="jenis_mutasi" id="jenis_mutasi" onchange="handleMutationChange()" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all">
                             <option value="Masuk" selected>📥 Barang Masuk</option>
                             <option value="Keluar">📤 Barang Keluar</option>
                         </select>
@@ -140,15 +151,12 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-xs" id="tableBody">
-                        <!-- MENGGUNAKAN LOOPING JINJA ASLI BAWAAN SISTEM ANDA AGAR DATA TIDAK CORRUPT ATAU ERROR -->
                         {% for item in spareparts %}
                         <tr class="hover:bg-slate-50/50 transition-colors sparepart-row">
-                            <!-- Kolom Nama Barang: Standar Hitam/Slate & Left Border Accent Sky Blue tipis -->
                             <td class="py-4 px-4 font-semibold text-slate-800 border-l-4 border-l-sky-500 nama-barang">
                                 {{ item.nama_barang }}
                             </td>
                             
-                            <!-- Kolom Jumlah: Standar Teks Hitam dengan Background Netral Gray -->
                             <td class="py-4 px-4 text-center">
                                 <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-800 font-bold px-2.5 py-1 rounded-lg border border-slate-200">
                                     {{ item.jumlah }}
@@ -156,7 +164,6 @@
                                 </span>
                             </td>
                             
-                            <!-- Kolom Tanggal Masuk: Tetap Hijau (Emerald) Sesuai Instruksi -->
                             <td class="py-4 px-4 text-center font-medium font-mono">
                                 {% if item.tanggal_masuk %}
                                     <span class="inline-block bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-100/55">
@@ -167,7 +174,6 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- Kolom Tanggal Keluar: Tetap Merah (Rose) Sesuai Instruksi -->
                             <td class="py-4 px-4 text-center font-medium font-mono">
                                 {% if item.tanggal_keluar %}
                                     <span class="inline-block bg-rose-50 text-rose-700 px-2.5 py-1 rounded-lg border border-rose-100/55">
@@ -178,7 +184,6 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- Kolom Peruntukan User: Standar Teks Hitam dengan Background Netral Gray -->
                             <td class="py-4 px-4 font-medium">
                                 {% if item.untuk_user %}
                                     <span class="inline-block bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200">
@@ -189,7 +194,6 @@
                                 {% endif %}
                             </td>
                             
-                            <!-- Kolom Approval Admin: Tetap Hijau/Merah Sesuai Status Approval -->
                             <td class="py-4 px-4 text-center">
                                 {% if item.status_approve == 'Approved' %}
                                     <span class="bg-emerald-100/80 text-emerald-700 text-[10px] font-extrabold px-3 py-1 rounded-full border border-emerald-200">✔ Approved</span>
@@ -248,6 +252,7 @@
     let currentPage = 1;
     let pageSize = 10;
     let filteredRows = [];
+    let masterStockArray = []; // Menyimpan daftar unik nama barang terdaftar
 
     function toggleUserField() {
         const jenisMutasi = document.getElementById('jenis_mutasi').value;
@@ -265,6 +270,81 @@
             inputUser.className = "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500 outline-none transition-all";
             inputUser.setAttribute('required', 'required');
         }
+    }
+
+    // Menggabungkan fungsi toggle dengan pengecekan real-time status master barang
+    function handleMutationChange() {
+        toggleUserField();
+        checkMasterStockStatus();
+    }
+
+    // Membaca tabel log untuk membangun dropdown master stock secara otomatis
+    function buildMasterStockDropdown() {
+        const rows = document.querySelectorAll(".sparepart-row");
+        const uniqueItems = new Set();
+        
+        rows.forEach(row => {
+            const nameEl = row.querySelector(".nama-barang");
+            if (nameEl) {
+                const nameText = nameEl.textContent.replace(/\s+/g, ' ').trim();
+                if (nameText && nameText !== "-") {
+                    uniqueItems.add(nameText);
+                }
+            }
+        });
+
+        masterStockArray = Array.from(uniqueItems);
+        const datalist = document.getElementById("masterStockList");
+        datalist.innerHTML = "";
+        
+        masterStockArray.forEach(item => {
+            const option = document.createElement("option");
+            option.value = item;
+            datalist.appendChild(option);
+        });
+    }
+
+    // Melakukan pengecekan status nama barang di form input secara interaktif
+    function checkMasterStockStatus() {
+        const inputName = document.getElementById("nama_barang").value.replace(/\s+/g, ' ').trim();
+        const jenisMutasi = document.getElementById("jenis_mutasi").value;
+        const infoBarangBaru = document.getElementById("infoBarangBaru");
+        const infoBarangAda = document.getElementById("infoBarangAda");
+
+        if (!inputName) {
+            infoBarangBaru.classList.add("hidden");
+            infoBarangAda.classList.add("hidden");
+            return;
+        }
+
+        const isRegistered = masterStockArray.includes(inputName);
+
+        if (jenisMutasi === "Masuk") {
+            if (isRegistered) {
+                infoBarangAda.classList.remove("hidden");
+                infoBarangBaru.classList.add("hidden");
+            } else {
+                infoBarangBaru.classList.remove("hidden");
+                infoBarangAda.classList.add("hidden");
+            }
+        } else {
+            // Jika mutasi Keluar, sembunyikan info teks bantuan (validasi langsung via popup saat submit)
+            infoBarangBaru.classList.add("hidden");
+            infoBarangAda.classList.add("hidden");
+        }
+    }
+
+    // Validasi utama pencegahan data terkirim jika tidak sesuai regulasi Anda
+    function validateForm() {
+        const inputName = document.getElementById("nama_barang").value.replace(/\s+/g, ' ').trim();
+        const jenisMutasi = document.getElementById("jenis_mutasi").value;
+        const isRegistered = masterStockArray.includes(inputName);
+
+        if (jenisMutasi === "Keluar" && !isRegistered) {
+            alert("Master Nama Barang Tidak Terdaftar");
+            return false; // Menggagalkan submit form
+        }
+        return true; // Melanjutkan proses simpan data ke backend
     }
 
     // Fungsi Utama Filter & Pagination
@@ -405,6 +485,10 @@
     document.addEventListener("DOMContentLoaded", function() {
         toggleUserField();
         initTableControl();
+        buildMasterStockDropdown();
+
+        // Listener untuk cek perubahan nama barang secara interaktif
+        document.getElementById("nama_barang").addEventListener("input", checkMasterStockStatus);
     });
 
     // EKSPOR LAPORAN TETAP MENGGUNAKAN DATA DOM TABEL ASLI
@@ -439,7 +523,6 @@
         for (let i = 0; i < trs.length; i++) {
             const tds = trs[i].getElementsByTagName("td");
             if (tds.length >= 6) {
-                // Membersihkan ekstra spasi, tab, dan baris baru dari elemen HTML
                 let namaBarang = tds[0].innerText.replace(/\s+/g, ' ').trim();
                 let jumlah = tds[1].innerText.replace(/\s+/g, ' ').trim();
                 let tglMasuk = tds[2].innerText.replace(/\s+/g, ' ').trim();
@@ -454,7 +537,6 @@
                     statusText = "Rejected";
                 }
 
-                // Jika kolom kosong berisi "-", bersihkan agar rapi di PDF
                 if (tglMasuk === "-") tglMasuk = "";
                 if (tglKeluar === "-") tglKeluar = "";
                 if (untukUser === "-") untukUser = "";
@@ -499,30 +581,25 @@
             },
             styles: {
                 overflow: 'linebreak',
-                cellPadding: 2, // Hemat ruang vertikal
-                lineColor: [226, 232, 240] // Garis border tipis abu-abu terang
+                cellPadding: 2,
+                lineColor: [226, 232, 240]
             },
             columnStyles: {
                 0: { cellWidth: 90 },  
                 1: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, 
-                2: { cellWidth: 35, halign: 'center', fontStyle: 'bold' }, // Tanggal Masuk Bold
-                3: { cellWidth: 35, halign: 'center', fontStyle: 'bold' }, // Tanggal Keluar Bold
+                2: { cellWidth: 35, halign: 'center', fontStyle: 'bold' },
+                3: { cellWidth: 35, halign: 'center', fontStyle: 'bold' },
                 4: { cellWidth: 55, halign: 'left' },
                 5: { cellWidth: 30, halign: 'center', fontStyle: 'bold' }
             },
             didParseCell: function(data) {
                 if (data.section === 'body') {
-                    // 1. Kolom Tanggal Masuk (Index 2) -> Beri warna hijau jika ada datanya
                     if (data.column.index === 2 && data.cell.raw !== "") {
                         data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
                     }
-                    
-                    // 2. Kolom Tanggal Keluar (Index 3) -> Beri warna merah jika ada datanya
                     if (data.column.index === 3 && data.cell.raw !== "") {
                         data.cell.styles.textColor = [220, 38, 38]; // Rose Red
                     }
-
-                    // 3. Kolom Status Approval (Index 5) -> Tetap Hijau/Merah
                     if (data.column.index === 5) {
                         if (data.cell.raw === 'Approved') {
                             data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
@@ -536,7 +613,6 @@
         
         let finalY = doc.lastAutoTable.finalY + 12;
         
-        // Cek jika space tanda tangan melewati batas halaman
         if (finalY > 165) {
             doc.addPage();
             finalY = 25;
