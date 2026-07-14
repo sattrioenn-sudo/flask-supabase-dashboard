@@ -454,7 +454,7 @@
                     statusText = "Rejected";
                 }
 
-                // Jika kolom kosong berisi "-", bersihkan agar rapi
+                // Jika kolom kosong berisi "-", bersihkan agar rapi di PDF
                 if (tglMasuk === "-") tglMasuk = "";
                 if (tglKeluar === "-") tglKeluar = "";
                 if (untukUser === "-") untukUser = "";
@@ -499,24 +499,36 @@
             },
             styles: {
                 overflow: 'linebreak',
-                cellPadding: 2, // Diperkecil dari 4 ke 2 agar baris tidak terlalu tinggi/mubazir ruang
+                cellPadding: 2, // Hemat ruang vertikal
                 lineColor: [226, 232, 240] // Garis border tipis abu-abu terang
             },
             columnStyles: {
-                0: { cellWidth: 90 },  // Lebar kolom Nama Barang lebih luas agar tidak gampang wrap
-                1: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, // Kolom Jumlah dipersempit
-                2: { cellWidth: 35, halign: 'center' },
-                3: { cellWidth: 35, halign: 'center' },
+                0: { cellWidth: 90 },  
+                1: { cellWidth: 25, halign: 'center', fontStyle: 'bold' }, 
+                2: { cellWidth: 35, halign: 'center', fontStyle: 'bold' }, // Tanggal Masuk Bold
+                3: { cellWidth: 35, halign: 'center', fontStyle: 'bold' }, // Tanggal Keluar Bold
                 4: { cellWidth: 55, halign: 'left' },
                 5: { cellWidth: 30, halign: 'center', fontStyle: 'bold' }
             },
             didParseCell: function(data) {
-                // Mewarnai teks status Approved (Hijau) / Rejected (Merah) demi estetika
-                if (data.section === 'body' && data.column.index === 5) {
-                    if (data.cell.raw === 'Approved') {
+                if (data.section === 'body') {
+                    // 1. Kolom Tanggal Masuk (Index 2) -> Beri warna hijau jika ada datanya
+                    if (data.column.index === 2 && data.cell.raw !== "") {
                         data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
-                    } else if (data.cell.raw === 'Rejected') {
+                    }
+                    
+                    // 2. Kolom Tanggal Keluar (Index 3) -> Beri warna merah jika ada datanya
+                    if (data.column.index === 3 && data.cell.raw !== "") {
                         data.cell.styles.textColor = [220, 38, 38]; // Rose Red
+                    }
+
+                    // 3. Kolom Status Approval (Index 5) -> Tetap Hijau/Merah
+                    if (data.column.index === 5) {
+                        if (data.cell.raw === 'Approved') {
+                            data.cell.styles.textColor = [16, 124, 65]; // Emerald Green
+                        } else if (data.cell.raw === 'Rejected') {
+                            data.cell.styles.textColor = [220, 38, 38]; // Rose Red
+                        }
                     }
                 }
             }
