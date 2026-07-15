@@ -10,7 +10,7 @@
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            background-color: #dbeafe; /* Menggunakan basis biru muda sejuk (Blue 100) */
+            background-color: #dbeafe; /* Warna dasar biru muda es yang adem */
         }
         /* Latar belakang gradasi biru muda es yang solid & nyaman di mata */
         .bg-page-gradient {
@@ -19,7 +19,7 @@
                 radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.3) 0px, transparent 60%),
                 radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.2) 0px, transparent 60%);
         }
-        /* Panel Kanan: Diubah ke gradasi Biru Es Lembut (menghilangkan unsur putih melelahkan) */
+        /* Panel Kanan: Diubah ke gradasi Biru Es Lembut */
         .bg-gradient-custom {
             background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
         }
@@ -56,9 +56,9 @@
     <!-- Outer Box: Menggunakan warna dasar biru muda transparan (Glassmorphic) dengan kontras border kokoh -->
     <div class="w-full max-w-5xl min-h-[600px] flex rounded-2xl overflow-hidden shadow-2xl shadow-blue-300/50 bg-blue-50/80 backdrop-blur-md z-10 border border-blue-300/80">
         
-        <!-- Sisi Kiri Panel: Biru Muda Redup Teduh -->
-        <div class="hidden lg:flex w-1/2 flex-col justify-between p-12 bg-blue-100/50 border-r border-blue-200/80 relative overflow-hidden">
-            <div class="absolute inset-0 opacity-[0.05] pointer-events-none" style="background-image: radial-gradient(#1e3a8a 1px, transparent 1px); background-size: 20px 20px;"></div>
+        <!-- Sisi Kiri Panel: Biru Muda Redup Teduh dengan Grid Halus -->
+        <div class="hidden lg:flex w-1/2 flex-col justify-between p-12 bg-blue-100/60 border-r border-blue-200/80 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-[0.07] pointer-events-none" style="background-image: radial-gradient(#1e3a8a 1.5px, transparent 1.5px); background-size: 24px 24px;"></div>
             
             <div class="flex items-center gap-3 relative z-10">
                 <div class="w-10 h-10 bg-gradient-to-tr from-blue-700 to-sky-500 rounded-xl flex items-center justify-center shadow-md shadow-blue-500/30">
@@ -138,7 +138,7 @@
 
                     <div class="pt-2">
                         <button type="submit" 
-                            class="w-full bg-blue-700 hover:bg-blue-850 text-white font-extrabold py-3 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.99] text-xs uppercase tracking-wider">
+                            class="w-full bg-blue-700 hover:bg-blue-800 text-white font-extrabold py-3 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-[0.99] text-xs uppercase tracking-wider">
                             Sign In to Dashboard
                         </button>
                     </div>
@@ -152,7 +152,7 @@
 
     </div>
 
-    <!-- SCRIPT JARING-JARING INTERAKTIF (KONTRAST TINGGI & RESPONSIF) -->
+    <!-- SCRIPT JARING-JARING INTERAKTIF (KONSTRAS TINGGI & RESPONSIF) -->
     <script>
         const canvas = document.getElementById('mesh-canvas');
         const ctx = canvas.getContext('2d');
@@ -166,11 +166,10 @@
         });
 
         const particles = [];
-        const maxParticles = 85;          // Ditambah sedikit agar jaring lebih padat
-        const connectionDistance = 125;  // Ditambah jangkauannya agar jaring mudah tersambung
-        const mouse = { x: null, y: null, radius: 180 }; // Radius tarikan mouse diperlebar
+        const maxParticles = 85;          
+        const connectionDistance = 130;  
+        const mouse = { x: null, y: null, radius: 185 }; 
 
-        // Mouse Tracker
         window.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
@@ -185,20 +184,18 @@
             constructor() {
                 this.x = Math.random() * width;
                 this.y = Math.random() * height;
-                this.vx = (Math.random() - 0.5) * 0.5; // Gerak alami santai
-                this.vy = (Math.random() - 0.5) * 0.5;
-                this.radius = Math.random() * 2.5 + 1.5; // Ukuran titik sedikit diperbesar agar jelas
+                this.vx = (Math.random() - 0.5) * 0.55; 
+                this.vy = (Math.random() - 0.5) * 0.55;
+                this.radius = Math.random() * 2.5 + 1.5; 
             }
 
             update() {
                 this.x += this.vx;
                 this.y += this.vy;
 
-                // Memantul di batas layar
                 if (this.x < 0 || this.x > width) this.vx *= -1;
                 if (this.y < 0 || this.y > height) this.vy *= -1;
 
-                // Efek magnetik interaktif saat mouse mendekat
                 if (mouse.x !== null && mouse.y !== null) {
                     let dx = mouse.x - this.x;
                     let dy = mouse.y - this.y;
@@ -212,15 +209,13 @@
             }
 
             draw() {
-                // Warna node biru elektrik sedang agar terlihat jelas di latar biru muda
-                ctx.fillStyle = 'rgba(29, 78, 216, 0.65)'; 
+                ctx.fillStyle = 'rgba(29, 78, 216, 0.7)'; 
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
 
-        // Generate partikel
         for (let i = 0; i < maxParticles; i++) {
             particles.push(new Particle());
         }
@@ -233,7 +228,6 @@
                 p.draw();
             });
 
-            // Hubungkan antar partikel (Garis Jaring)
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     let dx = particles[i].x - particles[j].x;
@@ -241,10 +235,9 @@
                     let dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist < connectionDistance) {
-                        // Menaikkan opacity pengali ke 0.4 agar garis jaring jauh lebih kontras terlihat
-                        let alpha = (1 - dist / connectionDistance) * 0.40;
+                        let alpha = (1 - dist / connectionDistance) * 0.45;
                         ctx.strokeStyle = `rgba(37, 99, 235, ${alpha})`;
-                        ctx.lineWidth = 1.0; // Garis sedikit dipertebal
+                        ctx.lineWidth = 1.1; 
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
@@ -252,17 +245,15 @@
                     }
                 }
 
-                // Hubungkan kursor mouse ke partikel terdekat (Garis Interaktif)
                 if (mouse.x !== null && mouse.y !== null) {
                     let dx = particles[i].x - mouse.x;
                     let dy = particles[i].y - mouse.y;
                     let dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist < mouse.radius) {
-                        // Opacity garis interaktif mouse dinaikkan menjadi maks 0.55 untuk efek visual yang mantap
-                        let alpha = (1 - dist / mouse.radius) * 0.55;
+                        let alpha = (1 - dist / mouse.radius) * 0.6;
                         ctx.strokeStyle = `rgba(29, 78, 216, ${alpha})`;
-                        ctx.lineWidth = 1.3;
+                        ctx.lineWidth = 1.4;
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(mouse.x, mouse.y);
