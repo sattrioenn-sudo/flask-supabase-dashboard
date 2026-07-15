@@ -10,40 +10,55 @@
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
             margin: 0;
-            background-color: #f8fafc; /* Disamakan dengan background dasar dashboard */
+            background-color: #eef4fc; /* Warna dasar biru muda pastel yang sangat santai di mata */
         }
-        /* Gradient Latar Belakang Kamasan yang Lembut & Bersih */
+        /* Gradient Latar Belakang Lembut & Berwarna Biru Es Rendah Kontras */
         .bg-page-gradient {
-            background-color: #f8fafc;
+            background-color: #edf4fc;
             background-image: 
-                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 40%),
-                radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.05) 0px, transparent 40%);
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.1) 0px, transparent 50%);
         }
-        /* Sisi Kanan Panel Login: Putih Bersih Minimalis */
+        /* Sisi Kanan Panel Login: Gradasi Biru Susu Lembut, Bukan Putih Polos */
         .bg-gradient-custom {
-            background: #ffffff;
+            background: linear-gradient(135deg, #f4f8fd 0%, #e8f2fc 100%);
         }
-        /* Ornamen Cahaya Abstrak Belakang */
+        /* Ornamen Cahaya Belakang */
         .bg-pattern {
             position: absolute;
             width: 700px;
             height: 700px;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, rgba(0,0,0,0) 70%);
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(0,0,0,0) 70%);
             top: -15%;
             left: -5%;
             z-index: 0;
+        }
+        /* Canvas untuk Jaring-Jaring Interaktif */
+        #mesh-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* Agar tidak menghalangi klik ke input / tombol */
         }
     </style>
 </head>
 <body class="flex min-h-screen items-center justify-center bg-page-gradient relative overflow-x-hidden p-4 sm:p-6">
 
+    <!-- Canvas Jaring-jaring Efek Interaktif -->
+    <canvas id="mesh-canvas"></canvas>
+
     <div class="bg-pattern hidden lg:block"></div>
 
-    <div class="w-full max-w-5xl min-h-[600px] flex rounded-2xl overflow-hidden shadow-xl shadow-slate-200/80 bg-white z-10 border border-slate-200/60">
+    <!-- Outer Box Menggunakan soft border & gradasi ice-blue lembut -->
+    <div class="w-full max-w-5xl min-h-[600px] flex rounded-2xl overflow-hidden shadow-xl shadow-blue-100/60 bg-slate-50/90 backdrop-blur-sm z-10 border border-blue-200/50">
         
-        <div class="hidden lg:flex w-1/2 flex-col justify-between p-12 bg-slate-50 border-r border-slate-100 relative overflow-hidden">
-            <div class="absolute inset-0 opacity-[0.02] pointer-events-none" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
+        <!-- Sisi Kiri Panel -->
+        <div class="hidden lg:flex w-1/2 flex-col justify-between p-12 bg-slate-100/70 border-r border-blue-100/50 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
             
             <div class="flex items-center gap-3 relative z-10">
                 <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-sky-500 rounded-xl flex items-center justify-center shadow-sm shadow-blue-500/20">
@@ -56,7 +71,7 @@
             </div>
 
             <div class="max-w-sm relative z-10">
-                <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-full uppercase tracking-wider">Welcome Back</span>
+                <span class="text-[10px] font-bold text-blue-700 bg-blue-100/80 px-3 py-1.5 rounded-full uppercase tracking-wider">Welcome Back</span>
                 <h1 class="text-3xl font-black text-slate-800 mt-4 mb-3 tracking-tight leading-tight">Effortless Access, Enhanced Security.</h1>
                 <p class="text-slate-500 text-xs leading-relaxed">Enter your registered credentials on the right panel to securely access your central dashboard workspace.</p>
             </div>
@@ -66,10 +81,11 @@
             </div>
         </div>
 
+        <!-- Sisi Kanan Panel: Menggunakan Warna Santai bg-gradient-custom -->
         <div class="w-full lg:w-1/2 bg-gradient-custom relative flex items-center justify-center p-8 sm:p-12">
             <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div class="absolute -top-40 -right-40 w-80 h-80 bg-sky-500/5 rounded-full blur-3xl"></div>
-                <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
+                <div class="absolute -top-40 -right-40 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
             </div>
 
             <div class="w-full max-w-sm relative z-10 text-slate-800">
@@ -99,7 +115,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206"></path></svg>
                             </span>
                             <input type="email" name="email" required 
-                                class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-slate-400 text-xs font-medium"
+                                class="w-full pl-11 pr-4 py-3 rounded-xl border border-blue-100 bg-white/70 text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-slate-400 text-xs font-medium"
                                 placeholder="name@company.com">
                         </div>
                     </div>
@@ -111,7 +127,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                             </span>
                             <input type="password" name="password" required 
-                                class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-slate-400 text-xs font-medium"
+                                class="w-full pl-11 pr-4 py-3 rounded-xl border border-blue-100 bg-white/70 text-slate-900 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 transition-all placeholder:text-slate-400 text-xs font-medium"
                                 placeholder="••••••••">
                         </div>
                     </div>
@@ -136,5 +152,127 @@
 
     </div>
 
+    <!-- SCRIPT JARING-JARING INTERAKTIF (CONSTELLATION MOUSE-TRACKING) -->
+    <script>
+        const canvas = document.getElementById('mesh-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const maxParticles = 75; // Kerapatan jaring-jaring
+        const connectionDistance = 110; // Batas jangkauan garis antar node
+        const mouse = { x: null, y: null, radius: 160 };
+
+        // Mouse Tracker
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.6; // Kecepatan gerak mandiri lambat & santai
+                this.vy = (Math.random() - 0.5) * 0.6;
+                this.radius = Math.random() * 2 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Batas dinding layar
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+
+                // Tarik/fokuskan ke arah mouse secara perlahan ketika kursor mendekat
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        let force = (mouse.radius - dist) / mouse.radius;
+                        this.x += (dx / dist) * force * 1.2;
+                        this.y += (dy / dist) * force * 1.2;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.4)'; // Node berwarna biru langit pudar
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Inisialisasi partikel jaring
+        for (let i = 0; i < maxParticles; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Logika Menggambar Garis Jaring (Konstelasi)
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < connectionDistance) {
+                        // Semakin dekat, garis semakin terlihat tebal (halus)
+                        let alpha = (1 - dist / connectionDistance) * 0.15;
+                        ctx.strokeStyle = `rgba(14, 165, 233, ${alpha})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+
+                // Gambar garis penghubung khusus dari mouse ke node sekitarnya
+                if (mouse.x !== null && mouse.y !== null) {
+                    let dx = particles[i].x - mouse.x;
+                    let dy = particles[i].y - mouse.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < mouse.radius) {
+                        let alpha = (1 - dist / mouse.radius) * 0.25;
+                        ctx.strokeStyle = `rgba(37, 99, 235, ${alpha})`;
+                        ctx.lineWidth = 1.0;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
 </body>
 </html>
