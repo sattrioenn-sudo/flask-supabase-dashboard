@@ -59,61 +59,118 @@ def dashboard():
 
 @app.route('/sales')
 def sales():
-    if 'user_id' not in session: return redirect(url_for('login'))
+    if 'user_id' not in session: 
+        return redirect(url_for('login'))
+        
     sales_filter = request.args.get('sales_filter')
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
+    
     try:
-        master_res = supabase.table('sales_activity').select("nama_customer").execute()
+        # Mengambil master data customer lengkap dengan alamat untuk fitur autofill datalist di frontend
+        master_res = supabase.table('sales_activity').select("nama_customer", "alamat_customer").execute()
         unique_customers = []
         seen = set()
         for item in (master_res.data or []):
-            name = item['nama_customer']
-            if name not in seen:
-                unique_customers.append({"nama_customer": name})
+            name = item.get('nama_customer')
+            # Memastikan alamat terisi atau fallback ke string kosong jika None
+            alamat = item.get('alamat_customer', '') 
+            if name and name not in seen:
+                unique_customers.append({
+                    "nama_customer": name,
+                    "alamat": alamat # Dicocokkan dengan properti cust.alamat di frontend
+                })
                 seen.add(name)
+                
+        # Query data aktivitas harian
         query = supabase.table('sales_activity').select("*")
-        if sales_filter: query = query.ilike('nama_sales', f'%{sales_filter}%')
-        if start_date: query = query.gte('tanggal', start_date)
-        if end_date: query = query.lte('tanggal', end_date)
+        if sales_filter: 
+            query = query.ilike('nama_sales', f'%{sales_filter}%')
+        if start_date: 
+            query = query.gte('tanggal', start_date)
+        if end_date: 
+            query = query.lte('tanggal', end_date)
+            
         response = query.order('tanggal', desc=True).execute()
         db_sales = response.data if response.data else []
+        
+        # Hitung statistik ringkasan per sales
         summary = {}
         for item in db_sales:
             name = item.get('nama_sales', 'Unknown')
             summary[name] = summary.get(name, 0) + 1
         stats = [{"nama_sales": k, "total_customer": v} for k, v in summary.items()]
+        
     except Exception as e: 
         db_sales, stats, unique_customers = [], [], []
         print(f"Error Sales: {e}")
-    return render_template('sales.html', email=session.get('user_email'), activity_data=db_sales, summary_stats=stats, master_customers=unique_customers)
+        
+    return render_template(
+        'sales.html', 
+        email=session.get('user_email'), 
+        activity_data=db_sales, 
+        summary_stats=stats, 
+        master_customers=unique_customers
+    )
 
 @app.route('/sales/add', methods=['POST'])
 def add_sales():
-    if 'user_id' not in session: return redirect(url_for('login'))
-    data = {"hari": request.form.get('hari'), "tanggal": request.form.get('tanggal'), "nama_sales": request.form.get('nama_sales'), "nama_customer": request.form.get('nama_customer'), "alamat_customer": request.form.get('alamat_customer')}
+    if 'user_id' not in session: 
+        return redirect(url_for('login'))
+        
+    # Menangkap data form dasar beserta parameter koordinat GPS jika dikirimkan oleh frontend
+    data = {
+        "hari": request.form.get('hari'),
+        "tanggal": request.form.get('tanggal'),
+        "nama_sales": request.form.get('nama_sales'),
+        "nama_customer": request.form.get('nama_customer'),
+        "alamat_customer": request.form.get('alamat_customer')
+    }
+    
+    # Opsional: Jika kolom koordinat GPS sudah tersedia di skema tabel Supabase Anda, 
+    # Anda bisa membuka baris di bawah ini untuk menyimpannya secara otomatis.
+    # if request.form.get('location_coords'):
+    #     data["location_coords"] = request.form.get('location_coords')
+        
     try:
         supabase.table('sales_activity').insert(data).execute()
         return redirect(url_for('sales'))
-    except Exception as e: return f"Gagal simpan: {e}", 500
+    except Exception as e: 
+        return f"Gagal simpan: {e}", 500
 
 @app.route('/sales/update', methods=['POST'])
 def update_sales():
-    if 'user_id' not in session: return redirect(url_for('login'))
+    if 'user_id' not in session: 
+        return redirect(url_for('login'))
+        
     row_id = request.form.get('id')
-    data = {"hari": request.form.get('hari'), "tanggal": request.form.get('tanggal'), "nama_sales": request.form.get('nama_sales'), "nama_customer": request.form.get('nama_customer'), "alamat_customer": request.form.get('alamat_customer')}
+    data = {
+        "hari": request.form.get('hari'),
+        "tanggal": request.form.get('tanggal'),
+        "nama_sales": request.form.get('nama_sales'),
+        "nama_customer": request.form.get('nama_customer'),
+        "alamat_customer": request.form.get('alamat_customer')
+    }
+    
+    # Opsional: Penyelarasan pembaruan koordinat GPS
+    # if request.form.get('location_coords'):
+    #     data["location_coords"] = request.form.get('location_coords')
+        
     try:
         supabase.table('sales_activity').update(data).eq('id', row_id).execute()
         return redirect(url_for('sales'))
-    except Exception as e: return f"Gagal update: {e}", 500
+    except Exception as e: 
+        return f"Gagal update: {e}", 500
 
 @app.route('/sales/delete/<id>', methods=['DELETE'])
 def delete_sales(id):
-    if 'user_id' not in session: return jsonify({"status": "unauthorized"}), 401
+    if 'user_id' not in session: 
+        return jsonify({"status": "unauthorized"}), 401
     try:
         supabase.table('sales_activity').delete().eq('id', id).execute()
         return jsonify({"status": "success"}), 200
-    except Exception as e: return jsonify({"status": "error", "message": str(e)}), 500
+    except Exception as e: 
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # --- VOUCHER MANAGEMENT ---
 
