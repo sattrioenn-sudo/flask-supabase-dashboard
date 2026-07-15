@@ -91,6 +91,38 @@
         </form>
     </div>
 
+    <!-- TAMBAHAN BARU: SECTION HITUNG CUSTOMER PER SALES & TOTAL CUSTOMER -->
+    <div class="bg-gradient-to-r from-slate-800 to-slate-900 border border-slate-700 rounded-3xl p-6 text-white shadow-xl">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div class="space-y-2 flex-1 w-full">
+                <label class="block text-xs font-bold text-indigo-400 uppercase tracking-widest">Cari Statistik Customer Sales</label>
+                <div class="relative max-w-md">
+                    <input type="text" id="searchSalesCustomer" oninput="calculateSalesCustomerStats()" placeholder="Masukkan Nama Sales..."
+                        class="w-full bg-white/10 border border-white/20 rounded-2xl px-4 py-3 pr-10 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-white placeholder-white/40">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Cards Tampilan Total -->
+            <div class="grid grid-cols-2 gap-4 w-full md:w-auto min-w-[320px]">
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/10">
+                    <p class="text-[10px] font-bold text-indigo-300 uppercase tracking-wider">Customer per Sales</p>
+                    <p id="stat_customer_per_sales" class="text-3xl font-black mt-1 text-white">0</p>
+                    <p id="stat_sales_target_name" class="text-[9px] text-white/50 italic truncate max-w-[120px]">-</p>
+                </div>
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/10">
+                    <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Total Semua Customer</p>
+                    <p id="stat_total_all_customers" class="text-3xl font-black mt-1 text-emerald-400">0</p>
+                    <p class="text-[9px] text-white/50 italic">Semua Toko Unik</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <!-- DATA TABLE WITH SEARCH & PAGINATION -->
         <div class="lg:col-span-9 bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm flex flex-col">
@@ -131,11 +163,11 @@
                                 <span class="text-[10px] text-slate-400 font-medium">{{ row.tanggal }}</span>
                             </td>
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 uppercase">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 uppercase row-sales-name">
                                     {{ row.nama_sales }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-xs font-bold text-slate-800 search-target">{{ row.nama_customer }}</td>
+                            <td class="px-6 py-4 text-xs font-bold text-slate-800 search-target row-customer-name">{{ row.nama_customer }}</td>
                             <td class="px-6 py-4">
                                 <p class="text-[11px] text-slate-500 leading-relaxed max-w-[200px] truncate" title="{{ row.alamat_customer }}">{{ row.alamat_customer }}</p>
                             </td>
@@ -313,6 +345,45 @@
         });
     }
 
+    // --- TAMBAHAN LOGIC BARU: HITUNG CUSTOMER STATS (REALTIME DI CLIENT SIDE) ---
+    function calculateSalesCustomerStats() {
+        const searchInput = document.getElementById('searchSalesCustomer').value.trim().toLowerCase();
+        const labelSalesName = document.getElementById('stat_sales_target_name');
+        const displaySalesCount = document.getElementById('stat_customer_per_sales');
+        const displayTotalAll = document.getElementById('stat_total_all_customers');
+
+        // Set penampung data unik customer
+        let uniqueCustomersForSales = new Set();
+        let uniqueAllCustomers = new Set();
+
+        allRows.forEach(row => {
+            const salesName = row.querySelector('.row-sales-name').innerText.trim();
+            const customerName = row.querySelector('.row-customer-name').innerText.trim();
+
+            // Tambahkan semua toko unik ke set global
+            if (customerName) {
+                uniqueAllCustomers.add(customerName.toLowerCase());
+            }
+
+            // Jika nama sales sesuai pencarian, kumpulkan toko uniknya
+            if (searchInput !== "" && salesName.toLowerCase().includes(searchInput)) {
+                uniqueCustomersForSales.add(customerName.toLowerCase());
+            }
+        });
+
+        // Tampilkan Total Semua Customer di sistem saat ini
+        displayTotalAll.innerText = uniqueAllCustomers.size;
+
+        // Tampilkan total untuk sales spesifik yang dicari
+        if (searchInput === "") {
+            labelSalesName.innerText = "Masukkan nama sales";
+            displaySalesCount.innerText = "0";
+        } else {
+            labelSalesName.innerText = `Sales cocok: "${document.getElementById('searchSalesCustomer').value}"`;
+            displaySalesCount.innerText = uniqueCustomersForSales.size;
+        }
+    }
+
     function updateHariOtomatis(val) {
         if (!val) return;
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -340,6 +411,9 @@
         document.getElementById('filter_end').value = today;
         renderTable();
         filterSummary();
+        
+        // Triger perhitungan statistik total customer saat pertama kali dibuka
+        calculateSalesCustomerStats();
     };
 
     function editRecord(id, hari, tanggal, sales, customer, alamat) {
