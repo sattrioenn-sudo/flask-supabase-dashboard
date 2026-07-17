@@ -17,7 +17,7 @@
         }
         [x-cloak] { display: none !important; }
         
-        /* Sidebar Biru Muda Polos Bersih (Tanpa Gradasi) */
+        /* Sidebar Biru Muda Polos Bersih (Tetap Sesuai Request) */
         .sidebar-minimalist { 
             background-color: #e0f2fe; /* Warna Biru Muda Polos Premium (Sky 100) */
             border-right: 1px solid #bae6fd;
@@ -37,12 +37,12 @@
             color: #0369a1 !important; /* Sky 700 */
         }
 
-        /* Header kaca transparan halus pada area konten (tetap putih) */
+        /* Header kaca transparan halus pada area konten (Diubah dari Putih ke Soft Ice Blue Tint) */
         .glass-header {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(240, 244, 248, 0.85);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid #cbd5e1;
         }
 
         @keyframes fadeIn {
@@ -53,7 +53,7 @@
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-[#f8fafc] text-slate-900 min-h-screen flex overflow-hidden">
+<body class="bg-[#f0f4f8] text-slate-900 min-h-screen flex overflow-hidden">
 
     <!-- Sidebar Samping Ramping & Berkelas (Warna Biru Muda Polos) -->
     <aside class="w-64 sidebar-minimalist hidden lg:flex flex-col h-screen sticky top-0 z-30">
@@ -94,7 +94,8 @@
 
         <!-- Sidebar Info & Logout -->
         <div class="p-4 border-t border-sky-200/60 bg-sky-200/20">
-            <div class="bg-white/70 border border-sky-200/60 rounded-xl p-3 mb-3 shadow-sm">
+            <!-- Diubah bg-white/70 ke bg-[#f0f4f8]/80 agar menyatu dengan tema anti-capek -->
+            <div class="bg-[#f0f4f8]/80 border border-sky-200/60 rounded-xl p-3 mb-3 shadow-sm">
                 <p class="text-[8px] font-extrabold text-sky-600 uppercase tracking-wider mb-0.5">Signed in as</p>
                 <p class="text-[11px] text-sky-950 font-semibold truncate">{{ email }}</p>
             </div>
@@ -105,32 +106,32 @@
         </div>
     </aside>
 
-    <!-- Konten Utama (Main Area - Tetap Putih Terang Standar) -->
-    <main class="flex-1 overflow-y-auto flex flex-col h-screen bg-[#f8fafc]">
+    <!-- Konten Utama (Main Area - Menggunakan warna abu es kebiruan anti-capek) -->
+    <main class="flex-1 overflow-y-auto flex flex-col h-screen bg-[#f0f4f8]">
         <!-- Top Navbar Header -->
         <header class="h-16 glass-header sticky top-0 z-20 px-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <h1 class="text-sm font-extrabold text-slate-800 tracking-tight">{% block header_title %}{% endblock %}</h1>
-                <span class="text-slate-300 text-sm">/</span>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Console</span>
+                <span class="text-slate-400 text-sm">/</span>
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Console</span>
             </div>
             
             <div class="flex items-center gap-6">
                 <!-- Status Pabrik -->
-                <div class="flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-full border border-slate-200/40">
+                <div class="flex items-center gap-2 bg-slate-200/60 px-3 py-1 rounded-full border border-slate-300/40">
                     <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                     <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Pasuruan Plant</span>
                 </div>
 
-                <div class="h-4 w-px bg-slate-200"></div>
+                <div class="h-4 w-px bg-slate-300"></div>
 
                 <!-- Informasi Profil Pengguna -->
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
                         <p class="text-[12px] font-bold text-slate-800 leading-none mb-0.5">{{ email.split('@')[0] if email else 'Admin' }}</p>
-                        <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Admin</p>
+                        <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Admin</p>
                     </div>
-                    <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center text-white font-black text-xs shadow-sm ring-2 ring-white">
+                    <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center text-white font-black text-xs shadow-sm ring-2 ring-[#f0f4f8]">
                         {{ email[0] | upper if email else 'A' }}
                     </div>
                 </div>
@@ -142,11 +143,11 @@
             {% block content %}{% endblock %}
         </div>
         
-        <!-- Bagian Footer -->
-        <footer class="px-8 py-4 border-t border-slate-100 bg-white/60">
+        <!-- Bagian Footer (Diubah transparan agar menyatu halus) -->
+        <footer class="px-8 py-4 border-t border-slate-200 bg-transparent">
             <div class="flex justify-between items-center">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">© 2026 PT. KCS</p>
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Kemasan Group</p>
+                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">© 2026 PT. KCS</p>
+                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">Kemasan Group</p>
             </div>
         </footer>
     </main>
