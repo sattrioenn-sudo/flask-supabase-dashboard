@@ -5,71 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kemasan Group - {% block title %}{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Menggunakan font Inter yang sangat tajam untuk UI Dashboard -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Inter untuk UI, JetBrains Mono untuk data/angka teknis -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
+        :root {
+            --sidebar-1: #0b1220;
+            --sidebar-2: #10192e;
+            --sidebar-border: #1e293b;
+            --accent: #4f46e5;
+            --accent-light: #6366f1;
+            --accent-soft: rgba(79, 70, 229, 0.14);
+            --amber: #f59e0b;
+        }
+        body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             scroll-behavior: smooth;
             text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: subpixel-antialiased;
-            -moz-osx-font-smoothing: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+        .font-mono-data { font-family: 'JetBrains Mono', ui-monospace, monospace; }
         [x-cloak] { display: none !important; }
-        
-        /* Sidebar Biru Muda Polos Bersih (Tetap Sesuai Request) */
-        .sidebar-minimalist { 
-            background-color: #e0f2fe; /* Warna Biru Muda Polos Premium (Sky 100) */
-            border-right: 1px solid #bae6fd;
-        } 
-        
-        /* Gaya Navigasi Aktif - Kontras Tinggi di atas Biru Muda */
-        .nav-active { 
-            background-color: #0284c7 !important; /* Biru Cerah Solid (Sky 600) */
+
+        /* Sidebar — navy operasional gelap dengan aksen indigo */
+        .sidebar-minimalist {
+            background: linear-gradient(180deg, var(--sidebar-1) 0%, var(--sidebar-2) 100%);
+            border-right: 1px solid var(--sidebar-border);
+        }
+
+        /* Nav aktif — indigo solid dengan glow halus */
+        .nav-active {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%) !important;
             color: #ffffff !important;
-            font-weight: 700;
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.15);
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35), inset 0 1px 0 rgba(255,255,255,0.12);
         }
 
-        /* Hover menu pasif pada sidebar biru muda */
+        /* Hover menu pasif pada sidebar gelap */
         .nav-hover:hover {
-            background-color: rgba(2, 132, 199, 0.08);
-            color: #0369a1 !important; /* Sky 700 */
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0 !important;
         }
 
-        /* Header kaca transparan halus pada area konten (Diubah dari Putih ke Soft Ice Blue Tint) */
+        /* Header kaca transparan halus pada area konten */
         .glass-header {
-            background: rgba(240, 244, 248, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid #cbd5e1;
+            background: rgba(248, 250, 252, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid #e5e9f0;
         }
+
+        .logo-mark {
+            background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+            box-shadow: 0 3px 10px rgba(79, 70, 229, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .status-dot {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
+        }
+
+        .avatar-ring {
+            background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 999px; }
+        .sidebar-minimalist ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-page { animation: fadeIn 0.3s ease-out; }
+        .animate-page { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
     </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-[#f0f4f8] text-slate-900 min-h-screen flex overflow-hidden">
+<body class="bg-[#f4f5f8] text-slate-900 min-h-screen flex overflow-hidden">
 
-    <!-- Sidebar Samping Ramping & Berkelas (Warna Biru Muda Polos) -->
+    <!-- Sidebar Samping Ramping & Berkelas -->
     <aside class="w-64 sidebar-minimalist hidden lg:flex flex-col h-screen sticky top-0 z-30">
         <!-- Logo Section -->
-        <div class="p-6 border-b border-sky-200/60 flex items-center gap-3">
-            <div class="w-8 h-8 bg-gradient-to-tr from-sky-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-                <span class="text-white font-extrabold text-sm tracking-tighter">KCS</span>
+        <div class="p-6 border-b border-white/[0.06] flex items-center gap-3">
+            <div class="w-9 h-9 logo-mark rounded-xl flex items-center justify-center">
+                <span class="text-white font-black text-xs tracking-tighter">KCS</span>
             </div>
             <div class="leading-none">
-                <span class="text-sm font-extrabold tracking-tight text-sky-900 block">IT-KEMASAN</span>
-                <span class="text-[8px] font-bold text-sky-600 uppercase tracking-widest mt-0.5 block">Infrastructure</span>
+                <span class="text-sm font-extrabold tracking-tight text-white block">IT-KEMASAN</span>
+                <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1 block">Infrastructure</span>
             </div>
         </div>
-        
+
         <!-- Navigation Menu -->
-        <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
             {% set nav_items = [
                 ('/dashboard', 'Dashboard', 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'),
                 ('/analytics', 'Analytics', 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'),
@@ -83,8 +111,8 @@
 
             {% for href, label, path in nav_items %}
             <a href="{{ href }}" class="flex items-center gap-3 py-2.5 px-4 rounded-xl transition-all duration-150 text-xs font-semibold group
-                {{ 'nav-active' if request.path == href else 'text-sky-800 nav-hover' }}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {{ 'nav-active' if request.path == href else 'text-slate-300 nav-hover' }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-[2] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="{{ path }}" />
                 </svg>
                 {{ label }}
@@ -93,45 +121,45 @@
         </nav>
 
         <!-- Sidebar Info & Logout -->
-        <div class="p-4 border-t border-sky-200/60 bg-sky-200/20">
-            <!-- Diubah bg-white/70 ke bg-[#f0f4f8]/80 agar menyatu dengan tema anti-capek -->
-            <div class="bg-[#f0f4f8]/80 border border-sky-200/60 rounded-xl p-3 mb-3 shadow-sm">
-                <p class="text-[8px] font-extrabold text-sky-600 uppercase tracking-wider mb-0.5">Signed in as</p>
-                <p class="text-[11px] text-sky-950 font-semibold truncate">{{ email }}</p>
+        <div class="p-4 border-t border-white/[0.06]">
+            <div class="bg-white/[0.04] border border-white/[0.06] rounded-xl p-3 mb-3">
+                <p class="text-[8px] font-extrabold text-indigo-300 uppercase tracking-wider mb-1">Signed in as</p>
+                <p class="text-[11px] text-white font-semibold truncate">{{ email }}</p>
             </div>
-            <a href="/logout" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sky-700 hover:text-rose-600 hover:bg-rose-100 transition-all font-bold text-[10px] uppercase tracking-wider">
+            <a href="/logout" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-slate-300 hover:text-rose-300 hover:bg-rose-500/10 transition-all font-bold text-[10px] uppercase tracking-wider">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                 Sign Out
             </a>
         </div>
     </aside>
 
-    <!-- Konten Utama (Main Area - Menggunakan warna abu es kebiruan anti-capek) -->
-    <main class="flex-1 overflow-y-auto flex flex-col h-screen bg-[#f0f4f8]">
+    <!-- Konten Utama -->
+    <main class="flex-1 overflow-y-auto flex flex-col h-screen bg-[#f4f5f8]">
         <!-- Top Navbar Header -->
         <header class="h-16 glass-header sticky top-0 z-20 px-8 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <h1 class="text-sm font-extrabold text-slate-800 tracking-tight">{% block header_title %}{% endblock %}</h1>
-                <span class="text-slate-400 text-sm">/</span>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Console</span>
+                <span class="text-slate-300 text-sm">/</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Console</span>
             </div>
-            
+
             <div class="flex items-center gap-6">
                 <!-- Status Pabrik -->
-                <div class="flex items-center gap-2 bg-slate-200/60 px-3 py-1 rounded-full border border-slate-300/40">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full status-dot animate-pulse"></span>
                     <span class="text-[9px] font-bold text-slate-600 uppercase tracking-wider">Pasuruan Plant</span>
+                    <span class="text-[9px] font-mono-data text-emerald-600 font-semibold">Online</span>
                 </div>
 
-                <div class="h-4 w-px bg-slate-300"></div>
+                <div class="h-4 w-px bg-slate-200"></div>
 
                 <!-- Informasi Profil Pengguna -->
                 <div class="flex items-center gap-3">
                     <div class="text-right hidden sm:block">
                         <p class="text-[12px] font-bold text-slate-800 leading-none mb-0.5">{{ email.split('@')[0] if email else 'Admin' }}</p>
-                        <p class="text-[9px] text-slate-500 font-semibold uppercase tracking-wider">Admin</p>
+                        <p class="text-[9px] text-slate-400 font-semibold uppercase tracking-wider">Admin</p>
                     </div>
-                    <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center text-white font-black text-xs shadow-sm ring-2 ring-[#f0f4f8]">
+                    <div class="w-8 h-8 rounded-full avatar-ring flex items-center justify-center text-white font-black text-xs ring-2 ring-white shadow-sm">
                         {{ email[0] | upper if email else 'A' }}
                     </div>
                 </div>
@@ -142,12 +170,12 @@
         <div class="p-8 max-w-[1400px] w-full mx-auto flex-1 animate-page">
             {% block content %}{% endblock %}
         </div>
-        
-        <!-- Bagian Footer (Diubah transparan agar menyatu halus) -->
-        <footer class="px-8 py-4 border-t border-slate-200 bg-transparent">
+
+        <!-- Bagian Footer -->
+        <footer class="px-8 py-4 border-t border-slate-200/70 bg-white/60">
             <div class="flex justify-between items-center">
-                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">© 2026 PT. KCS</p>
-                <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">Kemasan Group</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">© 2026 PT. KCS</p>
+                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">Kemasan Group</p>
             </div>
         </footer>
     </main>
