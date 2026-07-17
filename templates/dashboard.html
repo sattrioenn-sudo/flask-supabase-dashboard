@@ -7,7 +7,7 @@
 <!-- Stat Cards Section -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
     <!-- Voucher Count (Original) -->
-    <div class="bg-sky-50 p-6 rounded-[2rem] border border-sky-100 shadow-sm">
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Database Records</p>
         <div class="flex items-end gap-2">
             <h3 class="text-4xl font-black text-emerald-600 mt-2">{{ total_vouchers }}</h3>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Sales Activity (New - Creative) -->
-    <div class="bg-sky-50 p-6 rounded-[2rem] border border-sky-100 shadow-sm">
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Total Sales Activity</p>
         <div class="flex items-end gap-2">
             <h3 class="text-4xl font-black text-blue-600 mt-2">{{ activity_data|length if activity_data else '0' }}</h3>
@@ -27,7 +27,7 @@
     </div>
 
     <!-- Server Status (Original - Refined) -->
-    <div class="bg-sky-50 p-6 rounded-[2rem] border border-sky-100 shadow-sm flex items-center justify-between">
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
         <div>
             <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">System Status</p>
             <h3 class="text-xl font-black text-emerald-500 mt-2 uppercase italic">Online</h3>
@@ -39,7 +39,7 @@
     </div>
 
     <!-- Storage Sync (Original) -->
-    <div class="bg-sky-50 p-6 rounded-[2rem] border border-sky-100 shadow-sm">
+    <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
         <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Storage Sync</p>
         <h3 class="text-xl font-black text-slate-800 mt-2 italic">Supabase</h3>
         <p class="text-[10px] text-emerald-500 font-bold uppercase mt-1">Cloud Connected</p>
@@ -48,10 +48,10 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
     <!-- Sales Chart (New Section) -->
-    <div class="lg:col-span-2 bg-sky-50 p-8 rounded-[2.5rem] border border-sky-100 shadow-sm">
+    <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm">
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-bold text-slate-800">Sales Performance</h3>
-            <span class="text-[10px] bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-bold uppercase">Real-time Data</span>
+            <span class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase">Real-time Data</span>
         </div>
         <div class="h-[300px] w-full">
             <canvas id="salesChart"></canvas>
@@ -74,7 +74,7 @@
                 </a>
             </div>
         </div>
-
+        
         <!-- Info Card -->
         <div class="bg-emerald-50 p-6 rounded-[2rem] border border-emerald-100">
             <p class="text-emerald-800 text-xs font-bold italic">Pro Tip:</p>
